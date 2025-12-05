@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+class RangeParser
+  class << self
+    def parse(input_string)
+      ranges = input_string.split(",")
+      ranges.map do |range_string|
+        left, right = range_string.split("-")
+        left.to_i..right.to_i
+      end
+    end
+  end
+end
+
+class Integer
+  def invalid_product_id?
+    s = to_s
+    return false unless s.size.even?
+
+    mid = s.size / 2
+
+    s[...mid] == s[mid...]
+  end
+end
+
+input_string = File.read("inputs.txt")
+
+bad_id_batches = RangeParser.parse(input_string).map do |range|
+  range.select(&:invalid_product_id?)
+end
+
+puts bad_id_batches.flatten.sum
