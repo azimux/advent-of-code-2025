@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+class RangeParser
+  class << self
+    def parse(input_string)
+      ranges = input_string.split(",")
+      ranges.map do |range_string|
+        left, right = range_string.split("-")
+        left.to_i..right.to_i
+      end
+    end
+  end
+end
+
+class Integer
+  def invalid_product_id?
+    s = to_s
+
+    size = s.size
+
+    (1..(size / 2)).each do |substring_length|
+      next unless size % substring_length == 0
+
+      substrings = s.scan(/.{#{substring_length}}/)
+      return true if substrings.uniq.size == 1
+    end
+
+    false
+  end
+end
+
+input_string = File.read("inputs.txt")
+
+bad_id_batches = RangeParser.parse(input_string).map do |range|
+  range.select(&:invalid_product_id?)
+end
+
+puts bad_id_batches.flatten.sum
