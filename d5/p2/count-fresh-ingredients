@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+class Range
+  def merge(other)
+    bounds = [*minmax, *other.minmax]
+    self.class.new(bounds.min, bounds.max)
+  end
+end
+
+class Ingredients
+  attr_accessor :ranges
+
+  def initialize(input_string)
+    self.ranges = []
+
+    ranges = input_string.strip.split("\n\n").first
+
+    ranges.split("\n").map do |range_row|
+      range = Range.new(*range_row.split("-").map(&:to_i))
+
+      overlapping_ranges = [range]
+
+      self.ranges.each do |existing_range|
+        if range.overlap?(existing_range)
+          overlapping_ranges << existing_range
+        end
+      end
+
+      self.ranges.reject! { |range| overlapping_ranges.include?(range) }
+      self.ranges << overlapping_ranges.inject(:merge)
+    end
+  end
+
+  def fresh_ingredient_count
+    ranges.map(&:size).sum
+  end
+end
+
+input_string = File.read("inputs.txt")
+
+ingredients = Ingredients.new(input_string)
+
+puts ingredients.fresh_ingredient_count
