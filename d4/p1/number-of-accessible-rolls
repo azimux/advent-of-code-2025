@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+class Grid
+  attr_accessor :rows, :row_count, :column_count
+
+  def initialize(rows)
+    self.rows = rows
+    self.row_count = rows.size
+    self.column_count = rows.first.size
+  end
+
+  def adjacent_values(row_index, column_index)
+    values = []
+
+    [-1, 0, 1].each do |neighbor_row_offset|
+      [-1, 0, 1].each do |neighbor_column_offset|
+        next if neighbor_row_offset.zero? && neighbor_column_offset.zero?
+
+        neighbor_row_index = row_index + neighbor_row_offset
+
+        next if neighbor_row_index < 0
+        next if neighbor_row_index >= row_count
+
+        neighbor_column_index = column_index + neighbor_column_offset
+
+        next if neighbor_column_index < 0
+        next if neighbor_column_index >= column_count
+
+        values << rows[neighbor_row_index][neighbor_column_index]
+      end
+    end
+
+    values
+  end
+
+  def roll_present?(row, column)
+    rows[row][column]
+  end
+
+  def each_roll_coordinate
+    0.upto(row_count - 1) do |row|
+      0.upto(column_count - 1) do |column|
+        if rows[row][column]
+          yield row, column
+        end
+      end
+    end
+  end
+end
+
+def parse_input(input)
+  rows = input.split("\n")
+  rows.map { |row| row.chars.map { |v| v == "@" } }
+end
+
+input_string = File.read("inputs.txt")
+# input_string = File.read("inputs_test.txt")
+
+grid = Grid.new(parse_input(input_string))
+total_accessible = 0
+
+grid.each_roll_coordinate do |row, column|
+  if grid.adjacent_values(row, column).count { |x| x } < 4
+    total_accessible += 1
+  end
+end
+
+puts total_accessible
