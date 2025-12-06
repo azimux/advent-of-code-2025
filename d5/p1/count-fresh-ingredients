@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+class Ingredients
+  attr_accessor :ranges, :available_ingredients
+
+  def initialize(input_string)
+    ranges, available_ingredients = input_string.strip.split("\n\n")
+
+    self.ranges = ranges.split("\n").map do |range_row|
+      Range.new(*range_row.split("-").map(&:to_i))
+    end
+
+    self.available_ingredients = available_ingredients.split("\n").map(&:to_i)
+  end
+
+  def in_range_count
+    available_ingredients.count do |ingredient|
+      ranges.any? { |range| range.member?(ingredient) }
+    end
+  end
+end
+
+input_string = File.read("inputs.txt")
+
+ingredients = Ingredients.new(input_string)
+
+puts ingredients.in_range_count
