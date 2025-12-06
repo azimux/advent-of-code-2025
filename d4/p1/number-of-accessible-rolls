@@ -46,6 +46,14 @@ class Grid
       end
     end
   end
+
+  def remove_roll(row, column)
+    rows[row][column] = false
+  end
+
+  def total_rolls
+    rows.map { |row| row.count { |x| x } }.sum
+  end
 end
 
 def parse_input(input)
@@ -54,15 +62,21 @@ def parse_input(input)
 end
 
 input_string = File.read("inputs.txt")
-# input_string = File.read("inputs_test.txt")
 
 grid = Grid.new(parse_input(input_string))
-total_accessible = 0
+total_removed = 0
 
-grid.each_roll_coordinate do |row, column|
-  if grid.adjacent_values(row, column).count { |x| x } < 4
-    total_accessible += 1
+loop do
+  previous_total_rolls = grid.total_rolls
+
+  grid.each_roll_coordinate do |row, column|
+    if grid.adjacent_values(row, column).count { |x| x } < 4
+      grid.remove_roll(row, column)
+      total_removed += 1
+    end
   end
+
+  break if previous_total_rolls == grid.total_rolls
 end
 
-puts total_accessible
+puts total_removed
