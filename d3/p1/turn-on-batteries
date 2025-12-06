@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+class Bank
+  attr_accessor :batteries
+
+  def initialize(batteries)
+    self.batteries = batteries.chars.map(&:to_i)
+  end
+
+  def max_joltage
+    first_joltage, first_index = index_of_biggest_first_joltage
+
+    second_joltage = biggest_second_joltage(first_index + 1)
+
+    (first_joltage * 10) + second_joltage
+  end
+
+  private
+
+  def index_of_biggest_first_joltage
+    biggest_joltage = 0
+    biggest_index = nil
+
+    batteries[..-2].each.with_index do |joltage, index|
+      if joltage > biggest_joltage
+        biggest_index = index
+        biggest_joltage = joltage
+      end
+    end
+
+    [biggest_joltage, biggest_index]
+  end
+
+  def biggest_second_joltage(start_at_index)
+    batteries[start_at_index..].max
+  end
+end
+
+def parse_banks(input_string)
+  input_string.split("\n").map { |battery_string| Bank.new(battery_string) }
+end
+
+input_string = File.read("inputs.txt")
+
+banks = parse_banks(input_string)
+puts banks.map(&:max_joltage).sum
