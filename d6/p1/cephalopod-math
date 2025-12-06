@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+class Problem
+  attr_accessor :operator, :operands
+
+  def initialize(operator, operands)
+    self.operator = operator
+    self.operands = operands
+  end
+
+  def evaluate
+    operands.inject(operator)
+  end
+end
+
+class CephalopodMathGrid
+  attr_accessor :rows
+
+  def initialize(input_string)
+    self.rows = input_string.strip.split("\n").map { |row| row.strip.split(/\s+/) }
+  end
+
+  def problems
+    (0...problem_count).map do |column|
+      *operands, operator = rows.map { |row| row[column] }
+
+      Problem.new(operator.to_sym, operands.map(&:to_i))
+    end
+  end
+
+  def problem_count
+    rows.first.size
+  end
+end
+
+input_string = File.read("inputs.txt")
+
+grid = CephalopodMathGrid.new(input_string)
+
+puts grid.problems.map(&:evaluate).sum
