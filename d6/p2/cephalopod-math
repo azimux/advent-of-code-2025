@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+
+class Problem
+  attr_accessor :operator, :operands
+
+  def initialize(operator, operands)
+    self.operator = operator
+    self.operands = operands
+  end
+
+  def evaluate
+    operands.inject(operator)
+  end
+
+  def to_s
+    "#{operator} #{operands.inspect}"
+  end
+end
+
+class CephalopodMathGrid
+  attr_accessor :operand_rows, :operators, :column_widths
+
+  def initialize(input_string)
+    set_column_widths(input_string)
+
+    rows = input_string.split("\n")
+    operators_row = rows.last
+    rows = rows[..-2]
+
+    padded_operators = operators_row.scan(/[^ ] */)
+
+    self.operators = padded_operators.map(&:strip).map(&:to_sym)
+
+    self.operand_rows = rows.map do |row_string|
+      start_at = 0
+
+      parsed_row = []
+
+      column_widths.each do |column_width|
+        parsed_row << row_string[start_at...(start_at + column_width)]
+        start_at += column_width + 1
+      end
+
+      parsed_row
+    end
+  end
+
+  def set_column_widths(input_string)
+    rows = input_string.strip.split("\n")
+    rows.map! do |row|
+      row.strip.split(/\s+/)
+    end
+
+    column_count = rows.first.size
+
+    self.column_widths = (0...column_count).map do |column_index|
+      rows.map { |row| row[column_index] }.map(&:size).max
+    end
+  end
+
+  def column_count
+    operators.size
+  end
+
+  def problems
+    (0...column_count).map do |column|
+      operator = operators[column]
+
+      cephalopod_operands = operand_rows.map { |row| row[column] }
+
+      operands = cephalopod_operands_to_human_operands(cephalopod_operands)
+
+      Problem.new(operator, operands)
+    end
+  end
+
+  def cephalopod_operands_to_human_operands(operands)
+    width = operands.first.size
+
+    human_operands = []
+
+    0.upto(width - 1) do |i|
+      human_operands << operands.map { |operand_string| operand_string[i] }.join
+    end
+
+    human_operands.map(&:to_i)
+  end
+end
+
+input_string = File.read("inputs.txt")
+
+grid = CephalopodMathGrid.new(input_string)
+
+puts grid.problems.map(&:evaluate).sum
