@@ -2,6 +2,7 @@ source "https://rubygems.org"
 
 group :development do
   gem "foobara-rubocop-rules", ">= 1.0.0"
+  gem "rerun"
   gem "rubocop-rake"
   gem "rubocop-rspec"
 end
