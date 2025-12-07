@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+
+require "pry"
+require "pry-byebug"
+
+class Grid
+  EMPTY = ".".freeze
+  SPLITTER = "^".freeze
+  STARTING_POINT = "S".freeze
+  BEAM = "|".freeze
+
+  attr_accessor :rows, :splits, :already_processed
+
+  def initialize(input_string)
+    self.splits = 0
+    self.rows = input_string.split("\n")
+    self.already_processed = Set.new
+  end
+
+  def starting_point
+    rows.each.with_index do |row, row_index|
+      column_index = row.index STARTING_POINT
+
+      if column_index
+        return [row_index, column_index]
+      end
+    end
+  end
+
+  def process_beams
+    process_beam(*starting_point)
+  end
+
+  def process_beam(*from)
+    return if already_processed.include?(from)
+
+    already_processed << from
+
+    next_point = point_below(*from)
+
+    if next_point
+      next_value = rows[next_point.first][next_point.last]
+
+      case next_value
+      when EMPTY
+        process_beam(*next_point)
+      when SPLITTER
+        self.splits += 1
+
+        [
+          point_left(*next_point),
+          point_right(*next_point)
+        ].compact.each { |p| process_beam(*p) }
+      end
+    end
+  end
+
+  def point_below(row, column)
+    row += 1
+
+    if row < rows.size
+      [row, column]
+    end
+  end
+
+  def point_left(row, column)
+    column -= 1
+
+    if column.positive?
+      [row, column]
+    end
+  end
+
+  def point_right(row, column)
+    column += 1
+
+    if column < rows.first.size
+      [row, column]
+    end
+  end
+end
+
+inputs_string = File.read("inputs.txt")
+
+grid = Grid.new(inputs_string)
+grid.process_beams
+puts grid.splits

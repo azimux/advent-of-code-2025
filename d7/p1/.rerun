@@ -1,0 +1,3 @@
+-p '**/*'
+--ignore '.git/*'
+--no-notify
