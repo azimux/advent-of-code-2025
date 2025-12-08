@@ -1,0 +1,117 @@
+#!/usr/bin/env ruby
+
+# require "pry"
+# require "pry-byebug"
+
+class Point
+  attr_accessor :x, :y, :z
+
+  def initialize(x, y, z)
+    self.x = x
+    self.y = y
+    self.z = z
+  end
+
+  def distance_to(other)
+    ((x - other.x) ** 2) + ((y - other.y) ** 2) + ((z - other.z) ** 2)
+  end
+
+  def to_s = "(#{x}, #{y}, #{z})"
+end
+
+class Circuit
+  def connections = @connections ||= Set.new
+  def points = @points ||= []
+  def initialize(starting_point) = add_point(starting_point)
+  def add_point(point) = points << point
+
+  def connect(new_point, existing_point)
+    print "."
+    connections << [new_point, existing_point].sort_by(&:object_id)
+  end
+
+  def connected?(point1, point2)
+    connections.include?([point1, point2].sort_by(&:object_id))
+  end
+
+  def size = points.size
+end
+
+class JunctionProblem
+  attr_accessor :circuits
+
+  def initialize(inputs_string)
+    rows = inputs_string.split("\n")
+
+    self.circuits = rows.map do |row|
+      Circuit.new(Point.new(*row.split(",").map(&:to_i)))
+    end
+  end
+
+  def perform_connections(connections)
+    connections.times { perform_connection }
+  end
+
+  def three_biggest_circuits = circuits.sort_by(&:size)[-3..]
+
+  def perform_connection
+    mutex = Mutex.new
+
+    min_distance = nil
+    closest_circuits = nil
+    closest_points = nil
+
+    circuits_size = circuits.size
+
+    threads = 0.upto(circuits_size - 2).map do |circuit_index|
+      Thread.new do
+        circuit = circuits[circuit_index]
+
+        circuit.points.each do |point|
+          circuit_index.upto(circuits_size - 1).each do |other_circuit_index|
+            other_circuit = circuits[other_circuit_index]
+
+            other_circuit.points.each do |other_point|
+              next if point == other_point
+
+              distance = point.distance_to(other_point)
+
+              mutex.synchronize do
+                if min_distance.nil? || distance < min_distance
+                  if other_circuit != circuit || !circuit.connected?(point, other_point)
+                    min_distance = distance
+                    closest_points = [point, other_point]
+                    closest_circuits = [circuit, other_circuit]
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    threads.each(&:join)
+
+    connect_points(*closest_points, *closest_circuits)
+  end
+
+  def connect_points(point1, point2, circuit1, circuit2)
+    unless circuit1 == circuit2
+      connect_circuits(circuit1, circuit2)
+    end
+    circuit1.connect(point1, point2)
+  end
+
+  def connect_circuits(circuit1, circuit2)
+    circuits.delete(circuit2)
+    circuit2.points.each { |p| circuit1.add_point(p) }
+  end
+end
+
+inputs_string = File.read("inputs.txt")
+
+junction_problem = JunctionProblem.new(inputs_string)
+junction_problem.perform_connections(1000)
+
+puts junction_problem.three_biggest_circuits.map(&:size).inject(:*)
