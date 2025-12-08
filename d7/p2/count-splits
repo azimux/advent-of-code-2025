@@ -7,86 +7,97 @@ class Grid
   EMPTY = ".".freeze
   SPLITTER = "^".freeze
   STARTING_POINT = "S".freeze
-  BEAM = "|".freeze
 
-  attr_accessor :rows, :splits, :already_processed, :current_point
+  attr_accessor :rows, :current_row_index,
+                :paths_arriving_at_index
 
   def initialize(input_string)
-    self.splits = 0
+    self.current_row_index = 0
     self.rows = input_string.split("\n")
-    self.already_processed = Set.new
-    self.current_point = starting_point
+
+    final_row = rows.last
+
+    [*rows.reject! { |row| row =~ /\A\.+\z/ }, final_row]
+
+    self.paths_arriving_at_index = [0] * rows.first.size
+
+    paths_arriving_at_index[current_row_starting_point] = 1
   end
 
-  def starting_point
-    rows.each.with_index do |row, row_index|
-      column_index = row.index STARTING_POINT
+  def process_beam
+    until done_processing?
+      build_path_count_log_entry
+      self.current_row_index += 1
+    end
 
-      if column_index
-        return [row_index, column_index]
+    paths_arriving_at_index.sum
+  end
+
+  def done_processing?
+    current_row_index >= rows.size - 1
+  end
+
+  def build_path_count_log_entry
+    reachable_splitter_indexes_in_next_row = current_row_starting_points.select do |column_index|
+      next_row[column_index] == SPLITTER
+    end
+
+    uniq_reachable_splitter_indexes_in_next_row = reachable_splitter_indexes_in_next_row.to_set
+
+    splitters_in_next_row.each do |i|
+      unless uniq_reachable_splitter_indexes_in_next_row.include?(i)
+        next_row[i] = "."
       end
     end
+
+    uniq_reachable_splitter_indexes_in_next_row.each do |splitter_index|
+      path_count = paths_arriving_at_index[splitter_index]
+      paths_arriving_at_index[splitter_index] = 0
+      paths_arriving_at_index[splitter_index - 1] += path_count
+      paths_arriving_at_index[splitter_index + 1] += path_count
+    end
   end
 
-  def process_beams
-    process_beam(*starting_point)
+  def total_paths = paths_arriving_at_index.sum
+
+  def next_row
+    rows[current_row_index + 1]
   end
 
-  def process_beam(*from)
-    return if already_processed.include?(from)
+  def current_row_starting_points
+    starting_points_for(current_row_index)
+  end
 
-    self.already_processed |= Set[from]
+  def current_row_starting_point
+    current_row.chars.index { |char| char == STARTING_POINT }
+  end
 
-    next_point = point_below(*from)
+  def splitters_in_next_row
+    current_row = rows[current_row_index + 1]
+    indices = []
 
-    if next_point
-      next_value = rows[next_point.first][next_point.last]
-
-      case next_value
-      when EMPTY
-        process_beam(*next_point)
-      when SPLITTER
-        split!(*next_point)
+    current_row.chars.each.with_index do |char, i|
+      if char == SPLITTER
+        indices << i
       end
     end
+
+    indices
   end
 
-  def split!(*point)
-    self.splits += 1
+  def starting_points_for(row_index)
+    indices = []
 
-    [
-      point_left(*point),
-      point_right(*point)
-    ].each { |p| process_beam(*p) }
-  end
-
-  def point_below(row, column)
-    row += 1
-
-    if row < rows.size
-      [row, column]
+    paths_arriving_at_index.each.with_index do |path_count, i|
+      indices << i unless path_count.zero?
     end
+    indices
   end
 
-  def point_left(row, column)
-    column -= 1
-
-    if column >= 0
-      [row, column]
-    end
-  end
-
-  def point_right(row, column)
-    column += 1
-
-    if column < rows.first.size
-      [row, column]
-    end
-  end
+  def current_row = rows[current_row_index]
 end
 
 inputs_string = File.read("inputs.txt")
 
 grid = Grid.new(inputs_string)
-grid.process_beams
-puts grid.splits
+puts grid.process_beam
