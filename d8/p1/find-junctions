@@ -26,7 +26,7 @@ class Circuit
   def add_point(point) = points << point
 
   def connect_points(new_point, existing_point)
-    print "."
+    # print "."
     connections << [new_point, existing_point].sort_by(&:object_id)
   end
 
