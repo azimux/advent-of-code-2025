@@ -25,9 +25,16 @@ class Circuit
   def initialize(starting_point) = add_point(starting_point)
   def add_point(point) = points << point
 
-  def connect(new_point, existing_point)
+  def connect_points(new_point, existing_point)
     print "."
     connections << [new_point, existing_point].sort_by(&:object_id)
+  end
+
+  def connect_circuit(other)
+    other.points.each { |p| add_point(p) }
+    other.connections.each do |connection|
+      connections << connection
+    end
   end
 
   def connected?(point1, point2)
@@ -55,43 +62,35 @@ class JunctionProblem
   def three_biggest_circuits = circuits.sort_by(&:size)[-3..]
 
   def perform_connection
-    mutex = Mutex.new
-
     min_distance = nil
     closest_circuits = nil
     closest_points = nil
 
     circuits_size = circuits.size
 
-    threads = 0.upto(circuits_size - 2).map do |circuit_index|
-      Thread.new do
-        circuit = circuits[circuit_index]
+    0.upto(circuits_size - 2).each do |circuit_index|
+      circuit = circuits[circuit_index]
 
-        circuit.points.each do |point|
-          circuit_index.upto(circuits_size - 1).each do |other_circuit_index|
-            other_circuit = circuits[other_circuit_index]
+      circuit.points.each do |point|
+        circuit_index.upto(circuits_size - 1).each do |other_circuit_index|
+          other_circuit = circuits[other_circuit_index]
 
-            other_circuit.points.each do |other_point|
-              next if point == other_point
+          other_circuit.points.each do |other_point|
+            next if point == other_point
 
-              distance = point.distance_to(other_point)
+            distance = point.distance_to(other_point)
 
-              mutex.synchronize do
-                if min_distance.nil? || distance < min_distance
-                  if other_circuit != circuit || !circuit.connected?(point, other_point)
-                    min_distance = distance
-                    closest_points = [point, other_point]
-                    closest_circuits = [circuit, other_circuit]
-                  end
-                end
+            if min_distance.nil? || distance < min_distance
+              if other_circuit != circuit || !circuit.connected?(point, other_point)
+                min_distance = distance
+                closest_points = [point, other_point]
+                closest_circuits = [circuit, other_circuit]
               end
             end
           end
         end
       end
     end
-
-    threads.each(&:join)
 
     connect_points(*closest_points, *closest_circuits)
   end
@@ -100,12 +99,12 @@ class JunctionProblem
     unless circuit1 == circuit2
       connect_circuits(circuit1, circuit2)
     end
-    circuit1.connect(point1, point2)
+    circuit1.connect_points(point1, point2)
   end
 
   def connect_circuits(circuit1, circuit2)
     circuits.delete(circuit2)
-    circuit2.points.each { |p| circuit1.add_point(p) }
+    circuit1.connect_circuit(circuit2)
   end
 end
 
