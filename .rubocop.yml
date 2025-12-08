@@ -13,3 +13,7 @@ Naming/FileName:
 
 Naming/MethodParameterName:
   Enabled: false
+
+
+Style/MinMaxComparison:
+  Enabled: false
