@@ -16,20 +16,6 @@ class Point
     ((x - other.x) ** 2) + ((y - other.y) ** 2) + ((z - other.z) ** 2)
   end
 
-  def simple_distance_to(other)
-    distance = (x - other.x).abs
-
-    new_distance = (y - other.y).abs
-
-    if new_distance > distance
-      distance = new_distance
-    end
-
-    new_distance = (z - other.z).abs
-
-    new_distance > distance ? new_distance : distance
-  end
-
   def to_s = "(#{x}, #{y}, #{z})"
 end
 
@@ -81,7 +67,6 @@ class JunctionProblem
   end
 
   def done?
-    puts circuits.size
     circuits.size == 1
   end
 
@@ -103,11 +88,6 @@ class JunctionProblem
 
           other_circuit.points.each do |other_point|
             next if point == other_point
-
-            if min_distance
-              simple_distance = point.simple_distance_to(other_point)
-              next if simple_distance > min_distance
-            end
 
             distance = point.distance_to(other_point)
 
