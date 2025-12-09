@@ -1,0 +1,118 @@
+#!/usr/bin/env ruby
+
+# Looks like no directions repeat
+
+require "pry"
+require "pry-byebug"
+
+class Point
+  def self.[](...) = new(...)
+
+  attr_accessor :x, :y
+
+  def initialize(x, y)
+    self.x = x
+    self.y = y
+  end
+
+  def to_s = "(#{x},#{y})"
+end
+
+class Floor
+  attr_accessor :points, :directions, :vertical_lines
+
+  def initialize(input_string)
+    rows = input_string.split("\n")
+    self.points = rows.map do |row|
+      coordinates = row.split(",").map(&:to_i)
+      Point[*coordinates]
+    end
+
+    build_vertical_lines
+    # build_border_tiles
+  end
+
+  def build_vertical_lines
+    vertical_lines = []
+
+    first_point = points.first
+    second_point = points[1]
+
+    first_direction = direction(first_point, second_point)
+
+    if first_direction == :up || first_direction == :down
+      line = [first_point, second_point]
+      line.sort_by!(&:y)
+      vertical_lines << line
+    end
+
+    directions = [first_direction]
+    last_direction = directions.first
+    last_point = second_point
+
+    points[2..].each do |next_point|
+      direction = direction(last_point, next_point)
+
+      if direction == :up || direction == :down
+        line = [last_point, next_point]
+        line.sort_by!(&:y)
+        vertical_lines << line
+      end
+
+      directions << direction
+      last_point = next_point
+    end
+
+    last_point = points.last
+
+    direction =  direction(last_point, first_point)
+    directions << direction
+
+    if direction == :up || direction == :down
+      line = [last_point, first_point]
+      line.sort_by!(&:y)
+      vertical_lines << line
+    end
+
+    self.directions = directions
+    self.vertical_lines = vertical_lines
+  end
+
+  def direction(p1, p2)
+    if p1.x == p2.x
+      p2.y > p1.y ? :down : :up
+    else
+      p2.x > p1.x ? :right : :left
+    end
+  end
+
+  def biggest_rectangle
+    points_size = points.size
+    biggest_area = 0
+
+    0.upto(points_size - 2) do |corner1_index|
+      corner1 = points[corner1_index]
+      corner1_index.upto(points_size - 1) do |corner2_index|
+        corner2 = points[corner2_index]
+
+        area = ((corner1.x - corner2.x + 1) * (corner1.y - corner2.y + 1)).abs
+
+        if area > biggest_area
+          biggest_area = area
+        end
+      end
+    end
+
+    biggest_area
+  end
+end
+
+input_string = File.read("inputs.txt")
+
+floor = Floor.new(input_string)
+
+# puts floor.biggest_rectangle
+binding.pry
+
+min_x = floor.points.map(&:x).min
+puts floor.points.select { |p| p.x == min_x }.inspect
