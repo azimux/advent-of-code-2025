@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+
+# require "pry"
+# require "pry-byebug"
+
+class Point
+  def self.[](...) = new(...)
+
+  attr_accessor :x, :y
+
+  def initialize(x, y)
+    self.x = x
+    self.y = y
+  end
+
+  def to_s = "(#{x},#{y})"
+end
+
+class Floor
+  attr_accessor :points
+
+  def initialize(input_string)
+    rows = input_string.split("\n")
+    self.points = rows.map do |row|
+      coordinates = row.split(",").map(&:to_i)
+      Point[*coordinates]
+    end
+  end
+
+  def biggest_rectangle
+    points_size = points.size
+    biggest_area = 0
+
+    0.upto(points_size - 2) do |corner1_index|
+      corner1 = points[corner1_index]
+      corner1_index.upto(points_size - 1) do |corner2_index|
+        corner2 = points[corner2_index]
+
+        area = ((corner1.x - corner2.x + 1) * (corner1.y - corner2.y + 1)).abs
+
+        if area > biggest_area
+          biggest_area = area
+        end
+      end
+    end
+
+    biggest_area
+  end
+end
+
+input_string = File.read("inputs_test.txt")
+
+floor = Floor.new(input_string)
+
+puts floor.biggest_rectangle
