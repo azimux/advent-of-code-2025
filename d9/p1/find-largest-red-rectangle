@@ -48,7 +48,7 @@ class Floor
   end
 end
 
-input_string = File.read("inputs_test.txt")
+input_string = File.read("inputs.txt")
 
 floor = Floor.new(input_string)
 
