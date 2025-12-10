@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 
-# Looks like no directions repeat
-
-# require "pry"
-# require "pry-byebug"
+require "pry"
+require "pry-byebug"
 
 class Point
   include Comparable
@@ -110,23 +108,29 @@ class Ring
   end
 
   def delete_vertex(vertex)
-    self.size -= 1
+    if size == 1
+      self.size = 0
+      self.head = nil
+    else
+      self.size -= 1
 
-    prev_vertex = vertex.prev
-    next_vertex = vertex.next
+      prev_vertex = vertex.prev
+      next_vertex = vertex.next
 
-    if vertex == head
-      self.head = next_vertex
+      if vertex == head
+        self.head = next_vertex
+      end
+
+      prev_vertex.next = next_vertex
+      next_vertex.prev = prev_vertex
     end
-
-    prev_vertex.next = next_vertex
-    next_vertex.prev = prev_vertex
   end
 
   def points
     vertex = head
-
     points = []
+
+    return points unless head
 
     begin
       points << vertex.point
@@ -134,6 +138,10 @@ class Ring
     end until vertex == head
 
     points
+  end
+
+  def empty?
+    size == 0
   end
 end
 
@@ -213,3 +221,6 @@ floor = Floor.new(points)
 puts floor.rectangles.size
 
 ring = Ring.new(points)
+
+binding.pry
+puts "asdf"
