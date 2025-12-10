@@ -90,15 +90,13 @@ class Ring
       end
     end
 
-    def y
-      @y ||= point.y
-    end
-
-    def x
-      @x ||= point.x
-    end
-
+    def y = point.y
+    def x = point.x
     def to_s = point.to_s
+
+    def y=(y)
+      point.y = y
+    end
   end
 
   attr_accessor :head, :size
@@ -186,10 +184,32 @@ class Ring
     bottom_left = top_left.down
     bottom_right = top_right.down
 
-    puts "tl", top_left
-    puts "tr", top_right
-    puts "bl", bottom_left
-    puts "br", bottom_right
+    rectangle = nil
+
+    if bottom_left.y > bottom_right.y
+      rectangle = Rectangle.new(top_left.point, bottom_right.point)
+
+      delete(top_right)
+      top_left.y = bottom_right.y
+
+      delete(bottom_right)
+    elsif bottom_left.y < bottom_right.y
+      rectangle = Rectangle.new(top_right.point, bottom_left.point)
+
+      delete(top_left)
+      top_right.y = bottom_left.y
+
+      delete(bottom_left)
+    else
+      rectangle = Rectangle.new(top_left.point, bottom_right.point)
+
+      delete(top_left)
+      delete(bottom_left)
+      delete(top_right)
+      delete(bottom_right)
+    end
+
+    rectangle
   end
 
   def smallest_vertex
@@ -291,7 +311,7 @@ puts floor.rectangles.size
 
 ring = Ring.new(points)
 
+rectangle = ring.extract_rectangle
+
 binding.pry
 puts "asdf"
-
-puts ring.extract_rectangle
