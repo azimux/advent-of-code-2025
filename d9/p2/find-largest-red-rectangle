@@ -102,6 +102,8 @@ class Ring
   attr_accessor :head, :size
 
   def initialize(points)
+    points = points.dup
+
     self.size = points.size
 
     first_point = points.first
@@ -241,11 +243,19 @@ class Ring
 end
 
 class Floor
-  attr_accessor :points, :fill_from, :filled_tiles, :red_tiles_set
+  attr_accessor :points, :filled_tiles, :red_tiles_set, :green_rectangles, :ring
 
   def initialize(points)
     self.points = points
+    self.ring = Ring.new(points)
     self.red_tiles_set = points.to_set
+
+    extract_green_rectangles
+  end
+
+  def extract_green_rectangles
+    self.green_rectangles = ring.extract_rectangles
+    self.ring = nil
   end
 
   def biggest_rectangle
@@ -310,14 +320,10 @@ def parse_points(filename)
   end
 end
 
-points = parse_points("inputs_test.txt")
+points = parse_points("inputs.txt")
 
 floor = Floor.new(points)
-puts floor.rectangles.size
 
-ring = Ring.new(points)
+rectangles = floor.green_rectangles
 
-rectangles = ring.extract_rectangles
-
-binding.pry
-puts "asdf"
+puts rectangles.size
