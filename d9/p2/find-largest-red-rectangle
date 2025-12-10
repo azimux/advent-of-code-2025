@@ -60,6 +60,37 @@ class Rectangle
   end
 end
 
+class Ring
+  class Vertex
+    attr_accessor :point, :prev, :next
+
+    def initialize(point)
+      self.point = point
+    end
+  end
+
+  attr_accessor :head
+
+  def initialize(points)
+    first_point = points.first
+
+    vertex = Vertex.new(first_point)
+    self.head = vertex
+    prev_vertex = vertex
+
+    points[1..].each do |point|
+      next_vertex = Vertex.new(point)
+      prev_vertex.next = next_vertex
+      next_vertex.prev = prev_vertex
+
+      prev_vertex = next_vertex
+    end
+
+    prev_vertex.next = head
+    head.prev = prev_vertex
+  end
+end
+
 class Floor
   attr_accessor :points, :fill_from, :filled_tiles, :red_tiles_set
 
@@ -134,3 +165,5 @@ points = parse_points("inputs.txt")
 
 floor = Floor.new(points)
 puts floor.rectangles.size
+
+ring = Ring.new(points)
