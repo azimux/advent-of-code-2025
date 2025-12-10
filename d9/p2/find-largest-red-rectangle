@@ -78,6 +78,18 @@ class Ring
       end
     end
 
+    def down
+      vertex = if prev.x == x
+                 prev
+               elsif self.next.x == x
+                 self.next
+               end
+
+      if vertex && vertex.y > y
+        vertex
+      end
+    end
+
     def y
       @y ||= point.y
     end
@@ -171,8 +183,13 @@ class Ring
 
     top_right = top_left.right
 
+    bottom_left = top_left.down
+    bottom_right = top_right.down
+
     puts "tl", top_left
     puts "tr", top_right
+    puts "bl", bottom_left
+    puts "br", bottom_right
   end
 
   def smallest_vertex
