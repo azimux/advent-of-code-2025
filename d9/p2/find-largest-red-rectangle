@@ -143,6 +143,31 @@ class Ring
   def empty?
     size == 0
   end
+
+  def extract_rectangle
+    top_left = points.min
+  end
+
+  def smallest_vertex
+    return head if size == 1
+
+    smallest_vertex = head
+    smallest_point = head.point
+    vertex = head.next
+
+    begin
+      vertex_point = vertex.point
+
+      if vertex_point < smallest_point
+        smallest_vertex = vertex
+        smallest_point = vertex_point
+      end
+
+      vertex = vertex.next
+    end until vertex == head
+
+    smallest_vertex
+  end
 end
 
 class Floor
