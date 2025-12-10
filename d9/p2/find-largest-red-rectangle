@@ -37,6 +37,48 @@ class Point
   end
 end
 
+class Rectangle
+  attr_accessor :corner1, :corner2
+
+  def initialize(corner1, corner2)
+    self.corner1 = corner1
+    self.corner2 = corner2
+  end
+
+  def area
+    ((corner1.x - corner2.x + 1) * (corner1.y - corner2.y + 1)).abs
+  end
+
+  def each_point
+    x1 = corner1.x
+    x2 = corner2.x
+    y1 = corner1.y
+    y2 = corner2.y
+
+    if x1 > x2
+      ulx = x2
+      urx = x1
+    else
+      ulx = x1
+      urx = x2
+    end
+
+    if y1 > y2
+      uly = y2
+      ury = y1
+    else
+      uly = y1
+      ury = y2
+    end
+
+    (ulx..urx).each do |x|
+      (uly..ury).each do |y|
+        yield Point.new(x, y)
+      end
+    end
+  end
+end
+
 class Floor
   attr_accessor :points, :border_tiles, :fill_from, :filled_tiles, :red_tiles_set,
                 :neighbor_of
@@ -175,26 +217,44 @@ class Floor
   end
 
   def biggest_rectangle
+    rectangles.each do |rectangle|
+      found = true
+
+      rectangle.each_point do |point|
+        unless filled_tiles.include?(point)
+          found = false
+          break
+        end
+      end
+
+      return rectangle if found
+    end
+  end
+
+  def rectangles
+    return @rectangles if @rectangles
+
+    rectangles = []
+
     points_size = points.size
-    biggest_area = 0
 
     0.upto(points_size - 2) do |corner1_index|
       corner1 = points[corner1_index]
       corner1_index.upto(points_size - 1) do |corner2_index|
         corner2 = points[corner2_index]
 
-        area = ((corner1.x - corner2.x + 1) * (corner1.y - corner2.y + 1)).abs
-
-        if area > biggest_area
-          biggest_area = area
-        end
+        rectangles << Rectangle.new(corner1, corner2)
       end
     end
 
-    biggest_area
+    rectangles.sort_by!(&:area)
+    rectangles.reverse!
+
+    @rectangles = rectangles
   end
 end
 
 input_string = File.read("inputs_test.txt")
 
 floor = Floor.new(input_string)
+puts floor.biggest_rectangle.area
