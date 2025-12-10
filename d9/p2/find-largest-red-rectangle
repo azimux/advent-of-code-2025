@@ -65,6 +65,28 @@ class Ring
     def initialize(point)
       self.point = point
     end
+
+    def right
+      vertex = if prev.y == y
+                 prev
+               elsif self.next.y == y
+                 self.next
+               end
+
+      if vertex && vertex.x > x
+        vertex
+      end
+    end
+
+    def y
+      @y ||= point.y
+    end
+
+    def x
+      @x ||= point.x
+    end
+
+    def to_s = point.to_s
   end
 
   attr_accessor :head, :size
@@ -145,7 +167,12 @@ class Ring
   end
 
   def extract_rectangle
-    top_left = points.min
+    top_left = smallest_vertex
+
+    top_right = top_left.right
+
+    puts "tl", top_left
+    puts "tr", top_right
   end
 
   def smallest_vertex
@@ -249,3 +276,5 @@ ring = Ring.new(points)
 
 binding.pry
 puts "asdf"
+
+puts ring.extract_rectangle
