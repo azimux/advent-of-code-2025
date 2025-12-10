@@ -56,6 +56,142 @@ class Rectangle
   def area
     (x2 - x1 + 1) * (y2 - y1 + 1)
   end
+
+  def ul
+    Point.new(x1, y1)
+  end
+
+  def ur
+    Point.new(x2, y1)
+  end
+
+  def bl
+    Point.new(x1, y2)
+  end
+
+  def br
+    Point.new(x2, y2)
+  end
+
+  def points
+    [ul, ur, bl, br]
+  end
+
+  def remove_overlapping_pieces(rectangle_to_break)
+    contained_points, uncontained_points = rectangle_to_break.points.partition do |p|
+      contains?(p)
+    end
+
+    case contained_points.size
+    when 0
+      our_points_contained_by_rectangle_to_break = points.find { |p| rectangle_to_break.contains?(p) }.sort
+
+      case our_points_contained_by_rectangle_to_break.size
+      when 0
+        rectangle_to_break
+      when 2
+        case our_points_contained_by_rectangle_to_break
+        when [ul, ur] # top
+          [
+            # left piece
+            Rectangle.new(rectangle_to_break.ul, Point[x1, rectangle_to_break.y2]),
+            # middle top
+            Rectangle.new(ul, Point[x2, rectangle_to_break.y1]),
+            # left piece
+            Rectangle.new(rectangle_to_break.ur, Point[x2, rectangle_to_break.y2])
+          ]
+        when [ur, br] # right
+          [
+            # top piece
+            Rectangle.new(rectangle_to_break.ul, Point[rectangle_to_break.x2, y1]),
+            # middle right
+            Rectangle.new(br, Point[rectangle_to_break.x2, y1]),
+            # bottom piece
+            Rectangle.new(rectangle_to_break.bl, Point[rectangle_to_break.x2, y2])
+          ]
+        when [ul, bl] # left
+          [
+            # top piece
+            Rectangle.new(rectangle_to_break.ul, Point[rectangle_to_break.x2, y1]),
+            # middle right
+            Rectangle.new(bl, Point[rectangle_to_break.x1, y1]),
+            # bottom piece
+            Rectangle.new(rectangle_to_break.bl, Point[rectangle_to_break.x2, y2])
+          ]
+        when [bl, br] # bottom
+          [
+            # left piece
+            Rectangle.new(rectangle_to_break.ul, Point[x1, rectangle_to_break.y2]),
+            # middle bottom
+            Rectangle.new(bl, Point[x2, rectangle_to_break.y2]),
+            # left piece
+            Rectangle.new(rectangle_to_break.ur, Point[x2, rectangle_to_break.y2])
+          ]
+        else
+          raise "wtf"
+        end
+      when 4
+        [
+          # top row
+          Rectangle.new(ul, rectangle_to_break.ul),
+          Rectangle.new(ul, Point[x2, rectangle_to_break.y1]),
+          Rectangle.new(ur, rectangle_to_break.ur),
+
+          # middle row
+          Rectangle.new(ul, Point[rectangle_to_break.x1, y2]),
+          Rectangle.new(ur, Point[rectangle_to_break.x2, y2]),
+
+          # bottom row
+          Rectangle.new(bl, rectangle_to_break.bl),
+          Rectangle.new(bl, Point[x2, rectangle_to_break.y2]),
+          Rectangle.new(br, rectangle_to_break.br)
+        ]
+      end
+    when 1
+      corner1 = points.find { |p| rectangle_to_break.contains?(p) }
+
+      uncontained_points.map do |up|
+        Rectangle.new(corner1, up)
+      end
+    when 2
+      # 1r
+      # will contain the two uncontained points.
+      up1, up2 = uncontained_points
+      cp1 = contained_points.first
+
+      corner1 = up1
+
+      if up1.x == up2.x
+        # we contain a vertical edge
+        x = if cp1.x < up1.x
+              # we contain the left edge of the rectangle_to_break
+              x2 - 1
+            else
+              # we contain the right edge of the rectangle_to_break
+              x1 + 1
+            end
+
+        corner2 = Point[x, up2.y]
+      else
+        # we contain a horizontal edge
+        y = if cp1.y < up1.y
+              # we contain the top edge of the rectangle_to_break
+              y2 - 1
+            else
+              # we contain the bottom edge of the rectangle_to_break
+              y1 + 1
+            end
+
+        corner2 = Point[up2.x, y]
+      end
+
+      Rectangle.new(corner1, corner2)
+    end
+  end
+
+  def contains?(point)
+    point.x.between?(x1, x2) && point.y.between?(y1, y2)
+  end
 end
 
 class Ring
@@ -259,29 +395,8 @@ class Floor
   end
 
   def biggest_rectangle
-    rectangles_size = rectangles.size
-
     rectangles.each.with_index do |rectangle, index|
       # puts "considering #{index} of #{rectangles_size}"
-
-      found = true
-
-      upper_left_corner = rectangle.upper_left_corner
-      lower_right_corner = rectangle.lower_right_corner
-
-      covered = false
-
-      upper_left_corner.x.upto(lower_right_corner.x) do |x|
-        range = (upper_left_corner.y..lower_right_corner.y)
-
-        covered = filled_ranges[x].any? do |filled_range|
-          filled_range.cover?(range)
-        end
-
-        break unless covered
-      end
-
-      return rectangle if covered
     end
   end
 
