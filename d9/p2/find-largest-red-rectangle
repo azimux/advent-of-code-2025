@@ -45,72 +45,25 @@ class Point
 end
 
 class Rectangle
-  attr_accessor :corner1, :corner2
+  attr_accessor :x1, :x2, :y1, :y2
 
   def initialize(corner1, corner2)
-    self.corner1 = corner1
-    self.corner2 = corner2
-  end
-
-  def area
-    ((corner1.x - corner2.x + 1) * (corner1.y - corner2.y + 1)).abs
-  end
-
-  def each_point
-    x1 = corner1.x
-    x2 = corner2.x
-    y1 = corner1.y
-    y2 = corner2.y
+    self.x1 = corner1.x
+    self.x2 = corner2.x
+    self.y1 = corner1.y
+    self.y2 = corner2.y
 
     if x1 > x2
-      ulx = x2
-      urx = x1
-    else
-      ulx = x1
-      urx = x2
+      self.x1, self.x2 = x2, x1
     end
 
     if y1 > y2
-      uly = y2
-      ury = y1
-    else
-      uly = y1
-      ury = y2
-    end
-
-    (ulx..urx).each do |x|
-      (uly..ury).each do |y|
-        yield Point.new(x, y)
-      end
+      self.y1, self.y2 = y2, y1
     end
   end
 
-  def upper_left_corner
-    return @upper_left_corner if defined?(@upper_left_corner)
-
-    x1 = corner1.x
-    x2 = corner2.x
-    y1 = corner1.y
-    y2 = corner2.y
-
-    ulx =  x1 > x2 ? x2 : x1
-    uly =  y1 > y2 ? y2 : y1
-
-    @upper_left_corner = Point.new(ulx, uly)
-  end
-
-  def lower_right_corner
-    return @lower_right_corner if defined?(@lower_right_corner)
-
-    x1 = corner1.x
-    x2 = corner2.x
-    y1 = corner1.y
-    y2 = corner2.y
-
-    lrx =  x1 > x2 ? x1 : x2
-    lry =  y1 > y2 ? y1 : y2
-
-    @lower_right_corner = Point.new(lrx, lry)
+  def area
+    (x2 - x1 + 1) * (y2 - y1 + 1)
   end
 end
 
