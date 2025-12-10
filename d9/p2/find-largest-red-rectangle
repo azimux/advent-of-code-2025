@@ -32,44 +32,53 @@ class Point
   end
 
   def <=>(other)
-    cmp = x <=> other.x
-    cmp.zero? ? y <=> other.y : cmp
+    cmp = y <=> other.y
+    cmp.zero? ? x <=> other.x : cmp
   end
 end
 
 class Floor
-  attr_accessor :points, :border_tiles # , :filled_tiles
+  attr_accessor :points, :border_tiles, :fill_from, :filled_tiles, :red_tiles_set,
+                :neighbor_of
 
   def initialize(input_string)
+    self.neighbor_of = {}
+
     rows = input_string.split("\n")
     self.points = rows.map do |row|
       coordinates = row.split(",").map(&:to_i)
       Point[*coordinates]
     end
 
+    self.red_tiles_set = points.to_set
+
     build_border_tiles
+    fill
   end
 
   def build_border_tiles
-    self.border_tiles = []
+    self.border_tiles = Set.new
+    self.fill_from = []
+    self.filled_tiles = []
 
     first_point = points.first
     previous_point = first_point
 
-    points[1..].each do |next_point|
+    points.each do |next_point|
       fill_in_border_tiles(previous_point, next_point)
       previous_point = next_point
     end
 
-    previous_point = points.last
+    fill_in_border_tiles(points.last, first_point)
 
-    fill_in_border_tiles(previous_point, first_point)
-
-    border_tiles.uniq!
-    border_tiles.sort!
+    fill_from.uniq!
+    fill_from.sort!
   end
 
   def fill_in_border_tiles(p1, p2)
+    border_tiles << p1
+    border_tiles << p2
+
     if p1.x == p2.x
       x = p1.x
 
@@ -81,8 +90,11 @@ class Floor
         y2 = p1.y
       end
 
-      y1.upto(y2) { |y| border_tiles << Point[x, y] }
+      # (y1 + 1).upto(y2 - 1) { |y| border_tiles << Point[x, y] }
     else
+      neighbor_of[p1] = p2
+      neighbor_of[p2] = p1
+
       y = p1.y
 
       if p2.x > p1.x
@@ -93,8 +105,73 @@ class Floor
         x2 = p1.x
       end
 
-      x1.upto(x2) { |x| border_tiles << Point[x, y] }
+      x1.upto(x2) do |x|
+        p = Point[x, y]
+
+        fill_from << p
+        border_tiles << p
+      end
     end
+  end
+
+  def fill
+    until fill_from.empty?
+      p = fill_from.shift
+      p_is_red = red_tiles_set.include?(p)
+
+      x = p.x
+      below_p = p
+
+      loop do
+        below_p = Point[x, below_p.y + 1]
+
+        if border_tiles.include?(below_p)
+          if red_tiles_set.include?(below_p)
+            if p_is_red
+              p_neighbor = neighbor_of[p]
+              below_p_neighbor = neighbor_of[below_p]
+
+              p_direction = p.x < p_neighbor.x ? :right : :left
+              below_p_direction = below_p.x < below_p_neighbor.x ? :right : :left
+
+              above_p = Point.new(x, p.y - 1)
+
+              if p_direction == below_p_direction && !filled_tiles.include?(above_p)
+                fill_from.delete(below_p)
+              end
+
+              if p_direction != below_p_direction && filled_tiles.include?(above_p)
+                fill_from.delete(below_p)
+              end
+
+              if p_direction == below_p_direction
+                unless filled_tiles.include?(above_p)
+                  fill_from.delete(below_p)
+                end
+              elsif filled_tiles.include?(above_p)
+                fill_from.delete(below_p)
+              end
+            end
+          else
+            fill_from.delete(below_p)
+          end
+
+          break
+        else
+          filled_tiles << below_p
+        end
+      end
+    end
+
+    border_tiles.each do |p|
+      filled_tiles << p
+    end
+    self.border_tiles = nil
+    self.fill_from = nil
+    self.red_tiles_set = nil
+
+    filled_tiles.uniq!
+    filled_tiles.sort!
   end
 
   def biggest_rectangle
@@ -121,9 +198,3 @@ end
 input_string = File.read("inputs_test.txt")
 
 floor = Floor.new(input_string)
-
-# puts floor.biggest_rectangle
-binding.pry
-
-min_x = floor.points.map(&:x).min
-puts floor.points.select { |p| p.x == min_x }.inspect
