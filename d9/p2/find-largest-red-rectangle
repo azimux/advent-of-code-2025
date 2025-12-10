@@ -96,6 +96,7 @@ class Floor
 
     build_border_tiles
     fill
+    puts "done filling!"
   end
 
   def build_border_tiles
@@ -115,6 +116,8 @@ class Floor
 
     fill_from.uniq!
     fill_from.sort!
+
+    puts "done building border tiles!"
   end
 
   def fill_in_border_tiles(p1, p2)
@@ -217,7 +220,11 @@ class Floor
   end
 
   def biggest_rectangle
-    rectangles.each do |rectangle|
+    rectangles_size = rectangles.size
+
+    rectangles.each.with_index do |rectangle, index|
+      puts "considering #{index} of #{rectangles_size}"
+
       found = true
 
       rectangle.each_point do |point|
@@ -250,11 +257,13 @@ class Floor
     rectangles.sort_by!(&:area)
     rectangles.reverse!
 
+    puts "done building rectangles!"
+
     @rectangles = rectangles
   end
 end
 
-input_string = File.read("inputs_test.txt")
+input_string = File.read("inputs.txt")
 
 floor = Floor.new(input_string)
 puts floor.biggest_rectangle.area
