@@ -5,13 +5,6 @@
 # require "pry"
 # require "pry-byebug"
 
-class Range
-  def merge(other)
-    bounds = [*minmax, *other.minmax]
-    self.class.new(bounds.min, bounds.max)
-  end
-end
-
 class Point
   include Comparable
 
@@ -68,162 +61,11 @@ class Rectangle
 end
 
 class Floor
-  attr_accessor :points, :border_tiles, :fill_from, :filled_tiles, :red_tiles_set,
-                :neighbor_of, :filled_ranges
+  attr_accessor :points, :fill_from, :filled_tiles, :red_tiles_set
 
-  def initialize(input_string)
-    self.filled_ranges = {}
-    self.neighbor_of = {}
-
-    rows = input_string.split("\n")
-    self.points = rows.map do |row|
-      coordinates = row.split(",").map(&:to_i)
-      Point[*coordinates]
-    end
-
+  def initialize(points)
+    self.points = points
     self.red_tiles_set = points.to_set
-
-    build_border_tiles
-    fill
-    puts "done filling!"
-    union_ranges
-  end
-
-  def build_border_tiles
-    self.border_tiles = Set.new
-    self.fill_from = []
-    self.filled_tiles = []
-
-    first_point = points.first
-    previous_point = first_point
-
-    points.each do |next_point|
-      fill_in_border_tiles(previous_point, next_point)
-      previous_point = next_point
-    end
-
-    fill_in_border_tiles(points.last, first_point)
-
-    fill_from.uniq!
-    fill_from.sort!
-
-    puts "done building border tiles!"
-  end
-
-  def fill_in_border_tiles(p1, p2)
-    border_tiles << p1
-    border_tiles << p2
-
-    if p1.y == p2.y
-      neighbor_of[p1] = p2
-      neighbor_of[p2] = p1
-
-      y = p1.y
-
-      if p2.x > p1.x
-        x1 = p1.x
-        x2 = p2.x
-      else
-        x1 = p2.x
-        x2 = p1.x
-      end
-
-      x1.upto(x2) do |x|
-        p = Point[x, y]
-
-        fill_from << p
-        border_tiles << p
-      end
-    end
-  end
-
-  def fill
-    until fill_from.empty?
-      p = fill_from.shift
-      p_is_red = red_tiles_set.include?(p)
-
-      x = p.x
-      below_p = p
-
-      loop do
-        below_p = Point[x, below_p.y + 1]
-
-        puts below_p
-
-        if border_tiles.include?(below_p)
-          if red_tiles_set.include?(below_p)
-            if p_is_red
-              p_neighbor = neighbor_of[p]
-              below_p_neighbor = neighbor_of[below_p]
-
-              p_direction = p.x < p_neighbor.x ? :right : :left
-              below_p_direction = below_p.x < below_p_neighbor.x ? :right : :left
-
-              above_p_y = p.y - 1
-              if p_direction == below_p_direction
-                unless filled_ranges.any? { |r| r.member?(above_p_y) }
-                  fill_from.delete(below_p)
-                end
-              elsif filled_ranges.any? { |r| r.member?(above_p_y) }
-                fill_from.delete(below_p)
-              end
-            end
-          else
-            fill_from.delete(below_p)
-          end
-
-          a = filled_ranges[x] ||= []
-          a << Range.new(p.y, below_p.y)
-
-          break
-        end
-      end
-    end
-
-    border_tiles.each do |p|
-      filled_tiles << p
-    end
-    self.border_tiles = nil
-    self.fill_from = nil
-    self.red_tiles_set = nil
-
-    filled_tiles.uniq!
-    filled_tiles.sort!
-  end
-
-  def union_ranges
-    keys = filled_ranges.keys
-    keys.each do |x|
-      overlap_found = true
-
-      ranges = filled_ranges[x]
-
-      while overlap_found
-        overlap_found = false
-
-        0.upto(ranges.size - 2) do |range1_index|
-          range1 = ranges[range1_index]
-
-          (range1_index + 1).upto(ranges.size - 1) do |range2_index|
-            range2 = ranges[range2_index]
-
-            if range1.overlap?(range2)
-              ranges.delete(range1)
-              ranges.delete(range2)
-
-              ranges << range1.merge(range2)
-
-              overlap_found = true
-              break
-            end
-          end
-
-          break if overlap_found
-        end
-      end
-
-      filled_ranges[x] = ranges
-    end
   end
 
   def biggest_rectangle
@@ -278,7 +120,17 @@ class Floor
   end
 end
 
-input_string = File.read("inputs.txt")
+def parse_points(filename)
+  input_string = File.read(filename)
+  rows = input_string.split("\n")
 
-floor = Floor.new(input_string)
-puts floor.biggest_rectangle.area
+  rows.map do |row|
+    coordinates = row.split(",").map(&:to_i)
+    Point[*coordinates]
+  end
+end
+
+points = parse_points("inputs.txt")
+
+floor = Floor.new(points)
+puts floor.rectangles.size
