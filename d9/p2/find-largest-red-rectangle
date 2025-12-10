@@ -176,6 +176,12 @@ class Ring
     size == 0
   end
 
+  def extract_rectangles
+    rectangles = []
+    rectangles << extract_rectangle until empty?
+    rectangles
+  end
+
   def extract_rectangle
     top_left = smallest_vertex
 
@@ -311,7 +317,7 @@ puts floor.rectangles.size
 
 ring = Ring.new(points)
 
-rectangle = ring.extract_rectangle
+rectangles = ring.extract_rectangles
 
 binding.pry
 puts "asdf"
