@@ -69,9 +69,11 @@ class Ring
     end
   end
 
-  attr_accessor :head
+  attr_accessor :head, :size
 
   def initialize(points)
+    self.size = points.size
+
     first_point = points.first
 
     vertex = Vertex.new(first_point)
@@ -88,6 +90,50 @@ class Ring
 
     prev_vertex.next = head
     head.prev = prev_vertex
+  end
+
+  def delete(point_or_vertex)
+    case point_or_vertex
+    when Point
+      vertex = head
+
+      size.times do
+        if vertex.point == point_or_vertex
+          return delete_vertex(vertex)
+        end
+
+        vertex = vertex.next
+      end
+    when Vertex
+      delete_vertex(point_or_vertex)
+    end
+  end
+
+  def delete_vertex(vertex)
+    self.size -= 1
+
+    prev_vertex = vertex.prev
+    next_vertex = vertex.next
+
+    if vertex == head
+      self.head = next_vertex
+    end
+
+    prev_vertex.next = next_vertex
+    next_vertex.prev = prev_vertex
+  end
+
+  def points
+    vertex = head
+
+    points = []
+
+    begin
+      points << vertex.point
+      vertex = vertex.next
+    end until vertex == head
+
+    points
   end
 end
 
@@ -161,7 +207,7 @@ def parse_points(filename)
   end
 end
 
-points = parse_points("inputs.txt")
+points = parse_points("inputs_test.txt")
 
 floor = Floor.new(points)
 puts floor.rectangles.size
