@@ -2,8 +2,15 @@
 
 # Looks like no directions repeat
 
-require "pry"
-require "pry-byebug"
+# require "pry"
+# require "pry-byebug"
+
+class Range
+  def merge(other)
+    bounds = [*minmax, *other.minmax]
+    self.class.new(bounds.min, bounds.max)
+  end
+end
 
 class Point
   include Comparable
@@ -77,13 +84,42 @@ class Rectangle
       end
     end
   end
+
+  def upper_left_corner
+    return @upper_left_corner if defined?(@upper_left_corner)
+
+    x1 = corner1.x
+    x2 = corner2.x
+    y1 = corner1.y
+    y2 = corner2.y
+
+    ulx =  x1 > x2 ? x2 : x1
+    uly =  y1 > y2 ? y2 : y1
+
+    @upper_left_corner = Point.new(ulx, uly)
+  end
+
+  def lower_right_corner
+    return @lower_right_corner if defined?(@lower_right_corner)
+
+    x1 = corner1.x
+    x2 = corner2.x
+    y1 = corner1.y
+    y2 = corner2.y
+
+    lrx =  x1 > x2 ? x1 : x2
+    lry =  y1 > y2 ? y1 : y2
+
+    @lower_right_corner = Point.new(lrx, lry)
+  end
 end
 
 class Floor
   attr_accessor :points, :border_tiles, :fill_from, :filled_tiles, :red_tiles_set,
-                :neighbor_of
+                :neighbor_of, :filled_ranges
 
   def initialize(input_string)
+    self.filled_ranges = {}
     self.neighbor_of = {}
 
     rows = input_string.split("\n")
@@ -97,6 +133,7 @@ class Floor
     build_border_tiles
     fill
     puts "done filling!"
+    union_ranges
   end
 
   def build_border_tiles
@@ -124,19 +161,7 @@ class Floor
     border_tiles << p1
     border_tiles << p2
 
-    if p1.x == p2.x
-      x = p1.x
-
-      if p2.y > p1.y
-        y1 = p1.y
-        y2 = p2.y
-      else
-        y1 = p2.y
-        y2 = p1.y
-      end
-
-      # (y1 + 1).upto(y2 - 1) { |y| border_tiles << Point[x, y] }
-    else
+    if p1.y == p2.y
       neighbor_of[p1] = p2
       neighbor_of[p2] = p1
 
@@ -170,6 +195,8 @@ class Floor
       loop do
         below_p = Point[x, below_p.y + 1]
 
+        puts below_p
+
         if border_tiles.include?(below_p)
           if red_tiles_set.include?(below_p)
             if p_is_red
@@ -179,21 +206,12 @@ class Floor
               p_direction = p.x < p_neighbor.x ? :right : :left
               below_p_direction = below_p.x < below_p_neighbor.x ? :right : :left
 
-              above_p = Point.new(x, p.y - 1)
-
-              if p_direction == below_p_direction && !filled_tiles.include?(above_p)
-                fill_from.delete(below_p)
-              end
-
-              if p_direction != below_p_direction && filled_tiles.include?(above_p)
-                fill_from.delete(below_p)
-              end
-
+              above_p_y = p.y - 1
               if p_direction == below_p_direction
-                unless filled_tiles.include?(above_p)
+                unless filled_ranges.any? { |r| r.member?(above_p_y) }
                   fill_from.delete(below_p)
                 end
-              elsif filled_tiles.include?(above_p)
+              elsif filled_ranges.any? { |r| r.member?(above_p_y) }
                 fill_from.delete(below_p)
               end
             end
@@ -201,9 +219,10 @@ class Floor
             fill_from.delete(below_p)
           end
 
+          a = filled_ranges[x] ||= []
+          a << Range.new(p.y, below_p.y)
+
           break
-        else
-          filled_tiles << below_p
         end
       end
     end
@@ -219,22 +238,65 @@ class Floor
     filled_tiles.sort!
   end
 
+  def union_ranges
+    keys = filled_ranges.keys
+    keys.each do |x|
+      overlap_found = true
+
+      ranges = filled_ranges[x]
+
+      while overlap_found
+        overlap_found = false
+
+        0.upto(ranges.size - 2) do |range1_index|
+          range1 = ranges[range1_index]
+
+          (range1_index + 1).upto(ranges.size - 1) do |range2_index|
+            range2 = ranges[range2_index]
+
+            if range1.overlap?(range2)
+              ranges.delete(range1)
+              ranges.delete(range2)
+
+              ranges << range1.merge(range2)
+
+              overlap_found = true
+              break
+            end
+          end
+
+          break if overlap_found
+        end
+      end
+
+      filled_ranges[x] = ranges
+    end
+  end
+
   def biggest_rectangle
     rectangles_size = rectangles.size
 
     rectangles.each.with_index do |rectangle, index|
-      puts "considering #{index} of #{rectangles_size}"
+      # puts "considering #{index} of #{rectangles_size}"
 
       found = true
 
-      rectangle.each_point do |point|
-        unless filled_tiles.include?(point)
-          found = false
-          break
+      upper_left_corner = rectangle.upper_left_corner
+      lower_right_corner = rectangle.lower_right_corner
+
+      covered = false
+
+      upper_left_corner.x.upto(lower_right_corner.x) do |x|
+        range = (upper_left_corner.y..lower_right_corner.y)
+
+        covered = filled_ranges[x].any? do |filled_range|
+          filled_range.cover?(range)
         end
+
+        break unless covered
       end
 
-      return rectangle if found
+      return rectangle if covered
     end
   end
 
