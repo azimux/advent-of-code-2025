@@ -84,7 +84,9 @@ class Rectangle
 
     case contained_points.size
     when 0
-      our_points_contained_by_rectangle_to_break = points.find { |p| rectangle_to_break.contains?(p) }.sort
+      our_points_contained_by_rectangle_to_break = points.select do |p|
+        rectangle_to_break.contains?(p)
+      end.sort
 
       case our_points_contained_by_rectangle_to_break.size
       when 0
@@ -435,10 +437,33 @@ class Floor
     self.ring = nil
   end
 
-  def biggest_rectangle
+  def biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
     rectangles.each.with_index do |rectangle, index|
-      # puts "considering #{index} of #{rectangles_size}"
+      puts "processing #{index}: #{rectangle}"
+
+      green_rectangles.each do |green_rectangle|
+        rectangles_to_break = [rectangle]
+
+        loop do
+          if rectangles_to_break.empty?
+            return rectangle
+          end
+
+          rectangle_to_break = rectangles_to_break.shift
+
+          result = green_rectangle.remove_overlapping_pieces(rectangle_to_break)
+
+          if result == rectangle_to_break
+            # no progress made, move on to next green rectangle
+            break
+          end
+
+          [*result].each { rectangles_to_break << it }
+        end
+      end
     end
+
+    nil
   end
 
   def rectangles
@@ -476,10 +501,9 @@ def parse_points(filename)
   end
 end
 
-points = parse_points("inputs.txt")
+points = parse_points("inputs_test.txt")
 
 floor = Floor.new(points)
 
-rectangles = floor.green_rectangles
-
-puts rectangles.size
+biggest = floor.biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
+puts biggest.area
