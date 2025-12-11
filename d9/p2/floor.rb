@@ -12,17 +12,38 @@ class Floor
   end
 
   def extract_green_rectangles
-    self.green_rectangles = ring.extract_rectangles
+    self.green_rectangles = ring.extract_rectangles.sort_by(&:x1)
     self.ring = nil
   end
 
+  def find_green_rectangles_for(x1, x2, y1, y2)
+    found = false
+
+    rectangles = []
+
+    green_rectangles.each do |rectangle|
+      if rectangle.x1.between?(x1, x2) || rectangle.x2.between?(x1, x2)
+        found = true
+        rectangles << rectangle
+      end
+
+      break if found && rectangle.x1 > x2
+    end
+
+    rectangles.reject do |rectangle|
+      rectangle.y2 < y1 || rectangle.y1 > y2
+    end
+  end
+
   def biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
+    total_rectangles = rectangles.size
+
     rectangles.each.with_index do |rectangle, index|
-      puts "processing #{index}: #{rectangle}"
+      puts "processing #{index + 1}/#{total_rectangles} #{rectangle}"
 
-      green_rectangles.each do |green_rectangle|
-        puts "considering green rectangle #{green_rectangle}"
-
+      find_green_rectangles_for(
+        rectangle.x1, rectangle.x2, rectangle.y1, rectangle.y2
+      ).each do |green_rectangle|
         rectangles_to_break = [rectangle]
 
         loop do
@@ -40,8 +61,6 @@ class Floor
           end
 
           to_add = [*result]
-          to_add.each { puts "broke into #{to_add.inspect}" }
-
           to_add.each { rectangles_to_break << it }
         end
       end
