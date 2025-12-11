@@ -173,10 +173,10 @@ class Rectangle
         # we contain a vertical edge
         x = if cp1.x < up1.x
               # we contain the left edge of the rectangle_to_break
-              x2 - 1
+              x2 + 1
             else
               # we contain the right edge of the rectangle_to_break
-              x1 + 1
+              x1 - 1
             end
 
         corner2 = Point[x, up2.y]
@@ -184,10 +184,10 @@ class Rectangle
         # we contain a horizontal edge
         y = if cp1.y < up1.y
               # we contain the top edge of the rectangle_to_break
-              y2 - 1
+              y2 + 1
             else
               # we contain the bottom edge of the rectangle_to_break
-              y1 + 1
+              y1 - 1
             end
 
         corner2 = Point[up2.x, y]
@@ -200,4 +200,6 @@ class Rectangle
   def contains?(point)
     point.x.between?(x1, x2) && point.y.between?(y1, y2)
   end
+
+  def to_s = "R#{ul}-#{br}"
 end

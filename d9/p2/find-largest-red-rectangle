@@ -26,6 +26,8 @@ class Floor
       puts "processing #{index}: #{rectangle}"
 
       green_rectangles.each do |green_rectangle|
+        puts "considering green rectangle #{green_rectangle}"
+
         rectangles_to_break = [rectangle]
 
         loop do
@@ -42,7 +44,10 @@ class Floor
             break
           end
 
-          [*result].each { rectangles_to_break << it }
+          to_add = [*result]
+          to_add.each { puts "broke into #{to_add.inspect}" }
+
+          to_add.each { rectangles_to_break << it }
         end
       end
     end
@@ -68,8 +73,6 @@ class Floor
 
     rectangles.sort_by!(&:area)
     rectangles.reverse!
-
-    puts "done building rectangles!"
 
     @rectangles = rectangles
   end
