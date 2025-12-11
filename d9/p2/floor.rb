@@ -41,11 +41,11 @@ class Floor
     rectangles.each.with_index do |rectangle, index|
       puts "processing #{index + 1}/#{total_rectangles} #{rectangle}"
 
+      rectangles_to_break = [rectangle]
+
       find_green_rectangles_for(
         rectangle.x1, rectangle.x2, rectangle.y1, rectangle.y2
       ).each do |green_rectangle|
-        rectangles_to_break = [rectangle]
-
         loop do
           if rectangles_to_break.empty?
             return rectangle
@@ -57,6 +57,7 @@ class Floor
 
           if result == rectangle_to_break
             # no progress made, move on to next green rectangle
+            rectangles_to_break << result
             break
           end
 
