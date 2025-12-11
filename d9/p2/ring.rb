@@ -5,7 +5,7 @@ class Ring
   attr_accessor :head, :size
 
   def initialize(points)
-    points = points.dup
+    points = points.map(&:dup)
 
     self.size = points.size
 
