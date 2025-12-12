@@ -1,4 +1,5 @@
 require_relative "ring"
+require_relative "line"
 
 class Floor
   attr_accessor :points, :filled_tiles, :red_tiles_set, :green_rectangles, :ring
@@ -16,36 +17,47 @@ class Floor
     self.ring = nil
   end
 
-  def find_green_rectangles_for(x1, x2, y1, y2)
+  def find_green_rectangles_for(red_rectangle)
     found = false
 
-    rectangles = []
+    candidate_rectangles = []
 
-    green_rectangles.each do |rectangle|
-      if rectangle.x1.between?(x1, x2) || rectangle.x2.between?(x1, x2)
+    x1 = red_rectangle.x1
+    x2 = red_rectangle.x2
+    y1 = red_rectangle.y1
+    y2 = red_rectangle.y2
+
+    green_rectangles.each do |green_rectangle|
+      if green_rectangle.x1.between?(x1, x2) || green_rectangle.x2.between?(x1, x2) ||
+         (green_rectangle.x1 < x1 && green_rectangle.x2 > x2)
         found = true
-        rectangles << rectangle
+        candidate_rectangles << green_rectangle
       end
 
-      break if found && rectangle.x1 > x2
+      break if found && green_rectangle.x1 > x2
     end
 
-    rectangles.reject do |rectangle|
-      rectangle.y2 < y1 || rectangle.y1 > y2
+    found = candidate_rectangles.reject do |candidate_rectangle|
+      candidate_rectangle.y2 < y1 || candidate_rectangle.y1 > y2
     end
+
+    unless green_rectangles.select { |gr| gr.overlaps?(red_rectangle) } == found
+      binding.pry
+      raise "wtf"
+    end
+
+    found
   end
 
   def biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
     total_rectangles = rectangles.size
 
     rectangles.each.with_index do |rectangle, index|
-      puts "processing #{index + 1}/#{total_rectangles} #{rectangle}"
+      # puts "processing #{index + 1}/#{total_rectangles} #{rectangle}"
 
       rectangles_to_break = [rectangle]
 
-      find_green_rectangles_for(
-        rectangle.x1, rectangle.x2, rectangle.y1, rectangle.y2
-      ).each do |green_rectangle|
+      find_green_rectangles_for(rectangle).each do |green_rectangle|
         loop do
           if rectangles_to_break.empty?
             return rectangle

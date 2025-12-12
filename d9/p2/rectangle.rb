@@ -42,6 +42,23 @@ class Rectangle
     [ul, ur, bl, br]
   end
 
+  def lines
+    [
+      Line.new(ul, ur),
+      Line.new(ur, br),
+      Line.new(bl, br),
+      Line.new(ul, bl)
+    ]
+  end
+
+  def overlaps?(other)
+    lines.any? do |line|
+      other.lines.any? do |other_line|
+        line.intersects?(other_line)
+      end
+    end
+  end
+
   def remove_overlapping_pieces(rectangle_to_break)
     contained_points, uncontained_points = rectangle_to_break.points.partition do |p|
       contains?(p)
@@ -55,6 +72,11 @@ class Rectangle
 
       case our_points_contained_by_rectangle_to_break.size
       when 0
+        if overlaps?(rectangle_to_break)
+          binding.pry
+          raise "wtf"
+        end
+
         rectangle_to_break
       when 2
         case our_points_contained_by_rectangle_to_break
