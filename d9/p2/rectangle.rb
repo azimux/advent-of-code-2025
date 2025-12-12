@@ -123,11 +123,11 @@ class Rectangle
         [
           # top row
           Rectangle.new(rectangle_to_break.ul, Point[x1 - 1, y1 - 1]),
-          Rectangle.new(Point[x2, rectangle_to_break.y1], Point[x1, y1 - 1]),
+          Rectangle.new(Point[x1, rectangle_to_break.y1], Point[x2, y1 - 1]),
           Rectangle.new(rectangle_to_break.ur, Point[x2 + 1, y1 - 1]),
 
           # middle row
-          Rectangle.new(Point[rectangle_to_break.x1, y2], Point[x1 - 1, y1]),
+          Rectangle.new(Point[rectangle_to_break.x1, y1], Point[x1 - 1, y2]),
           Rectangle.new(Point[x2 + 1, y1], Point[rectangle_to_break.x2, y2]),
 
           # bottom row
@@ -237,6 +237,6 @@ class Rectangle
   def eql?(other) = self == other
 
   def <=>(other)
-    [x1, x2, y1, y2] <=> [other.x1, other.x2, other.y1, other.y2]
+    [y1, x1, y2, x2] <=> [other.y1, other.x1, other.y2, other.x2]
   end
 end

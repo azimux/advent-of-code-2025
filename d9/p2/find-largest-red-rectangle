@@ -21,6 +21,3 @@ floor = Floor.new(points)
 
 biggest = floor.biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
 puts biggest.area
-
-# NOTE! We were too low on our guess. So we hit the answer and decided it wasn't completely
-# covered by green tiles.
