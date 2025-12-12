@@ -1,20 +1,20 @@
 require_relative "point"
 
 class Rectangle
-  attr_accessor :x1, :x2, :y1, :y2
+  attr_reader :x1, :x2, :y1, :y2
 
   def initialize(corner1, corner2)
-    self.x1 = corner1.x
-    self.x2 = corner2.x
-    self.y1 = corner1.y
-    self.y2 = corner2.y
+    @x1 = corner1.x
+    @x2 = corner2.x
+    @y1 = corner1.y
+    @y2 = corner2.y
 
-    if x1 > x2
-      self.x1, self.x2 = x2, x1
+    if @x1 > @x2
+      @x1, @x2 = @x2, @x1
     end
 
-    if y1 > y2
-      self.y1, self.y2 = y2, y1
+    if @y1 > @y2
+      @y1, @y2 = @y2, @y1
     end
   end
 
@@ -22,33 +22,19 @@ class Rectangle
     (x2 - x1 + 1) * (y2 - y1 + 1)
   end
 
-  def ul
-    Point.new(x1, y1)
-  end
-
-  def ur
-    Point.new(x2, y1)
-  end
-
-  def bl
-    Point.new(x1, y2)
-  end
-
-  def br
-    Point.new(x2, y2)
-  end
-
-  def points
-    [ul, ur, bl, br]
-  end
+  def ul = @ul ||= Point.new(x1, y1)
+  def ur = @ur ||= Point.new(x2, y1)
+  def bl = @bl ||= Point.new(x1, y2)
+  def br = @br ||= Point.new(x2, y2)
+  def points = @points ||= [ul, ur, bl, br].freeze
 
   def lines
-    [
+    @lines ||= [
       Line.new(ul, ur),
       Line.new(ur, br),
       Line.new(bl, br),
       Line.new(ul, bl)
-    ]
+    ].freeze
   end
 
   def overlaps?(other)

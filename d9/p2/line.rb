@@ -39,8 +39,18 @@ class Line
     end
   end
 
-  def horizontal? = point1.y == point2.y
-  def vertical? = point1.x == point2.x
-  def y_range = (point1.y..point2.y)
-  def x_range = (point1.x..point2.x)
+  def horizontal?
+    return @horizontal if defined?(@horizontal)
+
+    @horizontal = point1.y == point2.y
+  end
+
+  def vertical?
+    return @vertical if defined?(@vertical)
+
+    @vertical = point1.x == point2.x
+  end
+
+  def y_range = @y_range ||= (point1.y..point2.y)
+  def x_range = @x_range ||= (point1.x..point2.x)
 end
