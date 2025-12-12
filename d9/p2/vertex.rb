@@ -35,7 +35,7 @@ class Ring
     def to_s = point.to_s
 
     def y=(y)
-      point.y = y
+      self.point = Point.new(point.x, y)
     end
   end
 end

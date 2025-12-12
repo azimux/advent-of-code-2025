@@ -8,6 +8,8 @@ class Point
   def initialize(x, y)
     self.x = x
     self.y = y
+
+    freeze
   end
 
   def to_s = "(#{x},#{y})"
@@ -28,4 +30,6 @@ class Point
     cmp = y <=> other.y
     cmp.zero? ? x <=> other.x : cmp
   end
+
+  def dup = super.freeze
 end
