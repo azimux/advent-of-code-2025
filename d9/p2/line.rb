@@ -30,6 +30,15 @@ class Line
     end
   end
 
+  # Only works with right-angle lines and if we already know we intersect
+  def intersects_at(other_line)
+    if horizontal?
+      Point.new(point1.y, other_line.point1.x)
+    else
+      Point.new(other_line.point1.x, point1.y)
+    end
+  end
+
   def horizontal? = point1.y == point2.y
   def vertical? = point1.x == point2.x
   def y_range = (point1.y..point2.y)

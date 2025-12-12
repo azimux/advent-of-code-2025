@@ -37,16 +37,9 @@ class Floor
       break if found && green_rectangle.x1 > x2
     end
 
-    found = candidate_rectangles.reject do |candidate_rectangle|
+    candidate_rectangles.reject do |candidate_rectangle|
       candidate_rectangle.y2 < y1 || candidate_rectangle.y1 > y2
     end
-
-    unless green_rectangles.select { |gr| gr.overlaps?(red_rectangle) } == found
-      binding.pry
-      raise "wtf"
-    end
-
-    found
   end
 
   def biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles

@@ -73,11 +73,25 @@ class Rectangle
       case our_points_contained_by_rectangle_to_break.size
       when 0
         if overlaps?(rectangle_to_break)
-          binding.pry
-          raise "wtf"
-        end
+          if y1 > rectangle_to_break.y1
+            tall_and_skinny = self
+            flat = rectangle_to_break
+          else
+            tall_and_skinny = rectangle_to_break
+            flat = self
+          end
 
-        rectangle_to_break
+          [
+            Rectangle.new(
+              tall_and_skinny.ul, Point[tall_and_skinny.x2, flat.y1 - 1]
+            ),
+            Rectangle.new(Point[tall_and_skinny.x2 + 1, flat.y1], flat.br),
+            Rectangle.new(Point[tall_and_skinny.x1, flat.y2 + 2], tall_and_skinny.br),
+            Rectangle.new(flat.ul, Point[tall_and_skinny.x1 - 1, flat.y2])
+          ]
+        else
+          rectangle_to_break
+        end
       when 2
         case our_points_contained_by_rectangle_to_break
         when [ul, ur] # top
