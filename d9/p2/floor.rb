@@ -1,5 +1,4 @@
 require_relative "ring"
-require_relative "line"
 
 class Floor
   attr_accessor :points, :filled_tiles, :red_tiles_set, :green_rectangles, :ring

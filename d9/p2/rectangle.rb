@@ -1,6 +1,9 @@
 require_relative "point"
+require_relative "line"
 
 class Rectangle
+  include Comparable
+
   attr_reader :x1, :x2, :y1, :y2
 
   def initialize(corner1, corner2)
@@ -224,4 +227,19 @@ class Rectangle
   end
 
   def to_s = "R#{ul}-#{br}"
+
+  def ==(other)
+    other.is_a?(Rectangle) &&
+      x1 == other.x1 &&
+      x2 == other.x2 &&
+      y1 == other.y1 &&
+      y2 == other.y2
+  end
+
+  def hash = [x1, x2, y1, y2]
+  def eql?(other) = self == other
+
+  def <=>(other)
+    [x1, x2, y1, y2] <=> [other.x1, other.x2, other.y1, other.y2]
+  end
 end
