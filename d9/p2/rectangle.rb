@@ -143,21 +143,27 @@ class Rectangle
 
       case corners_other_contains.size
       when 1
-        ul = self.ul
-        ur = self.ur
-        bl = self.bl
-        br = self.br
+        ul_ = ul
+        ur_ = ur
+        bl_ = bl
+        br_ = br
       when 4
-        ul = rectangle_to_break.br
-        ur = rectangle_to_break.bl
-        bl = rectangle_to_break.ur
-        br = rectangle_to_break.ul
+        case contained_points.first
+        when rectangle_to_break.ul
+          br_ = br
+        when rectangle_to_break.ur
+          bl_ = bl
+        when rectangle_to_break.bl
+          ur_ = ur
+        when rectangle_to_break.br
+          ul_ = ul
+        end
       else
-        raise "wtf"
+        raise "not sure how to handle #{corner_others_contains.size}"
       end
 
       case corner_other_contains
-      when ul
+      when ul_
         [
           # diagonal (upper left)
           Rectangle.new(rectangle_to_break.ul, Point[x1 - 1, y1 - 1]),
@@ -166,7 +172,7 @@ class Rectangle
           # lower left
           Rectangle.new(rectangle_to_break.bl, Point[x1 - 1, y1])
         ]
-      when ur
+      when ur_
         [
           # diagonal (upper right)
           Rectangle.new(rectangle_to_break.ur, Point[x2 + 1, y1 - 1]),
@@ -175,7 +181,7 @@ class Rectangle
           # bottom right
           Rectangle.new(rectangle_to_break.br, Point[x2 + 1, y1])
         ]
-      when bl
+      when bl_
         [
           # diagonal (lower left)
           Rectangle.new(rectangle_to_break.bl, Point[x1 - 1, y2 + 1]),
@@ -184,7 +190,7 @@ class Rectangle
           # bottom right
           Rectangle.new(rectangle_to_break.br, Point[x1, y2 + 1])
         ]
-      when br
+      when br_
         [
           # diagonal (bottom right)
           Rectangle.new(rectangle_to_break.br, Point[x2 + 1, y2 + 1]),
