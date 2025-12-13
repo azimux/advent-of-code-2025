@@ -21,3 +21,5 @@ floor = Floor.new(points)
 
 biggest = floor.biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
 puts biggest.area
+
+# 1395519733

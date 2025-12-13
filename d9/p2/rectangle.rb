@@ -151,7 +151,7 @@ class Rectangle
           # upper right
           Rectangle.new(rectangle_to_break.ur, Point[x1, y1 - 1]),
           # lower left
-          Rectangle.new(rectangle_to_break.bl, Point[x1, y1 - 1])
+          Rectangle.new(rectangle_to_break.bl, Point[x1 - 1, y1])
         ]
       when ur
         [
