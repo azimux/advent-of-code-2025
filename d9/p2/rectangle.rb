@@ -139,10 +139,10 @@ class Rectangle
     when 1
       corners_other_contains = points.select { |p| rectangle_to_break.contains?(p) }
 
-      corner_other_contains = corners_other_contains.first
-
       case corners_other_contains.size
       when 1
+        corner_other_contains = corners_other_contains.first
+
         ul_ = ul
         ur_ = ur
         bl_ = bl
@@ -150,13 +150,13 @@ class Rectangle
       when 4
         case contained_points.first
         when rectangle_to_break.ul
-          br_ = br
+          corner_other_contains = br_ = br
         when rectangle_to_break.ur
-          bl_ = bl
+          corner_other_contains = bl_ = bl
         when rectangle_to_break.bl
-          ur_ = ur
+          corner_other_contains = ur_ = ur
         when rectangle_to_break.br
-          ul_ = ul
+          corner_other_contains = ul_ = ul
         end
       else
         raise "not sure how to handle #{corner_others_contains.size}"
@@ -200,6 +200,7 @@ class Rectangle
           Rectangle.new(rectangle_to_break.bl, Point[x2, y2 + 1])
         ]
       else
+        binding.pry
         raise "wtf"
       end
     when 2
