@@ -137,10 +137,23 @@ class Rectangle
         ]
       end
     when 1
-      corner_other_contains = points.find { |p| rectangle_to_break.contains?(p) }
+      corners_other_contains = points.select { |p| rectangle_to_break.contains?(p) }
 
-      uncontained_points.map do |up|
-        Rectangle.new(corner_other_contains, up)
+      corner_other_contains = corners_other_contains.first
+
+      case corners_other_contains.size
+      when 1
+        ul = self.ul
+        ur = self.ur
+        bl = self.bl
+        br = self.br
+      when 4
+        ul = rectangle_to_break.br
+        ur = rectangle_to_break.bl
+        bl = rectangle_to_break.ur
+        br = rectangle_to_break.ul
+      else
+        raise "wtf"
       end
 
       case corner_other_contains
