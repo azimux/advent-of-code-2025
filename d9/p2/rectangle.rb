@@ -147,7 +147,7 @@ class Rectangle
         ur_ = ur
         bl_ = bl
         br_ = br
-      when 4
+      when 4, 2
         case contained_points.first
         when rectangle_to_break.ul
           corner_other_contains = br_ = br
@@ -159,7 +159,7 @@ class Rectangle
           corner_other_contains = ul_ = ul
         end
       else
-        raise "not sure how to handle #{corner_others_contains.size}"
+        raise "not sure how to handle #{corners_other_contains.size}"
       end
 
       case corner_other_contains
