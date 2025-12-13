@@ -187,33 +187,22 @@ class Rectangle
       # 1r
       # will contain the two uncontained points.
       up1, up2 = uncontained_points
-      cp1 = contained_points.first
 
       corner1 = up1
-
-      if up1.x == up2.x
-        # we contain a vertical edge
-        x = if cp1.x < up1.x
-              # we contain the left edge of the rectangle_to_break
-              x2 + 1
-            else
-              # we contain the right edge of the rectangle_to_break
-              x1 - 1
-            end
-
-        corner2 = Point[x, up2.y]
-      else
-        # we contain a horizontal edge
-        y = if cp1.y < up1.y
-              # we contain the top edge of the rectangle_to_break
-              y2 + 1
-            else
-              # we contain the bottom edge of the rectangle_to_break
-              y1 - 1
-            end
-
-        corner2 = Point[up2.x, y]
-      end
+      corner2 = case contained_points.sort
+                when [rectangle_to_break.ul, rectangle_to_break.ur]
+                  # we contain the top edge
+                  Point[up2.x, y2 + 1]
+                when [rectangle_to_break.bl, rectangle_to_break.br]
+                  # we contain the bottom edge
+                  Point[up2.x, y1 - 1]
+                when [rectangle_to_break.ul, rectangle_to_break.bl]
+                  # we contain the left edge
+                  Point[x2 + 1, up2.y]
+                when [rectangle_to_break.ur, rectangle_to_break.br]
+                  # we contain the right edge
+                  Point[x1 - 1, up2.y]
+                end
 
       Rectangle.new(corner1, corner2)
     end
