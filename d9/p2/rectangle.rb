@@ -135,6 +135,8 @@ class Rectangle
           Rectangle.new(Point[x1, y2 + 1], Point[x2, rectangle_to_break.y2]),
           Rectangle.new(Point[x2 + 1, y2 + 1], rectangle_to_break.br)
         ]
+      else
+        raise "wtf"
       end
     when 1
       corners_other_contains = points.select { |p| rectangle_to_break.contains?(p) }
@@ -157,6 +159,8 @@ class Rectangle
           corner_other_contains = ur_ = ur
         when rectangle_to_break.br
           corner_other_contains = ul_ = ul
+        else
+          raise "wtf"
         end
       else
         raise "not sure how to handle #{corners_other_contains.size}"
@@ -221,9 +225,21 @@ class Rectangle
                 when [rectangle_to_break.ur, rectangle_to_break.br]
                   # we contain the right edge
                   Point[x1 - 1, up2.y]
+                else
+                  raise "wtf"
                 end
 
       Rectangle.new(corner1, corner2)
+    when 4
+      value = nil
+      unless $reported
+        puts "going to use #{value}"
+      end
+      $reported = true
+      value
+    else
+      binding.pry
+      raise "Wtf"
     end
   end
 

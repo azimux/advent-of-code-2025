@@ -2,14 +2,11 @@
 
 require "simplecov"
 
-SimpleCov.start do
-  # enable_coverage :branch
-  minimum_coverage line: 100
-end
+SimpleCov.start
 
-require_relative "rectangle"
+require_relative "floor"
 require "pry"
-require "pry-byebug"
+# require "pry-byebug"
 
 def r(x1, y1, x2, y2)
   Rectangle.new(Point[x1, y1], Point[x2, y2])
@@ -25,8 +22,40 @@ def assert_rectangles(actual, expected)
     puts
     warn "Expected: #{expected.map(&:to_s)}"
     warn "     Got: #{actual.map(&:to_s)}"
+    exit 1
   end
 end
+
+def assert_equal(actual, expected)
+  if actual == expected
+    print "."
+  else
+    puts
+    warn "Expected: #{expected}"
+    warn "     Got: #{actual}"
+    exit 1
+  end
+end
+
+points = [
+  Point[2, 1],
+  Point[6, 1],
+  Point[6, 5],
+  Point[5, 5],
+  Point[5, 4],
+  Point[3, 4],
+  Point[3, 5],
+  Point[2, 5]
+]
+
+floor = Floor.new(points)
+
+binding.pry
+
+biggest = floor.biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
+
+assert_equal(biggest, Rectangle.new(Point[2, 1], Point[3, 5]))
+assert_equal(biggest.area, 10)
 
 {
   [[1, 1, 2, 2], [2, 2, 3, 3]] => [[2, 3, 2, 3], [3, 2, 3, 2], [3, 3, 3, 3]],
@@ -62,7 +91,20 @@ end
   [[1, 0, 2, 1], [0, 0, 2, 2]] => [[0, 0, 0, 1], [0, 2, 0, 2], [1, 2, 2, 2]],
   [[1, 0, 2, 0], [0, 0, 2, 2]] => [[0, 0, 0, 0], [0, 1, 0, 2], [1, 1, 2, 2]],
   [[2, 0, 3, 0], [0, 0, 2, 2]] => [[0, 0, 1, 0], [0, 1, 1, 2], [2, 1, 2, 2]],
-  [[1, 1, 3, 2], [0, 0, 2, 3]] => [[0, 0, 2, 0], [0, 1, 0, 2], [0, 3, 2, 3]]
+  [[1, 1, 3, 2], [0, 0, 2, 3]] => [[0, 0, 2, 0], [0, 1, 0, 2], [0, 3, 2, 3]],
+  [[0, 0, 0, 1], [0, 0, 2, 2]] => [[1, 0, 2, 1], [0, 2, 0, 2], [1, 2, 2, 2]],
+  [[0, 2, 1, 2], [0, 0, 2, 2]] => [[0, 0, 1, 1], [2, 0, 2, 1], [2, 2, 2, 2]],
+  [[2, 1, 2, 2], [0, 0, 2, 2]] => [[0, 0, 1, 0], [2, 0, 2, 0], [0, 1, 1, 2]],
+  [[0, 0, 0, 1], [0, 1, 2, 3]] => [[1, 1, 2, 1], [0, 2, 0, 3], [1, 2, 2, 3]],
+  [[0, 3, 1, 3], [1, 1, 3, 3]] => [[1, 1, 1, 2], [2, 1, 3, 2], [2, 3, 3, 3]],
+  [[3, 2, 3, 3], [1, 0, 3, 2]] => [[1, 0, 2, 1], [3, 0, 3, 1], [1, 2, 2, 2]],
+  [[0, 0, 3, 0], [2, 0, 5, 2]] => [[4, 0, 5, 0], [2, 1, 3, 2], [4, 1, 5, 2]],
+  [[0, 2, 0, 5], [0, 0, 2, 3]] => [[0, 0, 0, 1], [1, 0, 2, 1], [1, 2, 2, 3]],
+  [[2, 5, 5, 5], [0, 3, 3, 5]] => [[0, 3, 1, 4], [2, 3, 3, 4], [0, 5, 1, 5]],
+  [[5, 0, 5, 3], [3, 2, 5, 5]] => [[3, 2, 4, 3], [3, 4, 4, 5], [5, 4, 5, 5]],
+  [[0, 0, 1, 1], [2, 2, 3, 3]] => [[2, 2, 3, 3]],
+  [[0, 0, 2, 2], [0, 0, 2, 2]] => [],
+  [[0, 0, 0, 0], [0, 0, 0, 0]] => []
 }.each_pair do |green_and_red_rectangle, expected_rectangles|
   green_and_red_rectangle => [
     [green_x1, green_y1, green_x2, green_y2],
@@ -78,5 +120,63 @@ end
 
   assert_rectangles(remaining, expected_rectangles)
 end
+
+points = [
+  Point[9, 1],
+  Point[10, 1],
+  Point[10, 2],
+  Point[18, 2],
+  Point[18, 3],
+  Point[14, 3],
+  Point[14, 4],
+  Point[15, 4],
+  Point[15, 8],
+  Point[13, 8],
+  Point[13, 7],
+  Point[12, 7],
+  Point[12, 8],
+  Point[11, 8],
+  Point[11, 4],
+  Point[12, 4],
+  Point[12, 3],
+  Point[8, 3],
+  Point[8, 2],
+  Point[9, 2]
+]
+
+floor = Floor.new(points)
+biggest = floor.biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
+
+assert_equal(biggest, Rectangle.new(Point[11, 4], Point[15, 8]))
+assert_equal(biggest.area, 25)
+
+points = [
+  Point[9, 1],
+  Point[10, 1],
+  Point[10, 2],
+  Point[18, 2],
+  Point[18, 3],
+  Point[14, 3],
+  Point[14, 4],
+  Point[15, 4],
+  Point[15, 8],
+  Point[14, 8],
+  Point[14, 7],
+  Point[12, 7],
+  Point[12, 8],
+  Point[11, 8],
+  Point[11, 4],
+  Point[12, 4],
+  Point[12, 3],
+  Point[8, 3],
+  Point[8, 2],
+  Point[9, 2]
+]
+
+floor = Floor.new(points)
+biggest = floor.biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
+
+assert_equal(biggest, Rectangle.new(Point[8, 2], Point[18, 3]))
+assert_equal(biggest.area, 22)
 
 puts

@@ -17,8 +17,6 @@ class Floor
   end
 
   def find_green_rectangles_for(red_rectangle)
-    found = false
-
     candidate_rectangles = []
 
     x1 = red_rectangle.x1
@@ -27,13 +25,12 @@ class Floor
     y2 = red_rectangle.y2
 
     green_rectangles.each do |green_rectangle|
+      break if green_rectangle.x1 > x2
+
       if green_rectangle.x1.between?(x1, x2) || green_rectangle.x2.between?(x1, x2) ||
          (green_rectangle.x1 < x1 && green_rectangle.x2 > x2)
-        found = true
         candidate_rectangles << green_rectangle
       end
-
-      break if found && green_rectangle.x1 > x2
     end
 
     candidate_rectangles.reject do |candidate_rectangle|

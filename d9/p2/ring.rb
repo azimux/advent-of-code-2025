@@ -87,6 +87,7 @@ class Ring
     rectangles
   end
 
+  # There's a bug here!!
   def extract_rectangle
     top_left = smallest_vertex
 
