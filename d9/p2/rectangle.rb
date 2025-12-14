@@ -105,7 +105,7 @@ class Rectangle
             # middle left
             Rectangle.new(Point[x1 - 1, y2], Point[rectangle_to_break.x1, y1]),
             # bottom piece
-            Rectangle.new(rectangle_to_break.bl, Point[rectangle_to_break.x2, y2 + 2])
+            Rectangle.new(rectangle_to_break.bl, Point[rectangle_to_break.x2, y2 + 1])
           ]
         when [bl, br] # bottom
           [
@@ -200,7 +200,6 @@ class Rectangle
           Rectangle.new(rectangle_to_break.bl, Point[x2, y2 + 1])
         ]
       else
-        binding.pry
         raise "wtf"
       end
     when 2
