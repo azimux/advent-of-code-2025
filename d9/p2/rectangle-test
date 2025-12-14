@@ -1,5 +1,12 @@
 #!/usr/bin/env ruby
 
+require "simplecov"
+
+SimpleCov.start do
+  # enable_coverage :branch
+  minimum_coverage line: 100
+end
+
 require_relative "rectangle"
 require "pry"
 require "pry-byebug"
