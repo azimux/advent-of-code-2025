@@ -6,7 +6,7 @@ SimpleCov.start
 
 require_relative "floor"
 require "pry"
-# require "pry-byebug"
+require "pry-byebug"
 
 def r(x1, y1, x2, y2)
   Rectangle.new(Point[x1, y1], Point[x2, y2])
@@ -54,6 +54,8 @@ binding.pry
 
 biggest = floor.biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
 
+# Expected: R(2,1)-(3,5)
+# Got: R(2,1)-(6,5)
 assert_equal(biggest, Rectangle.new(Point[2, 1], Point[3, 5]))
 assert_equal(biggest.area, 10)
 

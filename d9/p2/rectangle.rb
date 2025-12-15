@@ -21,9 +21,9 @@ class Rectangle
     end
   end
 
-  def area
-    (x2 - x1 + 1) * (y2 - y1 + 1)
-  end
+  def area = height * width
+  def height = y2 - y1 + 1
+  def width = x2 - x1 + 1
 
   def ul = @ul ||= Point.new(x1, y1)
   def ur = @ur ||= Point.new(x2, y1)

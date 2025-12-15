@@ -77,18 +77,97 @@ class Ring
     points
   end
 
-  def empty?
-    size == 0
-  end
+  def empty? = size == 0
 
   def extract_rectangles
     rectangles = []
-    rectangles << extract_rectangle until empty?
+    until empty?
+      rectangles << extract_rectangle
+      binding.pry
+    end
     rectangles
   end
 
-  # There's a bug here!!
   def extract_rectangle
+    top_left_vertex = smallest_vertex
+    top_right_vertex = top_left_vertex.right
+    bottom_left_vertex = top_left_vertex.down
+    bottom_right_vertex = top_right_vertex.down
+
+    top_left = top_left_vertex.point
+    top_right = top_right_vertex.point
+    bottom_left = bottom_left_vertex.point
+    bottom_right = bottom_right_vertex.point
+
+    bl_y = bottom_left.y
+    br_y = bottom_right.y
+
+    green_rectangle_y2 = bl_y < br_y ? bl_y : br_y
+
+    candidate_green_rectangle = Rectangle.new(top_left, Point[top_right.x, green_rectangle_y2])
+
+    if candidate_green_rectangle.height > 2 && candidate_green_rectangle.width > 2
+      inner_rectangle = Rectangle.new(
+        Point[candidate_green_rectangle.x1 + 1, candidate_green_rectangle.y1 + 1],
+        Point[candidate_green_rectangle.x2 - 1, candidate_green_rectangle.y2 - 1]
+      )
+
+      contained_red_tiles = points.select { inner_rectangle.contains?(it) }
+
+      unless contained_red_tiles.empty?
+        new_y2 = contained_red_tiles.sort.first.y
+
+        candidate_green_rectangle = Rectangle.new(
+          candidate_green_rectangle.ul,
+          Point[candidate_green_rectangle.x2, new_y2]
+        )
+      end
+    end
+
+    green_rectangle = candidate_green_rectangle
+
+    new_y2 = green_rectangle.y2
+
+    new_bottom_left = Point[top_left.x, new_y2]
+
+    tl_deleted = false
+
+    if new_bottom_left == bottom_left
+      tl_deleted = true
+      delete(top_left_vertex)
+    else
+      top_left_vertex.y = new_y2
+    end
+
+    tr_deleted = false
+    new_bottom_right = Point[top_right.x, new_y2]
+
+    if new_bottom_right == bottom_right
+      tr_deleted = true
+      delete(top_right_vertex)
+    else
+      top_right_vertex.y = new_y2
+    end
+
+    if !tl_deleted && top_left_vertex.obtuse?
+      delete(top_left_vertex)
+    end
+    if !tr_deleted && top_right_vertex.obtuse?
+      delete(top_right_vertex)
+    end
+
+    if bottom_left_vertex.obtuse?
+      delete(bottom_left_vertex)
+    end
+
+    if bottom_right_vertex.obtuse?
+      delete(bottom_right_vertex)
+    end
+
+    green_rectangle
+  end
+
+  def extract_rectangle_old
     top_left = smallest_vertex
 
     top_right = top_left.right
