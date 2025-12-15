@@ -25,6 +25,12 @@ class Ring
 
     prev_vertex.next = head
     head.prev = prev_vertex
+
+    normalize_head
+  end
+
+  def normalize_head
+    self.head = smallest_vertex
   end
 
   def delete(point_or_vertex)
@@ -79,12 +85,19 @@ class Ring
 
   def empty? = size == 0
 
+  def yet_another_extract_rectangles
+    # start at head
+    # Does head
+  end
+
   def extract_rectangles
     rectangles = []
+
     until empty?
-      rectangles << extract_rectangle
-      binding.pry
+      new_rectangles = extract_rectangle
+      rectangles += [*new_rectangles]
     end
+
     rectangles
   end
 
@@ -126,6 +139,8 @@ class Ring
       end
     end
 
+    # We need this to be a collection and optionally strip off a row of
+    # 1 tile tall rectangles off the top to normalize things.
     green_rectangle = candidate_green_rectangle
 
     new_y2 = green_rectangle.y2

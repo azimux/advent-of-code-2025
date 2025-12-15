@@ -1,3 +1,27 @@
+
+
+new algorithm AGAIN
+
+.#..........#.
+..............
+..............
+..#.#....#.#..
+.##.#.........
+....#....#.##.
+
+strip off from ul to the y1 - 1 of the highest contained red tile.
+
+move down the ul and ur red rectangles to y1 - 1
+
+This gives a row of "new neighbors" pairs.
+extract rectangle between each "new neighbor" pair and update their horizontal
+pointers to point to their new partner.
+
+each new pair results in its own new ring. We can normalize the heads of
+the rings and see if they are the same rings or not and uniq by this.
+
+This continues until all rings are empty.
+
 .#..........#.
 ..............
 ..............
