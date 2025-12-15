@@ -38,6 +38,20 @@ class Ring
       self.point = Point.new(point.x, y)
     end
 
+    def vertical? = prev.x == self.next.x
+    def horizontal? = prev.y == self.next.y
+
+    def closest_neighbor
+      [prev, self.next].min_by { distance_to(it) }
+    end
+
+    def distance_to(other_vertex)
+      (other_vertex.x - x).abs + (other_vertex.y - y).abs
+    end
+
+    def acute? = line? && !obtuse?
+    def line? = vertical? || horizontal?
+
     def obtuse?
       prev_x = prev.x
       next_x = self.next.x
