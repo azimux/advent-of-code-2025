@@ -112,10 +112,12 @@ class Ring
         Point[candidate_green_rectangle.x2 - 1, candidate_green_rectangle.y2 - 1]
       )
 
-      contained_red_tiles = points.select { inner_rectangle.contains?(it) }
+      contained_red_vertices = vertices.select { inner_rectangle.contains?(it.point) }
 
-      unless contained_red_tiles.empty?
-        new_y2 = contained_red_tiles.sort.first.y
+      unless contained_red_vertices.empty?
+        new_y2 = contained_red_vertices.map(&:point).sort.first.y
+
+        potential_new_neighbors = contained_red_vertices.select { it.y == new_y }
 
         candidate_green_rectangle = Rectangle.new(
           candidate_green_rectangle.ul,
@@ -149,11 +151,35 @@ class Ring
       top_right_vertex.y = new_y2
     end
 
-    if !tl_deleted && top_left_vertex.obtuse?
-      delete(top_left_vertex)
+    unless tl_deleted
+      if top_left_vertex.next.y == top_left_vertex.y
+        neighbor = top_left_vertex.next
+        neighbor_distance = top_left_vertex.distance_to(neighbor)
+
+        new_neighbor = potential_new_neighbors.find { top_left_vertex.distance_to(it) < neighbor_distance }
+
+        if new_neighbor
+          top_left_vertex.next = new_neighbor
+        end
+        asdfasdf
+      end
+      if top_left_vertex.acute?
+        closest = top_left_vertex.closest_neighbor
+        top_left_vertex.next = closest
+        top_left_vertex.prev = closest
+      elsif top_left_vertex.obtuse?
+        delete(top_left_vertex)
+      end
     end
-    if !tr_deleted && top_right_vertex.obtuse?
-      delete(top_right_vertex)
+
+    unless tr_deleted
+      if top_right_vertex.acute?
+        closest = top_right_vertex.closest_neighbor
+        top_right_vertex.next = closest
+        top_right_vertex.prev = closest
+      elsif top_right_vertex.obtuse?
+        delete(top_right_vertex)
+      end
     end
 
     if bottom_left_vertex.obtuse?
