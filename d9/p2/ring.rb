@@ -106,8 +106,9 @@ class Ring
       ring = rings.shift
       next if ring.empty?
 
-      new_rectangle, rings = ring.extract_rectangle
-      rectangles << new_rectangle
+      new_rectangle, new_rings = ring.extract_rectangle
+      rings = [*rings, *new_rings]
+      rectangles << new_rectangle if new_rectangle
     end
 
     rectangles
@@ -115,19 +116,19 @@ class Ring
 
   def extract_rectangle
     if size == 2
-      vs = vertices
-      rectangle = Rectangle.new(vs.first, vs.last)
+      # vs = vertices
+      # rectangle = Rectangle.new(vs.first, vs.last)
 
       self.size = 0
       self.head = nil
 
-      return [rectangle, []]
+      # return [rectangle, []]
+      return [nil, []]
     end
 
     top_left_vertex = smallest_vertex
     top_right_vertex = top_left_vertex.right
     bottom_left_vertex = top_left_vertex.down
-    binding.pry unless bottom_left_vertex
     bottom_right_vertex = top_right_vertex.down
 
     top_left = top_left_vertex.point
@@ -238,4 +239,6 @@ class Ring
 
     smallest_vertex
   end
+
+  def to_s = points.map(&:to_s)
 end

@@ -48,9 +48,17 @@ points = [
   Point[2, 5]
 ]
 
-floor = Floor.new(points)
+ring = Ring.new(points)
+assert_rectangles(
+  ring.extract_rectangles,
+  [
+    Rectangle.new(Point[2, 1], Point[6, 4]),
+    Rectangle.new(Point[2, 4], Point[3, 5]),
+    Rectangle.new(Point[5, 4], Point[6, 5])
+  ]
+)
 
-binding.pry
+floor = Floor.new(points)
 
 biggest = floor.biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
 

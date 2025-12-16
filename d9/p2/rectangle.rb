@@ -231,12 +231,7 @@ class Rectangle
 
       Rectangle.new(corner1, corner2)
     when 4
-      value = nil
-      unless $reported
-        puts "going to use #{value}"
-      end
-      $reported = true
-      value
+      nil
     else
       binding.pry
       raise "Wtf"
