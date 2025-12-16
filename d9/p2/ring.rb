@@ -4,7 +4,16 @@ require_relative "rectangle"
 class Ring
   attr_accessor :head, :size
 
-  def initialize(points)
+  def initialize(points_or_vertex)
+    if points_or_vertex.is_a?(Vertex)
+      self.head = points_or_vertex
+      self.size = points.size
+
+      return
+    end
+
+    points = points_or_vertex
+
     points = points.map(&:dup)
 
     self.size = points.size
@@ -69,42 +78,56 @@ class Ring
     end
   end
 
-  def points
+  def vertices
     vertex = head
-    points = []
 
-    return points unless head
+    return [] unless head
 
+    vertices = []
     begin
-      points << vertex.point
+      vertices << vertex
       vertex = vertex.next
     end until vertex == head
 
-    points
+    vertices
+  end
+
+  def points
+    vertices.map(&:point)
   end
 
   def empty? = size == 0
 
-  def yet_another_extract_rectangles
-    # start at head
-    # Does head
-  end
-
   def extract_rectangles
     rectangles = []
+    rings = [self]
 
-    until empty?
-      new_rectangles = extract_rectangle
-      rectangles += [*new_rectangles]
+    until rings.empty?
+      ring = rings.shift
+      next if ring.empty?
+
+      new_rectangle, rings = ring.extract_rectangle
+      rectangles << new_rectangle
     end
 
     rectangles
   end
 
   def extract_rectangle
+    if size == 2
+      vs = vertices
+      rectangle = Rectangle.new(vs.first, vs.last)
+
+      self.size = 0
+      self.head = nil
+
+      return [rectangle, []]
+    end
+
     top_left_vertex = smallest_vertex
     top_right_vertex = top_left_vertex.right
     bottom_left_vertex = top_left_vertex.down
+    binding.pry unless bottom_left_vertex
     bottom_right_vertex = top_right_vertex.down
 
     top_left = top_left_vertex.point
@@ -128,9 +151,9 @@ class Ring
       contained_red_vertices = vertices.select { inner_rectangle.contains?(it.point) }
 
       unless contained_red_vertices.empty?
-        new_y2 = contained_red_vertices.map(&:point).sort.first.y
+        new_y2 = contained_red_vertices.map(&:point).min.y
 
-        potential_new_neighbors = contained_red_vertices.select { it.y == new_y }
+        potential_new_neighbors = contained_red_vertices.select { it.y == new_y2 }
 
         candidate_green_rectangle = Rectangle.new(
           candidate_green_rectangle.ul,
@@ -148,7 +171,6 @@ class Ring
     new_bottom_left = Point[top_left.x, new_y2]
 
     tl_deleted = false
-
     if new_bottom_left == bottom_left
       tl_deleted = true
       delete(top_left_vertex)
@@ -156,9 +178,9 @@ class Ring
       top_left_vertex.y = new_y2
     end
 
-    tr_deleted = false
     new_bottom_right = Point[top_right.x, new_y2]
 
+    tr_delete = false
     if new_bottom_right == bottom_right
       tr_deleted = true
       delete(top_right_vertex)
@@ -166,82 +188,34 @@ class Ring
       top_right_vertex.y = new_y2
     end
 
-    unless tl_deleted
-      if top_left_vertex.next.y == top_left_vertex.y
-        neighbor = top_left_vertex.next
-        neighbor_distance = top_left_vertex.distance_to(neighbor)
+    rings = if potential_new_neighbors.nil? || potential_new_neighbors.empty?
+              [self]
+            else
+              patch_up_new_neighbors(
+                [top_left_vertex,
+                 *potential_new_neighbors,
+                 top_right_vertex]
+              )
+            end
 
-        new_neighbor = potential_new_neighbors.find { top_left_vertex.distance_to(it) < neighbor_distance }
-
-        if new_neighbor
-          top_left_vertex.next = new_neighbor
-        end
-        asdfasdf
-      end
-      if top_left_vertex.acute?
-        closest = top_left_vertex.closest_neighbor
-        top_left_vertex.next = closest
-        top_left_vertex.prev = closest
-      elsif top_left_vertex.obtuse?
-        delete(top_left_vertex)
-      end
-    end
-
-    unless tr_deleted
-      if top_right_vertex.acute?
-        closest = top_right_vertex.closest_neighbor
-        top_right_vertex.next = closest
-        top_right_vertex.prev = closest
-      elsif top_right_vertex.obtuse?
-        delete(top_right_vertex)
-      end
-    end
-
-    if bottom_left_vertex.obtuse?
-      delete(bottom_left_vertex)
-    end
-
-    if bottom_right_vertex.obtuse?
-      delete(bottom_right_vertex)
-    end
-
-    green_rectangle
+    [green_rectangle, rings]
   end
 
-  def extract_rectangle_old
-    top_left = smallest_vertex
+  def patch_up_new_neighbors(to_patch_up)
+    to_patch_up = to_patch_up.sort
+    candidate_rings = []
 
-    top_right = top_left.right
+    to_patch_up.each_slice(2) do |(left_neighbor, right_neighbor)|
+      candidate_rings << left_neighbor
 
-    bottom_left = top_left.down
-    bottom_right = top_right.down
-
-    rectangle = nil
-
-    if bottom_left.y > bottom_right.y
-      rectangle = Rectangle.new(top_left.point, bottom_right.point)
-
-      delete(top_right)
-      top_left.y = bottom_right.y
-
-      delete(bottom_right)
-    elsif bottom_left.y < bottom_right.y
-      rectangle = Rectangle.new(top_right.point, bottom_left.point)
-
-      delete(top_left)
-      top_right.y = bottom_left.y
-
-      delete(bottom_left)
-    else
-      rectangle = Rectangle.new(top_left.point, bottom_right.point)
-
-      delete(top_left)
-      delete(bottom_left)
-      delete(top_right)
-      delete(bottom_right)
+      left_neighbor.update_horizontal_neighbor(right_neighbor)
+      right_neighbor.update_horizontal_neighbor(left_neighbor)
     end
 
-    rectangle
+    candidate_rings.map! { Ring.new(it) }
+    candidate_rings.each(&:normalize_head)
+    candidate_rings.uniq!(&:head)
+    candidate_rings
   end
 
   def smallest_vertex

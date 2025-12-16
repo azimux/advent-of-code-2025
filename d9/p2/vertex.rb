@@ -1,5 +1,7 @@
 class Ring
   class Vertex
+    include Comparable
+
     attr_accessor :point, :prev, :next
 
     def initialize(point)
@@ -28,6 +30,25 @@ class Ring
       if vertex && vertex.y > y
         vertex
       end
+    end
+
+    def update_horizontal_neighbor(new_neighbor)
+      if horizontal_neighbor_is_next?
+        self.next = new_neighbor
+      elsif horizontal_neighbor_is_prev?
+        self.prev = new_neighbor
+      else
+        binding.pry
+        raise "wtf"
+      end
+    end
+
+    def horizontal_neighbor_is_prev?
+      prev.y == y
+    end
+
+    def horizontal_neighbor_is_next?
+      self.next.y == y
     end
 
     def y = point.y
@@ -75,5 +96,7 @@ class Ring
         end
       end
     end
+
+    def <=>(other) = point <=> other.point
   end
 end
