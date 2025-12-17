@@ -13,6 +13,7 @@ class Point
   end
 
   def to_s = "(#{x},#{y})"
+  def inspect = to_s
 
   def ==(other)
     if other.is_a?(Point)

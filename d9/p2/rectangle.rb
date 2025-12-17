@@ -243,6 +243,7 @@ class Rectangle
   end
 
   def to_s = "R#{ul}-#{br}"
+  def inspect = to_s
 
   def ==(other)
     other.is_a?(Rectangle) &&

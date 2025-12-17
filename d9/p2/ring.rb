@@ -143,10 +143,10 @@ class Ring
 
     candidate_green_rectangle = Rectangle.new(top_left, Point[top_right.x, green_rectangle_y2])
 
-    if candidate_green_rectangle.height > 2 && candidate_green_rectangle.width > 2
+    if candidate_green_rectangle.height > 1 && candidate_green_rectangle.width > 2
       inner_rectangle = Rectangle.new(
         Point[candidate_green_rectangle.x1 + 1, candidate_green_rectangle.y1 + 1],
-        Point[candidate_green_rectangle.x2 - 1, candidate_green_rectangle.y2 - 1]
+        Point[candidate_green_rectangle.x2 - 1, candidate_green_rectangle.y2]
       )
 
       contained_red_vertices = vertices.select { inner_rectangle.contains?(it.point) }
@@ -172,9 +172,15 @@ class Ring
     new_bottom_left = Point[top_left.x, new_y2]
 
     tl_deleted = false
+    bl_deleted = false
     if new_bottom_left == bottom_left
       tl_deleted = true
       delete(top_left_vertex)
+
+      unless bottom_left_vertex.down
+        bl_deleted = true
+        delete(bottom_left_vertex)
+      end
     else
       top_left_vertex.y = new_y2
     end
@@ -182,21 +188,26 @@ class Ring
     new_bottom_right = Point[top_right.x, new_y2]
 
     tr_delete = false
+    br_deleted = false
     if new_bottom_right == bottom_right
       tr_deleted = true
       delete(top_right_vertex)
+
+      unless bottom_right_vertex.down
+        br_deleted = true
+        delete(bottom_right_vertex)
+      end
     else
       top_right_vertex.y = new_y2
     end
 
     rings = if potential_new_neighbors.nil? || potential_new_neighbors.empty?
+              normalize_head
               [self]
             else
-              patch_up_new_neighbors(
-                [top_left_vertex,
-                 *potential_new_neighbors,
-                 top_right_vertex]
-              )
+              potential_new_neighbors << top_left_vertex unless tl_deleted
+              potential_new_neighbors << top_right_vertex unless tr_deleted
+              patch_up_new_neighbors(potential_new_neighbors)
             end
 
     [green_rectangle, rings]
@@ -221,6 +232,7 @@ class Ring
 
   def smallest_vertex
     return head if size == 1
+    return nil if size == 0
 
     smallest_vertex = head
     smallest_point = head.point
