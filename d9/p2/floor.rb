@@ -17,7 +17,7 @@ class Floor
   end
 
   def find_green_rectangles_for(red_rectangle)
-    candidate_rectangles = []
+    candidate_green_rectangles = []
 
     x1 = red_rectangle.x1
     x2 = red_rectangle.x2
@@ -27,43 +27,50 @@ class Floor
     green_rectangles.each do |green_rectangle|
       break if green_rectangle.x1 > x2
 
-      if green_rectangle.x1.between?(x1, x2) || green_rectangle.x2.between?(x1, x2) ||
+      if green_rectangle.x1.between?(x1, x2) ||
+         green_rectangle.x2.between?(x1, x2) ||
          (green_rectangle.x1 < x1 && green_rectangle.x2 > x2)
-        candidate_rectangles << green_rectangle
+        candidate_green_rectangles << green_rectangle
       end
     end
 
-    candidate_rectangles.reject do |candidate_rectangle|
-      candidate_rectangle.y2 < y1 || candidate_rectangle.y1 > y2
+    candidate_green_rectangles.reject do |candidate_green_rectangle|
+      candidate_green_rectangle.y2 < y1 || candidate_green_rectangle.y1 > y2
     end
   end
 
-  def biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
-    total_rectangles = rectangles.size
+  def biggest_red_rectangle_containing_all_green_tiles
+    total_rectangles = red_rectangles.size
 
-    rectangles.each.with_index do |rectangle, index|
+    red_rectangles.each.with_index do |red_rectangle, index|
       # puts "processing #{index + 1}/#{total_rectangles} #{rectangle}"
 
-      rectangles_to_break = [rectangle]
+      red_rectangles_to_break = [red_rectangle]
 
-      find_green_rectangles_for(rectangle).each do |green_rectangle|
-        loop do
-          if rectangles_to_break.empty?
-            return rectangle
-          end
+      find_green_rectangles_for(red_rectangle).each do |green_rectangle|
+        if red_rectangles_to_break.empty?
+          return red_rectangle
+        end
 
-          rectangle_to_break = rectangles_to_break.shift
+        red_rectangle_to_break = red_rectangles_to_break.shift
 
-          result = green_rectangle.remove_overlapping_pieces(rectangle_to_break)
+        result = green_rectangle.remove_overlapping_pieces(red_rectangle_to_break)
 
-          if result == rectangle_to_break
-            # no progress made, move on to next green rectangle
-            rectangles_to_break << result
-            break
-          end
-
+        if result == red_rectangle_to_break
+          # no progress made, move on to next green rectangle
+          red_rectangles_to_break << result
+        else
           to_add = [*result]
-          to_add.each { rectangles_to_break << it }
+          to_add.each { red_rectangles_to_break << it }
+
+          begin
+            if to_add.size != to_add.uniq.size
+              binding.pry
+            end
+          rescue => e
+            binding.pry
+            raise
+          end
         end
       end
     end
@@ -71,25 +78,26 @@ class Floor
     nil
   end
 
-  def rectangles
-    return @rectangles if @rectangles
+  def red_rectangles
+    return @red_rectangles if @red_rectangles
 
-    rectangles = []
+    red_rectangles = []
 
     points_size = points.size
 
     0.upto(points_size - 2) do |corner1_index|
       corner1 = points[corner1_index]
-      corner1_index.upto(points_size - 1) do |corner2_index|
+
+      (corner1_index + 1).upto(points_size - 1) do |corner2_index|
         corner2 = points[corner2_index]
 
-        rectangles << Rectangle.new(corner1, corner2)
+        red_rectangles << Rectangle.new(corner1, corner2)
       end
     end
 
-    rectangles.sort_by!(&:area)
-    rectangles.reverse!
+    red_rectangles.sort_by!(&:area)
+    red_rectangles.reverse!
 
-    @rectangles = rectangles
+    @red_rectangles = red_rectangles
   end
 end

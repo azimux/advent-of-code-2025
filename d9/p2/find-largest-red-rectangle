@@ -15,12 +15,13 @@ def parse_points(filename)
   end
 end
 
-points = parse_points("inputs.txt")
+points = parse_points("inputs_test.txt")
 
 floor = Floor.new(points)
 
-biggest = floor.biggest_red_tile_defined_rectangle_containing_all_green_or_red_tiles
+biggest = floor.biggest_red_rectangle_containing_all_green_tiles
 puts biggest.area
 
 # 1395519733
 # 234478210
+# 334801116

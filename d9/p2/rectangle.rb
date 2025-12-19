@@ -253,7 +253,7 @@ class Rectangle
       y2 == other.y2
   end
 
-  def hash = [x1, x2, y1, y2]
+  def hash = [x1, x2, y1, y2].hash
   def eql?(other) = self == other
 
   def <=>(other)

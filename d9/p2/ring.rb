@@ -66,6 +66,12 @@ class Ring
     else
       self.size -= 1
 
+      if vertex.prev.nil?
+        binding.pry
+      end
+      if vertex.next.nil?
+        binding.pry
+      end
       prev_vertex = vertex.prev
       next_vertex = vertex.next
 
@@ -219,6 +225,8 @@ class Ring
 
     to_patch_up.each_slice(2) do |(left_neighbor, right_neighbor)|
       candidate_rings << left_neighbor
+
+      next unless right_neighbor
 
       left_neighbor.update_horizontal_neighbor(right_neighbor)
       right_neighbor.update_horizontal_neighbor(left_neighbor)
