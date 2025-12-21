@@ -43,33 +43,30 @@ class Floor
     total_rectangles = red_rectangles.size
 
     red_rectangles.each.with_index do |red_rectangle, index|
-      # puts "processing #{index + 1}/#{total_rectangles} #{rectangle}"
+      # puts "processing #{index + 1}/#{total_rectangles} #{red_rectangle}"
 
       red_rectangles_to_break = [red_rectangle]
 
       find_green_rectangles_for(red_rectangle).each do |green_rectangle|
-        if red_rectangles_to_break.empty?
-          return red_rectangle
-        end
+        red_rectangle_to_break_index = 0
 
-        red_rectangle_to_break = red_rectangles_to_break.shift
+        loop do
+          if red_rectangles_to_break.empty?
+            return red_rectangle
+          end
 
-        result = green_rectangle.remove_overlapping_pieces(red_rectangle_to_break)
+          red_rectangle_to_break = red_rectangles_to_break[red_rectangle_to_break_index]
+          break unless red_rectangle_to_break
 
-        if result == red_rectangle_to_break
-          # no progress made, move on to next green rectangle
-          red_rectangles_to_break << result
-        else
-          to_add = [*result]
-          to_add.each { red_rectangles_to_break << it }
+          result = green_rectangle.remove_overlapping_pieces(red_rectangle_to_break)
 
-          begin
-            if to_add.size != to_add.uniq.size
-              binding.pry
-            end
-          rescue => e
-            binding.pry
-            raise
+          if result == red_rectangle_to_break
+            red_rectangle_to_break_index += 1
+          else
+            red_rectangles_to_break.delete(red_rectangle_to_break)
+
+            to_add = [*result]
+            to_add.each { red_rectangles_to_break << it }
           end
         end
       end
