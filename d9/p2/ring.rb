@@ -158,9 +158,9 @@ class Ring
       contained_red_vertices = vertices.select { inner_rectangle.contains?(it.point) }
 
       unless contained_red_vertices.empty?
-        new_y2 = contained_red_vertices.map(&:point).min.y
+        need_to_patch_up_neighbors = true
 
-        potential_new_neighbors = contained_red_vertices.select { it.y == new_y2 }
+        new_y2 = contained_red_vertices.map(&:point).min.y
 
         candidate_green_rectangle = Rectangle.new(
           candidate_green_rectangle.ul,
@@ -207,12 +207,20 @@ class Ring
       top_right_vertex.y = new_y2
     end
 
+    if need_to_patch_up_neighbors
+      potential_new_neighbors = vertices.select do |vertex|
+        if vertex.obtuse? || vertex.acute?
+          binding.pry
+        end
+
+        vertex.y == new_y2
+      end
+    end
+
     rings = if potential_new_neighbors.nil? || potential_new_neighbors.empty?
               normalize_head
               [self]
             else
-              potential_new_neighbors << top_left_vertex unless tl_deleted
-              potential_new_neighbors << top_right_vertex unless tr_deleted
               patch_up_new_neighbors(potential_new_neighbors)
             end
 
@@ -225,8 +233,6 @@ class Ring
 
     to_patch_up.each_slice(2) do |(left_neighbor, right_neighbor)|
       candidate_rings << left_neighbor
-
-      next unless right_neighbor
 
       left_neighbor.update_horizontal_neighbor(right_neighbor)
       right_neighbor.update_horizontal_neighbor(left_neighbor)

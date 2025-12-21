@@ -15,7 +15,7 @@ def parse_points(filename)
   end
 end
 
-points = parse_points("inputs_test.txt")
+points = parse_points("inputs.txt")
 
 floor = Floor.new(points)
 
