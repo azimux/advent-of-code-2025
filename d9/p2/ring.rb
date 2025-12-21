@@ -66,12 +66,6 @@ class Ring
     else
       self.size -= 1
 
-      if vertex.prev.nil?
-        binding.pry
-      end
-      if vertex.next.nil?
-        binding.pry
-      end
       prev_vertex = vertex.prev
       next_vertex = vertex.next
 
@@ -209,10 +203,6 @@ class Ring
 
     if need_to_patch_up_neighbors
       potential_new_neighbors = vertices.select do |vertex|
-        if vertex.obtuse? || vertex.acute?
-          binding.pry
-        end
-
         vertex.y == new_y2
       end
     end
