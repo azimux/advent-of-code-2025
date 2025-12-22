@@ -1,0 +1,82 @@
+#!/usr/bin/env ruby
+
+require "pry"
+# require "pry-byebug"
+
+light_diagram_regex = /\[([.#]+)\]/
+button_wiring_regex = /\((?:\d+,)*\d+\)/
+buttons_wiring_regex = /((?:#{button_wiring_regex}\s*)+)/
+joltage_regex = /\{(?:\d+,)*\d+}/
+joltages_regex = /(#{joltage_regex}\s*)+/
+machine_regex = /\A#{light_diagram_regex}\s*#{buttons_wiring_regex}\s*#{joltages_regex}\z/
+
+class LightPanel
+  attr_accessor :state, :light_count
+
+  def initialize(state_string)
+    self.light_count = state_string.size
+    self.state = state_string.gsub(".", "0").gsub("#", "1").to_i(2)
+  end
+
+  def size =light_count
+
+  def to_s
+    s = state.to_s(2)
+    s = s.gsub("0", ".").gsub("1", "#")
+
+    (light_count - s.size).times do
+      s = ".#{s}"
+    end
+
+    s
+  end
+end
+
+class Button
+  attr_accessor :lights_to_toggle, :light_panel_toggle_value
+
+  def initialize(lights_to_toggle, light_count)
+    self.lights_to_toggle = lights_to_toggle
+    light_panel = []
+
+    lights_to_toggle.each do |light_index|
+      light_panel[light_index] = "#"
+    end
+
+    light_panel = light_panel[(0..light_count)]
+    light_panel.reverse!
+    light_panel.map! { it || "." }
+
+    self.light_panel_toggle_value = LightPanel.new(light_panel.join)
+  end
+
+  def to_s
+    s = light_panel_toggle_value.to_s
+
+    button_wires = []
+
+    s.chars.reverse.each.with_index do |char, index|
+      button_wires << index if char == "#"
+    end
+
+    "(#{button_wires.join(",")})"
+  end
+end
+
+File.foreach("inputs_test.txt") do |line|
+  if line =~ machine_regex
+    light_diagram = $1.strip
+    buttons_wiring = $2.strip
+    joltages = $3.strip
+  else
+    raise "Could not parse #{line}"
+  end
+
+  light_panel = LightPanel.new(light_diagram)
+  light_count = light_panel.size
+
+  buttons = buttons_wiring.scan(button_wiring_regex).map do |button_text|
+    light_indexes = button_text.gsub(/[()]/, "").split(",").map(&:to_i)
+    Button.new(light_indexes, light_count)
+  end
+end
