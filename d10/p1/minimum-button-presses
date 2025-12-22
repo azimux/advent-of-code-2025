@@ -5,6 +5,6 @@ require "pry"
 
 require_relative "machine_parser"
 
-machines = MachineParser.parse("inputs_test.txt")
+machines = MachineParser.parse("inputs.txt")
 
 puts machines.map(&:minimum_pushes_required).sum
