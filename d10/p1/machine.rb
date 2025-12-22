@@ -1,3 +1,5 @@
+require_relative "array"
+
 class Machine
   attr_accessor :light_panel, :buttons
 
