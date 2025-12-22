@@ -1,5 +1,6 @@
 require_relative "machine"
 require_relative "button"
+require_relative "joltages"
 
 class MachineParser
   class << self
@@ -7,7 +8,7 @@ class MachineParser
     def button_wiring_regex = /\((?:\d+,)*\d+\)/
     def buttons_wiring_regex = /((?:#{button_wiring_regex}\s*)+)/
     def joltage_regex = /\{(?:\d+,)*\d+}/
-    def joltages_regex = /(#{joltage_regex}\s*)+/
+    def joltages_regex = /((?:#{joltage_regex}\s*)+)/
     def machine_regex = /\A#{light_diagram_regex}\s*#{buttons_wiring_regex}\s*#{joltages_regex}\z/
 
     def parse(file_name)
@@ -29,15 +30,15 @@ class MachineParser
         raise "Could not parse #{line}"
       end
 
-      light_panel = LightPanel.new(light_diagram)
-      light_count = light_panel.size
-
       buttons = buttons_wiring.scan(button_wiring_regex).map do |button_text|
-        light_indexes = button_text.gsub(/[()]/, "").split(",").map(&:to_i)
-        Button.new(light_indexes, light_count)
+        joltage_indices = button_text.gsub(/[()]/, "").split(",").map(&:to_i)
+        Button.new(joltage_indices)
       end
 
-      Machine.new(light_panel, buttons)
+      joltages = joltages.gsub(/[{}]/, "").split(",").map(&:to_i)
+      joltages = Joltages.new(joltages)
+
+      Machine.new(joltages, buttons)
     end
   end
 end
