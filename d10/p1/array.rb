@@ -1,7 +1,7 @@
 class Array
   def choose(size)
     if size == 1
-      self
+      map { [it] }
     else
       result = []
 
@@ -10,6 +10,7 @@ class Array
         rest = self[(index + 1)..]
 
         rest.choose(size - 1).each do |group|
+          r = [first, *group]
           result << [first, *group]
         end
       end
