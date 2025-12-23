@@ -17,6 +17,15 @@ class Joltages
     raise
   end
 
+  def any_over?(target)
+    target_levels = target.joltage_levels
+
+    joltage_levels.each.with_index.any? do |level, index|
+      target_levels[index] > level
+    end
+  end
+
+  def each(&) = joltage_levels.each(&)
   def size = joltage_levels.size
   def to_s ="{#{joltage_levels.join(",")}}"
   def inspect = to_s
