@@ -1,34 +1,29 @@
 class Array
-  def choose(size)
-    if size == 1
-      each { yield [it] }
-    else
-      (0..(self.size - size)).each do |index|
-        first = self[index]
-        rest = self[(index + 1)..]
+  def choose_allowing_repetition(group_size, &block)
+    return if empty?
 
-        rest.choose(size - 1) do |group|
-          yield [first, *group]
+    if size == 1
+      block.call(Array.new(group_size, first))
+    else
+      first_element, *rest = self
+
+      rest.choose_allowing_repetition(group_size, &block)
+
+      (1..group_size).each do |number_of_first_element_occurrences|
+        entry = [first_element] * number_of_first_element_occurrences
+
+        remaining_size = group_size - number_of_first_element_occurrences
+
+        if remaining_size.zero?
+          block.call(entry)
+        else
+          rest.choose_allowing_repetition(remaining_size) do |group|
+            block.call([*entry, *group])
+          end
         end
       end
     end
-  end
 
-  # TODO: build these one at a time and yield them instead of building them all upfront
-  def choose_allowing_repetition(size)
-    new_size = size * self.size
-
-    puts "allocating #{new_size}"
-    a = Array.new(new_size)
-
-    each.with_index do |value, i|
-      size.times do |j|
-        a[(i * size) + j] = value
-      end
-    end
-
-    values = Set.new
-    a.choose(size) { |e| values << e }
-    values.to_a
+    nil
   end
 end

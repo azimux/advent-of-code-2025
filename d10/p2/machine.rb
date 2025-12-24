@@ -1,72 +1,80 @@
 require_relative "array"
 
-# potential algorithms...
-# 1)
-#   a. find button with most joltage indices in it
-#   b. find joltage index with the lowest target value
-#   c. build collection of possible button presses to get to that target value
-#   d. build a new machine for each possible value but without any of the
-#      no-longer pressable buttons and without the joltage we already met.
-#   e. go back to a.
-
 class Machine
-  attr_accessor :target_joltages, :buttons
+  attr_accessor :joltages, :buttons
 
-  def initialize(target_joltages, buttons)
-    self.target_joltages = target_joltages
+  def initialize(joltages, buttons)
+    self.joltages = joltages
     self.buttons = buttons
   end
 
   def minimum_pushes_required
-    # 1. build up all sets of button pushes for buttons containing first joltage
-    # that give exactly the first joltage
-    # 2. delete all of those buttons
-    # 3. repeat step 1 combining existing sets with button pushes from other buttons
-    #    to build new set containing all button pushes that satisfy joltage1 and joltage2
-    (1..(buttons.size * joltages_size)).each do |button_count|
-      puts "#{Time.now}: #{target_joltages} button count: #{button_count}"
+    target_button = button_with_most_joltage_indices
+    return 0 if target_button.nil?
 
-      possible_button_combinations(button_count) do |buttons_to_push|
-        works = true
+    target_joltage_index = minimum_nonzero_joltage_index(target_button)
+    return 0 if target_joltage_index.nil?
 
-        target_joltages.each.with_index do |joltage, index|
-          unless buttons_to_push.count { |b| b.include?(index) } == joltage
-            works = false
-            break
-          end
+    target_joltage = joltages[target_joltage_index]
+    binding.pry if target_joltage.zero?
+    relevant_buttons = buttons.select { |button| button.include?(target_joltage_index) }
+    relevant_buttons.reject! do |button|
+      binding.pry if button.nil?
+      button.joltages_to_increment.any? do |joltage_index|
+        joltages[joltage_index].zero?
+      end
+    end
+
+    minimum_submachine_pushes = nil
+
+    relevant_buttons.choose_allowing_repetition(target_joltage) do |buttons_to_push|
+      new_joltages = joltages.dup
+      buttons_to_push.each { |button| button.push(new_joltages) }
+
+      unless new_joltages.any?(&:negative?)
+        submachine = Machine.new(new_joltages, buttons - relevant_buttons)
+        min_pushes = submachine.minimum_pushes_required
+
+        next unless min_pushes
+
+        if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
+          minimum_submachine_pushes = min_pushes
         end
-
-        return buttons_to_push.size if works
       end
     end
 
-    binding.pry
-
-    raise "wtf"
+    unless minimum_submachine_pushes.nil?
+      target_joltage + minimum_submachine_pushes
+    end
   end
 
-  def possible_button_combinations(button_count, &)
-    buttons_to_choose_from = []
+  def button_with_most_joltage_indices
+    buttons.max_by do |button|
+      button.joltages_to_increment.count do |joltage_index|
+        joltages[joltage_index].positive?
+      end
+    end
+  end
 
-    buttons.each do |button|
-      joltages = Joltages.new(Array.new(target_joltages.size, 0))
-      count = 0
+  def minimum_nonzero_joltage_index(button)
+    binding.pry if button.nil?
+    joltages_to_increment = button.joltages_to_increment
 
-      loop do
-        button.push(joltages)
+    min_index = nil
+    min_joltage = nil
 
-        break if joltages.any_over?(target_joltages)
+    (0...joltages_to_increment.size).each do |joltage_index|
+      value = joltages[joltage_index]
 
-        buttons_to_choose_from << button
-        count += 1
-
-        break if count >= button_count
+      if value.positive? && (min_joltage.nil? || value < min_joltage)
+        min_joltage = value
+        min_index = joltage_index
       end
     end
 
-    buttons_to_choose_from.choose(button_count, &)
+    min_index
   end
 
-  def joltages_size = target_joltages.size
-  def to_s = "#{buttons.map(&:to_s).join(" ")} #{target_joltages}"
+  def joltages_size = joltages.size
+  def to_s = "#{buttons.map(&:to_s).join(" ")} #{joltages}"
 end

@@ -9,9 +9,9 @@ class Joltages
     joltage_levels == other.joltage_levels
   end
 
-  def inc(i)
-    joltage_levels[i] += 1
-  end
+  def dec(i) = joltage_levels[i] -= 1
+  def dup = Joltages.new(joltage_levels.dup)
+  def any?(&) = joltage_levels.any?(&)
 
   def any_over?(target)
     target_levels = target.joltage_levels
@@ -20,6 +20,8 @@ class Joltages
       level > target_levels[index]
     end
   end
+
+  def [](index) = joltage_levels[index]
 
   def each(&) = joltage_levels.each(&)
   def size = joltage_levels.size

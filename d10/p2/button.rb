@@ -6,8 +6,10 @@ class Button
   end
 
   def push(joltages)
-    joltages_to_increment.each { joltages.inc(it) }
+    joltages_to_increment.each { joltages.dec(it) }
   end
+
+  def joltages_size = joltages_to_increment.size
 
   def include?(joltage_index) = joltages_to_increment.include?(joltage_index)
 
