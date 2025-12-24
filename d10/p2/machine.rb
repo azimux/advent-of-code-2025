@@ -10,9 +10,9 @@ class Machine
 
   def minimum_pushes_required
     (1..(buttons.size * joltages_size)).each do |button_count|
-      puts "#{date}: #{target_joltages} button count: #{button_count}"
+      puts "#{Time.now}: #{target_joltages} button count: #{button_count}"
 
-      possible_button_combinations(button_count).each do |buttons_to_push|
+      possible_button_combinations(button_count) do |buttons_to_push|
         works = true
 
         target_joltages.each.with_index do |joltage, index|
@@ -31,7 +31,7 @@ class Machine
     raise "wtf"
   end
 
-  def possible_button_combinations(button_count)
+  def possible_button_combinations(button_count, &)
     buttons_to_choose_from = []
 
     buttons.each do |button|
@@ -50,7 +50,7 @@ class Machine
       end
     end
 
-    buttons_to_choose_from.choose(button_count)
+    buttons_to_choose_from.choose(button_count, &)
   end
 
   def joltages_size = target_joltages.size
