@@ -2,7 +2,6 @@ class Joltages
   attr_accessor :joltage_levels
 
   def initialize(joltage_levels)
-    binding.pry unless joltage_levels
     self.joltage_levels = joltage_levels
   end
 
@@ -12,16 +11,13 @@ class Joltages
 
   def inc(i)
     joltage_levels[i] += 1
-  rescue => e
-    binding.pry
-    raise
   end
 
   def any_over?(target)
     target_levels = target.joltage_levels
 
     joltage_levels.each.with_index.any? do |level, index|
-      target_levels[index] > level
+      level > target_levels[index]
     end
   end
 

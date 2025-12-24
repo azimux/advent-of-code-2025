@@ -18,6 +18,7 @@ class Array
     end
   end
 
+  # TODO: build these one at a time and yield them instead of building them all upfront
   def choose_allowing_repetition(size)
     new_size = size * self.size
 
