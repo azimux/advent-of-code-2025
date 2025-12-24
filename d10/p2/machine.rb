@@ -1,5 +1,14 @@
 require_relative "array"
 
+# potential algorithms...
+# 1)
+#   a. find button with most joltage indices in it
+#   b. find joltage index with the lowest target value
+#   c. build collection of possible button presses to get to that target value
+#   d. build a new machine for each possible value but without any of the
+#      no-longer pressable buttons and without the joltage we already met.
+#   e. go back to a.
+
 class Machine
   attr_accessor :target_joltages, :buttons
 
@@ -9,6 +18,11 @@ class Machine
   end
 
   def minimum_pushes_required
+    # 1. build up all sets of button pushes for buttons containing first joltage
+    # that give exactly the first joltage
+    # 2. delete all of those buttons
+    # 3. repeat step 1 combining existing sets with button pushes from other buttons
+    #    to build new set containing all button pushes that satisfy joltage1 and joltage2
     (1..(buttons.size * joltages_size)).each do |button_count|
       puts "#{Time.now}: #{target_joltages} button count: #{button_count}"
 
