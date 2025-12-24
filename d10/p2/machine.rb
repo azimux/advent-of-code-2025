@@ -8,16 +8,18 @@ class Machine
     self.buttons = buttons
   end
 
-  def minimum_pushes_required
-    binding.pry
+  def done? = joltages.all?(&:zero?)
 
+  def minimum_pushes_required
     target_button = button_with_most_joltage_indices
-    return 0 if target_button.nil?
+    if target_button.nil?
+      return done? ? 0 : nil
+    end
 
     target_joltage_index = minimum_nonzero_joltage_index(target_button)
-    return 0 if target_joltage_index.nil?
-
-    binding.pry
+    if target_joltage_index.nil?
+      return done? ? 0 : nil
+    end
 
     target_joltage = joltages[target_joltage_index]
 
@@ -46,8 +48,6 @@ class Machine
       end
     end
 
-    binding.pry
-
     unless minimum_submachine_pushes.nil?
       target_joltage + minimum_submachine_pushes
     end
@@ -75,8 +75,6 @@ class Machine
         min_joltage = value
         min_index = joltage_index
       end
-    end.tap do
-      binding.pry if it.nil?
     end
 
     min_index

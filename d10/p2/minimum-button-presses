@@ -5,7 +5,6 @@ require "pry-byebug"
 
 require_relative "machine_parser"
 
-machines = MachineParser.parse("inputs_test2.txt")
+machines = MachineParser.parse("inputs_test.txt")
 
-puts machines.map(&:minimum_pushes_required)
 puts machines.map(&:minimum_pushes_required).sum

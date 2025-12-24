@@ -12,6 +12,7 @@ class Joltages
   def dec(i) = joltage_levels[i] -= 1
   def dup = Joltages.new(joltage_levels.dup)
   def any?(&) = joltage_levels.any?(&)
+  def all?(&) = joltage_levels.all?(&)
 
   def any_over?(target)
     target_levels = target.joltage_levels
