@@ -8,7 +8,7 @@ require_relative "machine_parser"
 machines = MachineParser.parse("inputs_test.txt")
 
 sum = machines.map do |machine|
-  puts "starting new machine..."
+  puts "#{Time.now}: starting new machine..."
   machine.minimum_pushes_required
 end.sum
 

@@ -30,9 +30,13 @@ class Machine
       end
     end
 
+    relevant_buttons.sort_by!(&:joltages_size).reverse!
+
     minimum_submachine_pushes = nil
 
     relevant_buttons.choose_allowing_repetition(target_joltage) do |buttons_to_push|
+      # puts "#{Time.now}: #{self} creating a submachine for #{buttons_to_push}"
+
       new_joltages = joltages.dup
       buttons_to_push.each { |button| button.push(new_joltages) }
 

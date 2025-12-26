@@ -7,9 +7,7 @@ class Array
     else
       first_element, *rest = self
 
-      rest.choose_allowing_repetition(group_size, &block)
-
-      (1..group_size).each do |number_of_first_element_occurrences|
+      group_size.downto(1) do |number_of_first_element_occurrences|
         entry = [first_element] * number_of_first_element_occurrences
 
         remaining_size = group_size - number_of_first_element_occurrences
@@ -22,6 +20,8 @@ class Array
           end
         end
       end
+
+      rest.choose_allowing_repetition(group_size, &block)
     end
 
     nil

@@ -10,9 +10,7 @@ class Button
   end
 
   def joltages_size = joltages_to_increment.size
-
   def include?(joltage_index) = joltages_to_increment.include?(joltage_index)
-
   def to_s ="(#{joltages_to_increment.join(",")})"
   def inspect = to_s
 end
