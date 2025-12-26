@@ -13,4 +13,12 @@ class Button
   def include?(joltage_index) = joltages_to_increment.include?(joltage_index)
   def to_s ="(#{joltages_to_increment.join(",")})"
   def inspect = to_s
+
+  def hash = joltages_to_increment.hash
+
+  def ==(other)
+    other.is_a?(Button) && other.joltages_to_increment == joltages_to_increment
+  end
+
+  def eql?(other)= self == other
 end

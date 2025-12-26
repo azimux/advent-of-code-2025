@@ -13,4 +13,14 @@ class ButtonPresses
   def push(joltages)
     button.joltages_to_increment.each { joltages.dec(it, press_count) }
   end
+
+  def hash = [button, press_count].hash
+
+  def ==(other)
+    other.is_a?(ButtonPresses) &&
+      other.button == button &&
+      other.press_count == press_count
+  end
+
+  def eql?(other)= self == other
 end

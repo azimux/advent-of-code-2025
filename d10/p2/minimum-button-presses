@@ -5,7 +5,7 @@
 
 require_relative "machine_parser"
 
-machines = MachineParser.parse("inputs_test.txt")
+machines = MachineParser.parse("inputs2.txt")
 
 sum = machines.map do |machine|
   puts "#{Time.now}: starting new machine..."

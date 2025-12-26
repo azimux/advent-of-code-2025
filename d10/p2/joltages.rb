@@ -6,8 +6,11 @@ class Joltages
   end
 
   def ==(other)
-    joltage_levels == other.joltage_levels
+    other.is_a?(Joltages) && joltage_levels == other.joltage_levels
   end
+
+  def hash = joltage_levels.hash
+  def eql?(other) = self == other
 
   def dec(i, amount = 1) = joltage_levels[i] -= amount
   def dup = Joltages.new(joltage_levels.dup)
@@ -28,6 +31,6 @@ class Joltages
 
   def each(&) = joltage_levels.each(&)
   def size = joltage_levels.size
-  def to_s ="{#{joltage_levels.join(",")}}"
+  def to_s = "{#{joltage_levels.join(",")}}"
   def inspect = to_s
 end

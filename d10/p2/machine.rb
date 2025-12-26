@@ -1,11 +1,40 @@
 require_relative "array"
 
 class Machine
+  class << self
+    def seen?(joltages, button_presses)
+      seen.include?([joltages, button_presses])
+    end
+
+    def mark_seen(joltages, button_presses)
+      seen << [joltages, button_presses]
+    end
+
+    def cached(joltages, button_presses) = seen[[joltages, button_presses]]
+    def reset_cache! = seen.clear
+
+    private
+
+    def seen
+      @seen ||= Set.new
+    end
+  end
+
   attr_accessor :joltages, :buttons
 
   def initialize(joltages, buttons)
     self.joltages = joltages
     self.buttons = buttons
+  end
+
+  # Normalize to allow for more cache hits
+  def normalize!
+    # TODO:
+    # remove all zero values from joltages
+    #   #NOTE: maybe not necessary because we have no buttons with indices to zero joltage values
+    #   not necessary with current algorithm: remove those indices from all buttons
+    # order joltages from lowest to highest
+    #   which means re-ordering button joltage indices to match, and in case of tie, use index value
   end
 
   def done? = joltages.done?
@@ -29,6 +58,8 @@ class Machine
   end
 
   def minimum_pushes_required(top_level = true)
+    self.class.reset_cache! if top_level
+
     target_button = buttons.first
     if target_button.nil?
       return done? ? 0 : nil
@@ -56,6 +87,14 @@ class Machine
       if top_level
         puts "#{Time.now}: #{self} creating a submachine for #{button_presses.sum(&:joltages_size)}"
       end
+
+      if seen?(joltages, button_presses)
+        raise "yay!"
+        # TODO: need to actually cache these values!
+        return cached(joltages, button_presses)
+      end
+
+      mark_seen(joltages, button_presses)
 
       new_joltages = joltages.dup
       button_presses.each { |button_press| button_press.push(new_joltages) }
@@ -119,4 +158,8 @@ class Machine
 
   def joltages_size = joltages.size
   def to_s = "#{buttons.map(&:to_s).join(" ")} #{joltages}"
+
+  def seen?(joltages, button_presses) = self.class.seen?(joltages, button_presses)
+  def mark_seen(joltages, button_presses) = self.class.mark_seen(joltages, button_presses)
+  def cached(joltages, button_presses) = self.class.cached(joltages, button_presses)
 end
