@@ -11,6 +11,8 @@ class Machine
   def done? = joltages.done?
 
   def crude_max_pushes
+    return @crude_max_pushes if defined?(@crude_max_pushes)
+
     min_joltage_size = buttons.map(&:joltages_size).min
 
     binding.pry if min_joltage_size.nil?
@@ -19,11 +21,11 @@ class Machine
 
     dividend = joltages_sum / min_joltage_size
 
-    if joltages_sum % min_joltage_size == 0
-      dividend
-    else
-      dividend + 1
-    end
+    @crude_max_pushes = if joltages_sum % min_joltage_size == 0
+                          dividend
+                        else
+                          dividend + 1
+                        end
   end
 
   def minimum_pushes_required(top_level = true)
