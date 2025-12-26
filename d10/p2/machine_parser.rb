@@ -35,6 +35,9 @@ class MachineParser
         Button.new(joltage_indices)
       end
 
+      buttons.sort_by!(&:joltages_size)
+      buttons.reverse!
+
       joltages = joltages.gsub(/[{}]/, "").split(",").map(&:to_i)
       joltages = Joltages.new(joltages)
 

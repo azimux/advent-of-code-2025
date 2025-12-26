@@ -12,4 +12,4 @@ sum = machines.map do |machine|
   machine.minimum_pushes_required
 end.sum
 
-puts sum
+puts "found sum! #{sum}"

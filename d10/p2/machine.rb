@@ -11,7 +11,7 @@ class Machine
   def done? = joltages.all?(&:zero?)
 
   def minimum_pushes_required(top_level = true)
-    target_button = button_with_most_joltage_indices
+    target_button = buttons.first
     if target_button.nil?
       return done? ? 0 : nil
     end
@@ -29,8 +29,6 @@ class Machine
         joltages[joltage_index].zero?
       end
     end
-
-    relevant_buttons.sort_by!(&:joltages_size).reverse!
 
     minimum_submachine_pushes = nil
 
