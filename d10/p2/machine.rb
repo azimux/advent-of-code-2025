@@ -52,35 +52,34 @@ class Machine
 
     minimum_submachine_pushes = nil
 
-    relevant_buttons.choose_allowing_repetition(target_joltage) do |buttons_to_push|
+    relevant_buttons.button_presses(target_joltage) do |button_presses|
       if top_level
-        puts "#{Time.now}: #{self} creating a submachine for #{buttons_to_push.sum(&:joltages_size)}"
+        puts "#{Time.now}: #{self} creating a submachine for #{button_presses.sum(&:joltages_size)}"
       end
 
       new_joltages = joltages.dup
-      buttons_to_push.each { |button| button.push(new_joltages) }
+      button_presses.each { |button_press| button_press.push(new_joltages) }
 
       unless new_joltages.any?(&:negative?)
         if new_joltages.done?
-          puts "stopping because done!!"
           return target_joltage
         end
 
         new_buttons = buttons - relevant_buttons
         if new_buttons.empty?
-          puts "short circuiting because no buttons!"
           next
         end
+
         submachine = Machine.new(new_joltages, buttons - relevant_buttons)
 
         if submachine.crude_max_pushes > worse_case_pushes
-          puts "skipping due to worst case pushes!!!"
+          raise "skipping due to worst case pushes!!!"
           next
         end
+
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
-          puts "found solution!"
           return target_joltage + min_pushes
         end
       end

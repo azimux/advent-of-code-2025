@@ -9,7 +9,7 @@ class Joltages
     joltage_levels == other.joltage_levels
   end
 
-  def dec(i) = joltage_levels[i] -= 1
+  def dec(i, amount = 1) = joltage_levels[i] -= amount
   def dup = Joltages.new(joltage_levels.dup)
   def any?(&) = joltage_levels.any?(&)
   def all?(&) = joltage_levels.all?(&)
