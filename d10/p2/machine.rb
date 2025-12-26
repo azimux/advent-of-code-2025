@@ -44,10 +44,8 @@ class Machine
         submachine = Machine.new(new_joltages, buttons - relevant_buttons)
         min_pushes = submachine.minimum_pushes_required
 
-        next unless min_pushes
-
-        if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
-          minimum_submachine_pushes = min_pushes
+        if min_pushes
+          return target_joltage + min_pushes
         end
       end
     end
