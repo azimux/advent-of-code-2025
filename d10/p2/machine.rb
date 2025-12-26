@@ -10,7 +10,7 @@ class Machine
 
   def done? = joltages.all?(&:zero?)
 
-  def minimum_pushes_required
+  def minimum_pushes_required(top_level = true)
     target_button = button_with_most_joltage_indices
     if target_button.nil?
       return done? ? 0 : nil
@@ -35,16 +35,19 @@ class Machine
     minimum_submachine_pushes = nil
 
     relevant_buttons.choose_allowing_repetition(target_joltage) do |buttons_to_push|
-      # puts "#{Time.now}: #{self} creating a submachine for #{buttons_to_push}"
+      if top_level
+        puts "#{Time.now}: #{self} creating a submachine for #{buttons_to_push.sum(&:joltages_size)}"
+      end
 
       new_joltages = joltages.dup
       buttons_to_push.each { |button| button.push(new_joltages) }
 
       unless new_joltages.any?(&:negative?)
         submachine = Machine.new(new_joltages, buttons - relevant_buttons)
-        min_pushes = submachine.minimum_pushes_required
+        min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
+          puts "found solution!"
           return target_joltage + min_pushes
         end
       end
