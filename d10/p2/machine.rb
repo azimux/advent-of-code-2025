@@ -8,7 +8,23 @@ class Machine
     self.buttons = buttons
   end
 
-  def done? = joltages.all?(&:zero?)
+  def done? = joltages.done?
+
+  def crude_max_pushes
+    min_joltage_size = buttons.map(&:joltages_size).min
+
+    binding.pry if min_joltage_size.nil?
+
+    joltages_sum = joltages.sum
+
+    dividend = joltages_sum / min_joltage_size
+
+    if joltages_sum % min_joltage_size == 0
+      dividend
+    else
+      dividend + 1
+    end
+  end
 
   def minimum_pushes_required(top_level = true)
     target_button = buttons.first
@@ -22,6 +38,8 @@ class Machine
     end
 
     target_joltage = joltages[target_joltage_index]
+
+    worse_case_pushes = crude_max_pushes - target_joltage
 
     relevant_buttons = buttons.select { |button| button.include?(target_joltage_index) }
     relevant_buttons.reject! do |button|
@@ -41,7 +59,22 @@ class Machine
       buttons_to_push.each { |button| button.push(new_joltages) }
 
       unless new_joltages.any?(&:negative?)
+        if new_joltages.done?
+          puts "stopping because done!!"
+          return target_joltage
+        end
+
+        new_buttons = buttons - relevant_buttons
+        if new_buttons.empty?
+          puts "short circuiting because no buttons!"
+          next
+        end
         submachine = Machine.new(new_joltages, buttons - relevant_buttons)
+
+        if submachine.crude_max_pushes > worse_case_pushes
+          puts "skipping due to worst case pushes!!!"
+          next
+        end
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes

@@ -13,6 +13,8 @@ class Joltages
   def dup = Joltages.new(joltage_levels.dup)
   def any?(&) = joltage_levels.any?(&)
   def all?(&) = joltage_levels.all?(&)
+  def sum = joltage_levels.sum
+  def done? = joltage_levels.all?(&:zero?)
 
   def any_over?(target)
     target_levels = target.joltage_levels
