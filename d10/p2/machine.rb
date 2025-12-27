@@ -7,20 +7,12 @@ class Machine
     self.joltages = joltages
     self.buttons = buttons
 
+    normalize!
     update_multiplier!
   end
 
-  # Normalize to allow for more cache hits
-  def normalize!
-    # TODO:
-    # remove all zero values from joltages
-    #   #NOTE: maybe not necessary because we have no buttons with indices to zero joltage values
-    #   not necessary with current algorithm: remove those indices from all buttons
-    # order joltages from lowest to highest
-    #   which means re-ordering button joltage indices to match, and in case of tie, use index value
-  end
-
   def done? = joltages.done?
+  def cannot_have_a_solution? = buttons.empty?
 
   def crude_max_pushes
     return @crude_max_pushes if defined?(@crude_max_pushes)
@@ -84,6 +76,11 @@ class Machine
 
         submachine = Machine.new(new_joltages, buttons - relevant_buttons)
 
+        if submachine.cannot_have_a_solution?
+          binding.pry
+          next
+        end
+
         if submachine.crude_max_pushes > worse_case_pushes
           raise "skipping due to worst case pushes!!!"
           next
@@ -145,5 +142,86 @@ class Machine
   end
 
   def joltages_size = joltages.size
+  def joltage_levels = joltages.joltage_levels
   def to_s = "#{buttons.map(&:to_s).join(" ")} #{joltages}"
+
+  # Normalize to allow for more cache hits
+  def normalize!
+    remove_all_zero_joltages!
+    # order_joltages!
+  end
+
+  def remove_all_zero_joltages!
+    indices_to_remove = []
+
+    joltages.each.with_index do |joltage_level, index|
+      if joltage_level.zero?
+        indices_to_remove << index
+      end
+    end
+
+    return if indices_to_remove.empty?
+
+    updated_joltages = []
+
+    joltages.each.with_index do |joltage_level, index|
+      unless indices_to_remove.include?(index)
+        updated_joltages << joltage_level
+      end
+    end
+
+    binding.pry
+    self.joltages = Joltages.new(updated_joltages)
+
+    indices_to_remove.each do |index|
+      self.buttons = buttons.map do |button|
+        new_joltages = button.joltages_to_increment.map do |joltage_index|
+          if joltage_index > index
+            joltage_index - 1
+          elsif joltage_index < index
+            joltage_index
+          end
+        end.compact
+
+        if new_joltages.empty?
+          binding.pry
+        else
+          Button.new(new_joltages)
+        end
+      end.compact
+    end
+  end
+
+  def order_joltages!
+    joltage_index_map = joltage_levels.map.with_index do |level, index|
+      [level, index]
+    end
+
+    sorted_joltage_index_map = joltage_index_map.sort
+
+    return if sorted_joltage_index_map == joltage_index_map
+
+    self.joltages = Joltages.new(joltage_index_map.map(&:first))
+
+    joltage_index_map = sorted_joltage_index_map.map(&:last).map.with_index do |old_index, new_index|
+      unless old_index.is_a?(Integer)
+        binding.pry
+      end
+      unless new_index.is_a?(Integer)
+        binding.pry
+      end
+      [old_index, new_index]
+    end.to_h
+
+    self.buttons = buttons.map do |button|
+      new_joltage_indices = button.joltages_to_increment.map do |old_joltage_index|
+        joltage_index_map[old_joltage_index]
+      end
+
+      Button.new(new_joltage_indices)
+    end
+  rescue => e
+    binding.pry
+    raise
+  end
 end

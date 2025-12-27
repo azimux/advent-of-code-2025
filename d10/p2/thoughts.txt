@@ -1,7 +1,8 @@
 * normalizing machines...
-  * removing unusable or redundant buttons
+  * remove all zero values from joltages
   * order joltages
-  * update buttons to reflect new joltage order
+    * update buttons to reflect new joltage order
+  * removing unusable or redundant buttons
   * optional: can we detect if two joltages are always in the same buttons?
     * if the joltages are the same, merge the joltages
     * if the joltages are different, there's no answer, return nil
