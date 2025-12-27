@@ -1,6 +1,18 @@
 require_relative "button_presses"
 
 class Array
+  def gcd_ish
+    return nil if empty?
+
+    [13, 11, 7, 5, 3, 2].each do |i|
+      if all? { |elem| elem % i == 0 }
+        return i
+      end
+    end
+
+    nil
+  end
+
   def button_presses(group_size, &block)
     return if empty?
 

@@ -6,6 +6,8 @@ class Machine
   def initialize(joltages, buttons)
     self.joltages = joltages
     self.buttons = buttons
+
+    update_multiplier!
   end
 
   # Normalize to allow for more cache hits
@@ -72,7 +74,7 @@ class Machine
 
       unless new_joltages.any?(&:negative?)
         if new_joltages.done?
-          return target_joltage
+          return target_joltage * multiplier
         end
 
         new_buttons = buttons - relevant_buttons
@@ -90,13 +92,13 @@ class Machine
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
-          return target_joltage + min_pushes
+          return (target_joltage + min_pushes) * multiplier
         end
       end
     end
 
     unless minimum_submachine_pushes.nil?
-      target_joltage + minimum_submachine_pushes
+      (target_joltage + minimum_submachine_pushes) * multiplier
     end
   end
 
@@ -125,6 +127,21 @@ class Machine
     end
 
     min_index
+  end
+
+  def multiplier
+    @multiplier || 1
+  end
+
+  attr_writer :multiplier
+
+  def update_multiplier!
+    gcd = joltages.gcd
+
+    if gcd
+      self.multiplier *= gcd
+      self.joltages /= gcd
+    end
   end
 
   def joltages_size = joltages.size

@@ -1,0 +1,10 @@
+* normalizing machines...
+  * removing unusable or redundant buttons
+  * order joltages
+  * update buttons to reflect new joltage order
+  * optional: can we detect if two joltages are always in the same buttons?
+    * if the joltages are the same, merge the joltages
+    * if the joltages are different, there's no answer, return nil
+* Find GCD in joltages. If > 1, multiply multiplier by that GCD and divide all
+  joltages by that GCD.
+* if caching normalized machines, start with machine with best worst-case-scenario

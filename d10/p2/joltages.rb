@@ -18,6 +18,8 @@ class Joltages
   def all?(&) = joltage_levels.all?(&)
   def sum = joltage_levels.sum
   def done? = joltage_levels.all?(&:zero?)
+  def gcd = joltage_levels.gcd_ish
+  def /(other) = Joltages.new(joltage_levels.map { it / other })
 
   def any_over?(target)
     target_levels = target.joltage_levels
