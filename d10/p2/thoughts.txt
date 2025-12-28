@@ -9,3 +9,11 @@
 * Find GCD in joltages. If > 1, multiply multiplier by that GCD and divide all
   joltages by that GCD.
 * if caching normalized machines, start with machine with best worst-case-scenario
+
+
+note: no solution if button joltage index count of the only button is not the same as joltages index count
+      and if they do match, no solution if all joltage values are not the same
+
+NOTE!: instead of driving smallest joltage to 0, drive any odd joltage to an even joltage??
+
+always choose path with fewest odd joltages with hopes of a 2x multiplier to cut problem in half

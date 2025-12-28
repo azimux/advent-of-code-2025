@@ -9,6 +9,12 @@ class Button
     joltages_to_increment.each { joltages.dec(it) }
   end
 
+  def dup
+    super.tap do |j|
+      j.joltages_to_increment = j.joltages_to_increment.dup
+    end
+  end
+
   def joltages_size = joltages_to_increment.size
   def include?(joltage_index) = joltages_to_increment.include?(joltage_index)
   def to_s ="(#{joltages_to_increment.join(",")})"

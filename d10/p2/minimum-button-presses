@@ -1,13 +1,11 @@
 #!/usr/bin/env ruby
 
 require "pry"
-# require "pry-byebug"
+require "pry-byebug"
 
 require_relative "machine_parser"
 
 machines = MachineParser.parse("inputs_test.txt")
-
-binding.pry
 
 sum = machines.map do |machine|
   puts "#{Time.now}: starting new machine..."

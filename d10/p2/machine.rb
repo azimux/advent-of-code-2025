@@ -8,7 +8,6 @@ class Machine
     self.buttons = buttons
 
     normalize!
-    update_multiplier!
   end
 
   def done? = joltages.done?
@@ -18,8 +17,6 @@ class Machine
     return @crude_max_pushes if defined?(@crude_max_pushes)
 
     min_joltage_size = buttons.map(&:joltages_size).min
-
-    binding.pry if min_joltage_size.nil?
 
     joltages_sum = joltages.sum
 
@@ -35,12 +32,22 @@ class Machine
   def minimum_pushes_required(top_level = true)
     target_button = buttons.first
     if target_button.nil?
-      return done? ? 0 : nil
+      if done?
+        return 0
+      else
+        binding.pry if top_level
+        return nil
+      end
     end
 
     target_joltage_index = minimum_nonzero_joltage_index(target_button)
     if target_joltage_index.nil?
-      return done? ? 0 : nil
+      if done?
+        return 0
+      else
+        binding.pry if top_level
+        return nil
+      end
     end
 
     target_joltage = joltages[target_joltage_index]
@@ -74,10 +81,9 @@ class Machine
           next
         end
 
-        submachine = Machine.new(new_joltages, buttons - relevant_buttons)
+        submachine = Machine.new(new_joltages, new_buttons)
 
         if submachine.cannot_have_a_solution?
-          binding.pry
           next
         end
 
@@ -94,7 +100,9 @@ class Machine
       end
     end
 
-    unless minimum_submachine_pushes.nil?
+    if minimum_submachine_pushes.nil?
+      binding.pry if top_level
+    else
       (target_joltage + minimum_submachine_pushes) * multiplier
     end
   end
@@ -148,6 +156,7 @@ class Machine
   # Normalize to allow for more cache hits
   def normalize!
     remove_all_zero_joltages!
+    update_multiplier!
     # order_joltages!
   end
 
@@ -173,7 +182,7 @@ class Machine
     binding.pry
     self.joltages = Joltages.new(updated_joltages)
 
-    indices_to_remove.each do |index|
+    indices_to_remove.reverse.each do |index|
       self.buttons = buttons.map do |button|
         new_joltages = button.joltages_to_increment.map do |joltage_index|
           if joltage_index > index
@@ -181,13 +190,15 @@ class Machine
           elsif joltage_index < index
             joltage_index
           end
-        end.compact
-
-        if new_joltages.empty?
-          binding.pry
-        else
-          Button.new(new_joltages)
         end
+
+        new_joltages.compact!
+
+        next if new_joltages.empty?
+
+        # binding.pry
+
+        Button.new(new_joltages)
       end.compact
     end
   end
@@ -204,12 +215,6 @@ class Machine
     self.joltages = Joltages.new(joltage_index_map.map(&:first))
 
     joltage_index_map = sorted_joltage_index_map.map(&:last).map.with_index do |old_index, new_index|
-      unless old_index.is_a?(Integer)
-        binding.pry
-      end
-      unless new_index.is_a?(Integer)
-        binding.pry
-      end
       [old_index, new_index]
     end.to_h
 
@@ -220,8 +225,5 @@ class Machine
 
       Button.new(new_joltage_indices)
     end
-  rescue => e
-    binding.pry
-    raise
   end
 end
