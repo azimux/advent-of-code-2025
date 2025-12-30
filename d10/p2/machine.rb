@@ -31,11 +31,12 @@ class Machine
 
   def minimum_pushes_required(top_level = true)
     target_button = buttons.first
+
     if target_button.nil?
       if done?
         return 0
       else
-        binding.pry if top_level
+        # binding.pry if top_level
         return nil
       end
     end
@@ -45,7 +46,7 @@ class Machine
       if done?
         return 0
       else
-        binding.pry if top_level
+        # binding.pry if top_level
         return nil
       end
     end
@@ -157,7 +158,7 @@ class Machine
   def normalize!
     remove_all_zero_joltages!
     update_multiplier!
-    # order_joltages!
+    order_joltages!
   end
 
   def remove_all_zero_joltages!
@@ -179,7 +180,6 @@ class Machine
       end
     end
 
-    binding.pry
     self.joltages = Joltages.new(updated_joltages)
 
     indices_to_remove.reverse.each do |index|
@@ -196,8 +196,6 @@ class Machine
 
         next if new_joltages.empty?
 
-        # binding.pry
-
         Button.new(new_joltages)
       end.compact
     end
@@ -212,7 +210,7 @@ class Machine
 
     return if sorted_joltage_index_map == joltage_index_map
 
-    self.joltages = Joltages.new(joltage_index_map.map(&:first))
+    self.joltages = Joltages.new(sorted_joltage_index_map.map(&:first))
 
     joltage_index_map = sorted_joltage_index_map.map(&:last).map.with_index do |old_index, new_index|
       [old_index, new_index]
