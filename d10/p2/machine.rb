@@ -81,7 +81,7 @@ class Machine
 
     target_joltage = joltages[target_joltage_index]
 
-    worse_case_pushes = crude_max_pushes - target_joltage
+    worst_case_pushes = crude_max_pushes - target_joltage
 
     relevant_buttons = buttons.select { |button| button.include?(target_joltage_index) }
     relevant_buttons.reject! do |button|
@@ -94,7 +94,7 @@ class Machine
 
     relevant_buttons.button_presses(target_joltage) do |button_presses|
       if top_level
-        puts "#{Time.now}: #{self} creating a submachine for #{button_presses.sum(&:joltages_size)}"
+        puts "#{Time.now}: #{self} creating a submachine for #{worst_case_pushes}"
       end
 
       new_joltages = joltages.dup
@@ -107,16 +107,25 @@ class Machine
 
         new_buttons = buttons - relevant_buttons
         if new_buttons.empty?
+          if done?
+            binding.pry
+          end
           next
         end
 
         submachine = Machine.new(new_joltages, new_buttons, false)
 
         if submachine.cannot_have_a_solution?
+          if done?
+            binding.pry
+          end
           next
         end
 
-        if submachine.crude_max_pushes > worse_case_pushes
+        if submachine.crude_max_pushes > worst_case_pushes
+          if done?
+            binding.pry
+          end
           next
         end
 

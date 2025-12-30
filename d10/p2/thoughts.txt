@@ -17,3 +17,15 @@ note: no solution if button joltage index count of the only button is not the sa
 NOTE!: instead of driving smallest joltage to 0, drive any odd joltage to an even joltage??
 
 always choose path with fewest odd joltages with hopes of a 2x multiplier to cut problem in half
+
+TODO:
+
+* build a test suite, generate test examples by randomly pushing buttons
+
+this is interesting... no submachines had solutions at all??
+
+[5] pry(#<Machine>)> self.class.instance_variable_get(:@minimum_pushes_cache).size
+=> 1928268
+[6] pry(#<Machine>)> self.class.instance_variable_get(:@minimum_pushes_cache).values.count(&:nil?)
+=> 1928268
+[7] pry(#<Machine>)>
