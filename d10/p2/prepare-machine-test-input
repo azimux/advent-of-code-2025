@@ -12,20 +12,28 @@ machine_text = "[###..#...#] (2,6,7,8) (0,3,7,8,9) (0,8) (5,7) (1,2,5,8) (1,3,6,
 
 real_machine = MachineParser.parse_line(machine_text)
 
-test_buttons = real_machine.buttons.map(&:dup)
-test_joltages = Joltages.new(real_machine.joltages.joltage_levels.map { 0 })
+test_machines = []
 
-test_buttons.each do |button|
-  pushes = rand * 2
-  pushes = pushes.to_i
-  pushes += 1
-  pushes.times do
-    button.push(test_joltages)
+100.times do
+  test_buttons = real_machine.buttons.map(&:dup)
+  test_joltages = Joltages.new(real_machine.joltages.joltage_levels.map { 0 })
+
+  test_buttons.each do |button|
+    pushes = rand * 4
+    pushes = pushes.to_i
+    pushes += 1
+    pushes.times do
+      button.push(test_joltages)
+    end
   end
+
+  test_joltages = Joltages.new(test_joltages.joltage_levels.map(&:abs))
+
+  test_machines << Machine.new(test_joltages, test_buttons)
 end
 
-test_joltages = Joltages.new(test_joltages.joltage_levels.map(&:abs))
+test_machines.map! do |test_machine|
+  "[###..#...#] #{test_machine.buttons.map(&:to_s).join(" ")} #{test_machine.joltages}"
+end
 
-test_machine = Machine.new(test_joltages, test_buttons)
-
-puts test_machine
+File.write("inputs_test_suite.txt", test_machines.join("\n"))

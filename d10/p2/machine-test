@@ -31,14 +31,8 @@ def assert_is_a(actual, expected_class)
 end
 
 machines = MachineParser.parse("inputs_test_suite.txt")
-machine = machines.first
 
-push_counts = machines.map(&:minimum_pushes_required)
-
-puts push_counts
-
-push_counts.each do |push_count|
-  assert_is_a(push_count, Integer)
+machines.each do |machine|
+  min_pushes = machine.minimum_pushes_required
+  assert_is_a(min_pushes, Integer)
 end
-
-puts machine
