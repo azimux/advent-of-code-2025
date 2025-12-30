@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+
+# require "simplecov"
+
+# SimpleCov.start
+
+require_relative "machine_parser"
+require "pry"
+# require "pry-byebug"
+
+def assert_equal(actual, expected)
+  if actual == expected
+    print "."
+  else
+    puts
+    warn "Expected: #{expected}"
+    warn "     Got: #{actual}"
+    exit 1
+  end
+end
+
+def assert_is_a(actual, expected_class)
+  if actual.is_a?(expected_class)
+    print "."
+  else
+    puts
+    warn "Expected instance of: #{expected_class}"
+    warn "     Got instance of: #{actual.class}"
+    exit 1
+  end
+end
+
+machines = MachineParser.parse("inputs_test_suite.txt")
+machine = machines.first
+
+push_counts = machines.map(&:minimum_pushes_required)
+
+puts push_counts
+
+push_counts.each do |push_count|
+  assert_is_a(push_count, Integer)
+end
+
+puts machine
