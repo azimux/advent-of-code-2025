@@ -1,11 +1,29 @@
 require_relative "array"
 
 class Machine
-  attr_accessor :joltages, :buttons
+  class << self
+    def minimum_pushes_cached(machine)
+      @minimum_pushes_cache ||= {}
 
-  def initialize(joltages, buttons)
+      if @minimum_pushes_cache.key?(machine)
+        @minimum_pushes_cache[machine]
+      else
+        @minimum_pushes_cache[machine] = yield
+      end
+    end
+
+    def cache_size
+      @minimum_pushes_cache&.size || 0
+    end
+  end
+
+  attr_accessor :joltages, :buttons, :original_to_s
+
+  def initialize(joltages, buttons, top_level = true)
     self.joltages = joltages
     self.buttons = buttons
+
+    self.original_to_s = to_s if top_level
 
     normalize!
   end
@@ -30,6 +48,16 @@ class Machine
   end
 
   def minimum_pushes_required(top_level = true)
+    if top_level
+      puts "#{Time.now}: starting #{self}"
+    end
+
+    minimum_pushes_cached do
+      minimum_pushes_required_without_cache(top_level)
+    end
+  end
+
+  def minimum_pushes_required_without_cache(top_level = true)
     target_button = buttons.first
 
     if target_button.nil?
@@ -82,14 +110,13 @@ class Machine
           next
         end
 
-        submachine = Machine.new(new_joltages, new_buttons)
+        submachine = Machine.new(new_joltages, new_buttons, false)
 
         if submachine.cannot_have_a_solution?
           next
         end
 
         if submachine.crude_max_pushes > worse_case_pushes
-          raise "skipping due to worst case pushes!!!"
           next
         end
 
@@ -106,6 +133,10 @@ class Machine
     else
       (target_joltage + minimum_submachine_pushes) * multiplier
     end
+  end
+
+  def minimum_pushes_cached(&)
+    self.class.minimum_pushes_cached(self, &)
   end
 
   def button_with_most_joltage_indices
@@ -152,7 +183,20 @@ class Machine
 
   def joltages_size = joltages.size
   def joltage_levels = joltages.joltage_levels
-  def to_s = "#{buttons.map(&:to_s).join(" ")} #{joltages}"
+
+  def to_s
+    s = "#{buttons.map(&:to_s).join(" ")} #{joltages} cache size: #{self.class.cache_size}"
+
+    if multiplier > 1
+      s += "x#{multiplier}"
+    end
+
+    if original_to_s
+      "#{s} originally: #{original_to_s}"
+    else
+      s
+    end
+  end
 
   # Normalize to allow for more cache hits
   def normalize!
@@ -224,4 +268,16 @@ class Machine
       Button.new(new_joltage_indices)
     end
   end
+
+  def hash
+    # rubocop:disable Security/CompoundHash
+    buttons.hash ^ joltages.hash
+    # rubocop:enable Security/CompoundHash
+  end
+
+  def ==(other)
+    other.is_a?(Machine) && joltages == other.joltages && buttons == other.buttons
+  end
+
+  def eql?(other) = self == other
 end
