@@ -32,7 +32,12 @@ end
 
 machines = MachineParser.parse("inputs_test_suite.txt")
 
+all = []
+
 machines.each do |machine|
   min_pushes = machine.minimum_pushes_required
+  all << min_pushes
   assert_is_a(min_pushes, Integer)
 end
+
+puts all.sum

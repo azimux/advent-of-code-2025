@@ -49,7 +49,16 @@ class Machine
 
   def minimum_pushes_required(top_level = true)
     if top_level
-      puts "#{Time.now}: starting #{self}"
+      # puts "#{Time.now}: starting #{self}"
+      $i ||= 0
+      $i += 1
+      $previous_time ||= Time.now
+      $current_time = Time.now
+      span = $current_time - $previous_time
+      $total_time ||= 0
+      $total_time += span
+      puts "#{$current_time} #{span.to_i}s ##{$i} #{$total_time / $i} s/m cache: #{self.class.cache_size}"
+      $previous_time = $current_time
     end
 
     minimum_pushes_cached do
@@ -94,7 +103,7 @@ class Machine
 
     relevant_buttons.button_presses(target_joltage) do |button_presses|
       if top_level
-        puts "#{Time.now}: #{self} creating a submachine for #{worst_case_pushes}"
+        # puts "#{Time.now}: #{self} creating a submachine for #{worst_case_pushes}"
       end
 
       new_joltages = joltages.dup

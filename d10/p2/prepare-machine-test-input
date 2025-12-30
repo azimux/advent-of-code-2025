@@ -5,7 +5,7 @@
 # SimpleCov.start
 
 require_relative "machine_parser"
-require "pry"
+# require "pry"
 # require "pry-byebug"
 
 machine_text = "[###..#...#] (2,6,7,8) (0,3,7,8,9) (0,8) (5,7) (1,2,5,8) (1,3,6,7) (2,3,4,7,9) (0,1,2,3,6,9) (0,2,4,6,7,8,9) (1,2,3,4,5,6,9) (0,1,4,5,7,9) {54,37,34,27,18,20,28,34,44,38}"
@@ -14,15 +14,14 @@ real_machine = MachineParser.parse_line(machine_text)
 
 test_machines = []
 
-100.times do
+1000.times do
   test_buttons = real_machine.buttons.map(&:dup)
   test_joltages = Joltages.new(real_machine.joltages.joltage_levels.map { 0 })
 
   test_buttons.each do |button|
-    pushes = rand * 4
-    pushes = pushes.to_i
-    pushes += 1
-    pushes.times do
+    pushes = rand * 6
+
+    (pushes.to_i + 1).times do
       button.push(test_joltages)
     end
   end
