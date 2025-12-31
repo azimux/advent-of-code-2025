@@ -114,7 +114,7 @@ class Machine
 
       unless new_joltages.any?(&:negative?)
         if new_joltages.done?
-          return target_joltage # * multiplier
+          return target_joltage * multiplier
         end
 
         new_buttons = buttons - relevant_buttons
@@ -137,33 +137,33 @@ class Machine
           next
         end
 
-        if submachine.crude_max_pushes > worst_case_pushes
-          if done?
-            raise "wtf"
-            binding.pry
-          end
-          # next
-        end
+        # if submachine.crude_max_pushes > worst_case_pushes
+        #   if done?
+        #     raise "wtf"
+        #     binding.pry
+        #   end
+        #   # next
+        # end
 
-        submachine.update_multiplier!
-
-        if submachine.multiplier > 1
-          min_pushes = submachine.minimum_pushes_required(false)
-
-          if min_pushes
-            min_pushes *= submachine.multiplier
-            return target_joltage + min_pushes
-          else
-            # There was no solution for the multiplier submachine so revert
-            # to the real submachine and continue looking for a solution
-            submachine = Machine.new(new_joltages, new_buttons, false)
-          end
-        end
+        # submachine.update_multiplier!
+        #
+        # if submachine.multiplier > 1
+        #   min_pushes = submachine.minimum_pushes_required(false)
+        #
+        #   if min_pushes
+        #     min_pushes *= submachine.multiplier
+        #     return target_joltage + min_pushes
+        #   else
+        #     # There was no solution for the multiplier submachine so revert
+        #     # to the real submachine and continue looking for a solution
+        #     submachine = Machine.new(new_joltages, new_buttons, false)
+        #   end
+        # end
 
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
-          return target_joltage + min_pushes # * multiplier
+          return (target_joltage + min_pushes) * multiplier
         end
       end
     end
@@ -246,7 +246,8 @@ class Machine
   # Normalize to allow for more cache hits
   def normalize!
     remove_all_zero_joltages!
-    # update_multiplier!
+    remove_duplicate_buttons!
+    update_multiplier!
     order_joltages!
   end
 
@@ -287,6 +288,14 @@ class Machine
 
         Button.new(new_joltages)
       end.compact
+    end
+  end
+
+  def remove_duplicate_buttons!
+    uniq_buttons = buttons.uniq
+
+    if uniq_buttons.size != buttons.size
+      self.buttons = uniq_buttons
     end
   end
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
-require "pry"
+# require "pry"
 # require "pry-byebug"
 
 require_relative "machine_parser"
 
-machines = MachineParser.parse("inputs_test.txt")
+machines = MachineParser.parse("inputs.txt")
 
 machines.sort_by!(&:crude_max_pushes)
 
