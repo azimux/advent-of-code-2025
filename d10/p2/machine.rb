@@ -47,6 +47,14 @@ class Machine
                         end
   end
 
+  def crude_min_pushes
+    max_joltage_size = buttons.map(&:joltages_size).max
+
+    joltages_sum = joltages.sum
+
+    joltages_sum / max_joltage_size
+  end
+
   def minimum_pushes_required(top_level = true)
     if top_level
       # puts "#{Time.now}: starting #{self}"
@@ -130,20 +138,20 @@ class Machine
         submachine = Machine.new(new_joltages, new_buttons, false)
 
         if submachine.cannot_have_a_solution?
+          # if done?
+          #   raise "wtf"
+          #   binding.pry
+          # end
+          next
+        end
+
+        if submachine.crude_min_pushes > worst_case_pushes
           if done?
-            raise "wtf"
+            raise "not expecting done!"
             binding.pry
           end
           next
         end
-
-        # if submachine.crude_max_pushes > worst_case_pushes
-        #   if done?
-        #     raise "wtf"
-        #     binding.pry
-        #   end
-        #   # next
-        # end
 
         # submachine.update_multiplier!
         #
@@ -246,9 +254,9 @@ class Machine
   # Normalize to allow for more cache hits
   def normalize!
     remove_all_zero_joltages!
-    remove_duplicate_buttons!
     update_multiplier!
     order_joltages!
+    order_buttons!
   end
 
   def remove_all_zero_joltages!
@@ -272,8 +280,10 @@ class Machine
 
     self.joltages = Joltages.new(updated_joltages)
 
-    indices_to_remove.reverse.each do |index|
-      self.buttons = buttons.map do |button|
+    indices_to_remove.reverse!
+
+    indices_to_remove.each do |index|
+      buttons.map! do |button|
         new_joltages = button.joltages_to_increment.map do |joltage_index|
           if joltage_index > index
             joltage_index - 1
@@ -287,15 +297,10 @@ class Machine
         next if new_joltages.empty?
 
         Button.new(new_joltages)
-      end.compact
-    end
-  end
+      end
 
-  def remove_duplicate_buttons!
-    uniq_buttons = buttons.uniq
-
-    if uniq_buttons.size != buttons.size
-      self.buttons = uniq_buttons
+      buttons.compact!
+      buttons.uniq!
     end
   end
 
@@ -314,13 +319,18 @@ class Machine
       [old_index, new_index]
     end.to_h
 
-    self.buttons = buttons.map do |button|
+    buttons.map! do |button|
       new_joltage_indices = button.joltages_to_increment.map do |old_joltage_index|
         joltage_index_map[old_joltage_index]
       end
 
       Button.new(new_joltage_indices)
     end
+  end
+
+  def order_buttons!
+    buttons.sort_by!(&:joltages_size)
+    buttons.reverse!
   end
 
   def hash

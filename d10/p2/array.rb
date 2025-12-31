@@ -1,10 +1,11 @@
 require_relative "button_presses"
 
 class Array
+  PRIMES = [13, 11, 7, 5, 3, 2]
   def gcd_ish
     return nil if empty?
 
-    [13, 11, 7, 5, 3, 2].each do |i|
+    PRIMES.each do |i|
       if all? { |elem| elem % i == 0 }
         return i
       end
@@ -30,7 +31,7 @@ class Array
           block.call([entry])
         else
           rest.button_presses(remaining_size) do |group|
-            block.call([*entry, *group])
+            block.call([entry, *group])
           end
         end
       end
@@ -50,7 +51,7 @@ class Array
       first_element, *rest = self
 
       group_size.downto(1) do |number_of_first_element_occurrences|
-        entry = [first_element] * number_of_first_element_occurrences
+        entry = Array.new(number_of_first_element_occurrences, first_element)
 
         remaining_size = group_size - number_of_first_element_occurrences
 
