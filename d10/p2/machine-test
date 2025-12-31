@@ -30,7 +30,9 @@ def assert_is_a(actual, expected_class)
   end
 end
 
-machines = MachineParser.parse("inputs_test_suite.txt")
+machines = MachineParser.parse("inputs2.txt")
+
+machines.sort_by!(&:crude_max_pushes)
 
 all = []
 

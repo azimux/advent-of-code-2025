@@ -79,6 +79,7 @@ class Machine
     end
 
     target_joltage_index = minimum_nonzero_joltage_index(target_button)
+
     if target_joltage_index.nil?
       if done?
         return 0
@@ -101,6 +102,8 @@ class Machine
 
     minimum_submachine_pushes = nil
 
+    # binding.pry
+
     relevant_buttons.button_presses(target_joltage) do |button_presses|
       if top_level
         # puts "#{Time.now}: #{self} creating a submachine for #{worst_case_pushes}"
@@ -111,12 +114,14 @@ class Machine
 
       unless new_joltages.any?(&:negative?)
         if new_joltages.done?
-          return target_joltage * multiplier
+          return target_joltage # * multiplier
         end
 
         new_buttons = buttons - relevant_buttons
+
         if new_buttons.empty?
           if done?
+            raise "wtf"
             binding.pry
           end
           next
@@ -126,6 +131,7 @@ class Machine
 
         if submachine.cannot_have_a_solution?
           if done?
+            raise "wtf"
             binding.pry
           end
           next
@@ -133,15 +139,31 @@ class Machine
 
         if submachine.crude_max_pushes > worst_case_pushes
           if done?
+            raise "wtf"
             binding.pry
           end
-          next
+          # next
+        end
+
+        submachine.update_multiplier!
+
+        if submachine.multiplier > 1
+          min_pushes = submachine.minimum_pushes_required(false)
+
+          if min_pushes
+            min_pushes *= submachine.multiplier
+            return target_joltage + min_pushes
+          else
+            # There was no solution for the multiplier submachine so revert
+            # to the real submachine and continue looking for a solution
+            submachine = Machine.new(new_joltages, new_buttons, false)
+          end
         end
 
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
-          return (target_joltage + min_pushes) * multiplier
+          return target_joltage + min_pushes # * multiplier
         end
       end
     end
@@ -171,8 +193,7 @@ class Machine
     min_index = nil
     min_joltage = nil
 
-    (0...joltages_to_increment.size).each do |i|
-      joltage_index = joltages_to_increment[i]
+    joltages_to_increment.each do |joltage_index|
       value = joltages[joltage_index]
 
       if value.positive? && (min_joltage.nil? || value < min_joltage)
@@ -196,6 +217,12 @@ class Machine
     if gcd
       self.multiplier *= gcd
       self.joltages /= gcd
+
+      # binding.pry
+      if instance_variable_defined?(:@crude_max_pushes)
+        # binding.pry
+        remove_instance_variable(:@crude_max_pushes)
+      end
     end
   end
 
@@ -206,7 +233,7 @@ class Machine
     s = "#{buttons.map(&:to_s).join(" ")} #{joltages} cache size: #{self.class.cache_size}"
 
     if multiplier > 1
-      s += "x#{multiplier}"
+      s += " x#{multiplier}"
     end
 
     if original_to_s
@@ -219,7 +246,7 @@ class Machine
   # Normalize to allow for more cache hits
   def normalize!
     remove_all_zero_joltages!
-    update_multiplier!
+    # update_multiplier!
     order_joltages!
   end
 
