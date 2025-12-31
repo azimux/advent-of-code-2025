@@ -9,6 +9,10 @@ class Button
     joltages_to_increment.each { joltages.dec(it) }
   end
 
+  def sort_joltage_indices!
+    joltages_to_increment.sort!
+  end
+
   def dup
     super.tap do |j|
       j.joltages_to_increment = j.joltages_to_increment.dup

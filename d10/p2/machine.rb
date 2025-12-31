@@ -1,10 +1,10 @@
 require_relative "array"
 
 class Machine
+  @minimum_pushes_cache = {}
+
   class << self
     def minimum_pushes_cached(machine)
-      @minimum_pushes_cache ||= {}
-
       if @minimum_pushes_cache.key?(machine)
         @minimum_pushes_cache[machine]
       else
@@ -13,7 +13,7 @@ class Machine
     end
 
     def cache_size
-      @minimum_pushes_cache&.size || 0
+      @minimum_pushes_cache.size
     end
   end
 
@@ -34,7 +34,7 @@ class Machine
   def crude_max_pushes
     return @crude_max_pushes if defined?(@crude_max_pushes)
 
-    min_joltage_size = buttons.map(&:joltages_size).min
+    min_joltage_size = buttons.last.joltages_size
 
     joltages_sum = joltages.sum
 
@@ -48,7 +48,7 @@ class Machine
   end
 
   def crude_min_pushes
-    max_joltage_size = buttons.map(&:joltages_size).max
+    max_joltage_size = buttons.first.joltages_size
 
     joltages_sum = joltages.sum
 
@@ -66,6 +66,7 @@ class Machine
       $total_time ||= 0
       $total_time += span
       puts "#{$current_time} #{span.to_i}s ##{$i} #{$total_time / $i} s/m cache: #{self.class.cache_size}"
+      puts self
       $previous_time = $current_time
     end
 
@@ -324,13 +325,12 @@ class Machine
         joltage_index_map[old_joltage_index]
       end
 
-      Button.new(new_joltage_indices)
+      Button.new(new_joltage_indices).tap(&:sort_joltage_indices!)
     end
   end
 
   def order_buttons!
-    buttons.sort_by!(&:joltages_size)
-    buttons.reverse!
+    buttons.sort_by! { |button| -button.joltages_size }
   end
 
   def hash
