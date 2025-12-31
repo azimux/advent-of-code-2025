@@ -12,3 +12,9 @@ note: no solution if button joltage index count of the only button is not the sa
 NOTE!: instead of driving smallest joltage to 0, drive any odd joltage to an even joltage??
 
 maybe always choose path with fewest odd joltages with hopes of a 2x multiplier to cut problem in half?
+
+Pick target joltage index that appears in the most buttons first instead of the
+joltage index of the smallest joltage value.
+
+Great idea from ChaelCodes: persist cache and leverage/extend it between runs
+Use serialized hash key as the machine's hash key?
