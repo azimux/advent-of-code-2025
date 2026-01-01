@@ -4,11 +4,42 @@ class Machine
   @minimum_pushes_cache = {}
 
   class << self
-    def minimum_pushes_cached(machine)
-      if @minimum_pushes_cache.key?(machine)
-        @minimum_pushes_cache[machine]
+    def load_cache_from_file
+      if MachineParser.last_parsed_filename
+        cache_file_name = "#{MachineParser.last_parsed_filename.gsub(/\.txt$/, "")}.cache"
+
+        if File.exist?(cache_file_name)
+          File.open(cache_file_name) do |f|
+            until f.eof?
+              # rubocop:disable Security/MarshalLoad
+              cache_key = Marshal.load(f)
+              cache_value = Marshal.load(f)
+              # rubocop:enable Security/MarshalLoad
+              @minimum_pushes_cache[cache_key] = cache_value
+            end
+          end
+        end
+
+        @cache_file = File.open(cache_file_name, "a")
+      end
+    end
+
+    def close_cache_file
+      @cache_file&.close
+    end
+
+    def minimum_pushes_cached(cache_key)
+      if @minimum_pushes_cache.key?(cache_key)
+        @minimum_pushes_cache[cache_key]
       else
-        @minimum_pushes_cache[machine] = yield
+        value = yield
+
+        if @cache_file
+          @cache_file.write(Marshal.dump(cache_key))
+          @cache_file.write(Marshal.dump(value))
+        end
+
+        @minimum_pushes_cache[cache_key] = value
       end
     end
 
@@ -185,7 +216,7 @@ class Machine
   end
 
   def minimum_pushes_cached(&)
-    self.class.minimum_pushes_cached(self, &)
+    self.class.minimum_pushes_cached(cache_key, &)
   end
 
   def button_with_most_joltage_indices
@@ -344,4 +375,22 @@ class Machine
   end
 
   def eql?(other) = self == other
+
+  def cache_key
+    a = []
+
+    buttons.each do |button|
+      button.joltages_to_increment.each do |joltage_index|
+        a << joltage_index
+      end
+
+      a << 10
+    end
+
+    joltages.joltage_levels.each do |joltage_level|
+      a << joltage_level
+    end
+
+    a
+  end
 end

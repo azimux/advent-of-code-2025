@@ -4,6 +4,8 @@ require_relative "joltages"
 
 class MachineParser
   class << self
+    attr_accessor :last_parsed_filename
+
     def light_diagram_regex = /\[([.#]+)\]/
     def button_wiring_regex = /\((?:\d+,)*\d+\)/
     def buttons_wiring_regex = /((?:#{button_wiring_regex}\s*)+)/
@@ -12,6 +14,8 @@ class MachineParser
     def machine_regex = /\A#{light_diagram_regex}\s*#{buttons_wiring_regex}\s*#{joltages_regex}\z/
 
     def parse(file_name)
+      self.last_parsed_filename = file_name
+
       machines = []
 
       File.foreach(file_name) do |line|
