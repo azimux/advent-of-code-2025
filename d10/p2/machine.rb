@@ -60,7 +60,34 @@ class Machine
   end
 
   def done? = joltages.done?
-  def cannot_have_a_solution? = buttons.empty?
+
+  def cannot_have_a_solution?
+    return true if buttons.empty?
+
+    buttons_to_index = {}
+
+    0.upto(joltages.size - 1) do |joltage_index|
+      buttons_key = buttons.select { it.include?(joltage_index) }
+
+      if buttons_to_index.key?(buttons_key)
+        to_check = buttons_to_index[buttons_key]
+
+        to_check = [*to_check] unless to_check.is_a?(Array)
+
+        to_check.each do |other_index|
+          if joltages[joltage_index] != joltages[other_index]
+            return true
+          end
+        end
+
+        buttons_to_index[buttons_key] = [joltage_index, *to_check]
+      else
+        buttons_to_index[buttons_key] = joltage_index
+      end
+    end
+
+    false
+  end
 
   def crude_max_pushes
     return @crude_max_pushes if defined?(@crude_max_pushes)
@@ -169,6 +196,9 @@ class Machine
 
         submachine = Machine.new(new_joltages, new_buttons, false)
 
+        # should we cache the fact that this has no solution to skip checking it??
+        # that would mean moving this check to the top so we don't skip caching
+        # the submachine
         if submachine.cannot_have_a_solution?
           # if done?
           #   raise "wtf"
@@ -224,6 +254,14 @@ class Machine
       button.joltages_to_increment.count do |joltage_index|
         joltages[joltage_index].positive?
       end
+    end
+  end
+
+  def joltage_index_with_most_occurrences(button)
+    joltages_to_increment = button.joltages_to_increment
+
+    joltages_to_increment.max_by do |joltage_index|
+      buttons.count { it.include?(joltage_index) }
     end
   end
 

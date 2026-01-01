@@ -1,5 +1,4 @@
 * normalizing machines...
-  * removing redundant buttons
   * optional: can we detect if two joltages are always in the same buttons?
     * if the joltages are the same, merge the joltages
     * if the joltages are different, there's no answer, return nil
@@ -9,11 +8,10 @@
 note: no solution if button joltage index count of the only button is not the same as joltages index count
       and if they do match, no solution if all joltage values are not the same
 
-NOTE!: instead of driving smallest joltage to 0, drive any odd joltage to an even joltage??
+[didn't work] NOTE!: instead of driving smallest joltage to 0, drive any odd joltage to an even joltage??
+[didn't work] maybe always choose path with fewest odd joltages with hopes of a 2x multiplier to cut problem in half?
 
-maybe always choose path with fewest odd joltages with hopes of a 2x multiplier to cut problem in half?
-
-Pick target joltage index that appears in the most buttons first instead of the
+[didn't work] Pick target joltage index that appears in the most buttons first instead of the
 joltage index of the smallest joltage value.
 
 Great idea from ChaelCodes: persist cache and leverage/extend it between runs
