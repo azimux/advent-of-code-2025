@@ -165,7 +165,7 @@ class Machine
       return nil
     end
 
-    target_joltage_index = joltage_index_with_most_occurrences(target_button)
+    target_joltage_index = joltage_index_with_min_occurrences(target_button)
 
     if target_joltage_index.nil?
       if done?
@@ -290,7 +290,7 @@ class Machine
     end
   end
 
-  def joltage_index_with_most_occurrences(button)
+  def joltage_index_with_min_occurrences(button)
     button.joltages_to_increment.min_by do |joltage_index|
       buttons.count { it.include?(joltage_index) }
     end
