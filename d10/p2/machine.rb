@@ -9,18 +9,30 @@ class Machine
         cache_file_name = "#{MachineParser.last_parsed_filename.gsub(/\.txt$/, "")}.cache"
 
         if File.exist?(cache_file_name)
-          File.open(cache_file_name) do |f|
-            until f.eof?
-              # rubocop:disable Security/MarshalLoad
-              cache_key = Marshal.load(f)
-              cache_value = Marshal.load(f)
-              # rubocop:enable Security/MarshalLoad
-              @minimum_pushes_cache[cache_key] = cache_value
+          begin
+            File.open(cache_file_name) do |f|
+              until f.eof?
+                # rubocop:disable Security/MarshalLoad
+                cache_key = Marshal.load(f)
+                cache_value = Marshal.load(f)
+                # rubocop:enable Security/MarshalLoad
+                @minimum_pushes_cache[cache_key] = cache_value
+              end
             end
+          rescue EOFError
+            puts "cache corrupted, dumping out good values"
+            cache_file = File.open(cache_file_name, "w")
+
+            @minimum_pushes_cache.each_pair do |key, value|
+              cache_file.write(Marshal.dump(key))
+              cache_file.write(Marshal.dump(value))
+            end
+
+            @cache_file = cache_file
           end
         end
 
-        @cache_file = File.open(cache_file_name, "a")
+        @cache_file ||= File.open(cache_file_name, "a")
       end
     end
 
