@@ -172,7 +172,7 @@ class Machine
       return nil
     end
 
-    target_joltage_index = joltage_index_with_min_occurrences(target_button)
+    target_joltage_index = joltage_index_with_most_occurrences(target_button)
 
     if target_joltage_index.nil?
       if done?
