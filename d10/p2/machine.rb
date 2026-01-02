@@ -157,7 +157,15 @@ class Machine
       end
     end
 
-    target_joltage_index = minimum_nonzero_joltage_index(target_button)
+    if cannot_have_a_solution?
+      if done?
+        raise "wtf"
+        binding.pry
+      end
+      return nil
+    end
+
+    target_joltage_index = joltage_index_with_most_occurrences(target_button)
 
     if target_joltage_index.nil?
       if done?
@@ -245,7 +253,12 @@ class Machine
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
-          return (target_joltage + min_pushes) * multiplier
+          begin
+            return (target_joltage + min_pushes) * multiplier
+          rescue => e
+            binding.pry
+            raise
+          end
         end
       end
     end
@@ -273,6 +286,12 @@ class Machine
     joltages_to_increment = button.joltages_to_increment
 
     joltages_to_increment.max_by do |joltage_index|
+      buttons.count { it.include?(joltage_index) }
+    end
+  end
+
+  def joltage_index_with_most_occurrences(button)
+    button.joltages_to_increment.min_by do |joltage_index|
       buttons.count { it.include?(joltage_index) }
     end
   end
