@@ -327,11 +327,16 @@ class Machine
       self.multiplier *= gcd
       self.joltages /= gcd
 
+      clear_caches
+
+    end
+  end
+
+  def clear_caches
+    # binding.pry
+    if instance_variable_defined?(:@crude_max_pushes)
       # binding.pry
-      if instance_variable_defined?(:@crude_max_pushes)
-        # binding.pry
-        remove_instance_variable(:@crude_max_pushes)
-      end
+      remove_instance_variable(:@crude_max_pushes)
     end
   end
 
@@ -371,6 +376,10 @@ class Machine
 
     return if indices_to_remove.empty?
 
+    remove_joltage_indices(indices_to_remove)
+  end
+
+  def remove_joltage_indices(indices_to_remove)
     updated_joltages = []
 
     joltages.each.with_index do |joltage_level, index|
@@ -403,6 +412,8 @@ class Machine
       buttons.compact!
       buttons.uniq!
     end
+
+    clear_caches
   end
 
   def order_joltages!
