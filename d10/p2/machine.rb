@@ -74,8 +74,10 @@ class Machine
   def done? = joltages.done?
 
   def cannot_have_a_solution?
-    return true if buttons.empty?
+    buttons.empty? || @has_no_solution
+  end
 
+  def merge_joined_joltage_indices!
     buttons_to_index = {}
 
     0.upto(joltages.size - 1) do |joltage_index|
@@ -88,7 +90,8 @@ class Machine
 
         to_check.each do |other_index|
           if joltages[joltage_index] != joltages[other_index]
-            return true
+            @has_no_solution = true
+            return
           end
         end
 
@@ -98,7 +101,11 @@ class Machine
       end
     end
 
-    false
+    buttons_to_index.each_pair do |buttons, indices|
+      if indices.is_a?(Array)
+        remove_joltage_indices(indices.reverse[1..])
+      end
+    end
   end
 
   def crude_max_pushes
@@ -363,6 +370,7 @@ class Machine
     update_multiplier!
     order_joltages!
     order_buttons!
+    merge_joined_joltage_indices!
   end
 
   def remove_all_zero_joltages!

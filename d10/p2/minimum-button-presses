@@ -5,7 +5,7 @@
 
 require_relative "machine_parser"
 
-machines = MachineParser.parse("inputs.txt")
+machines = MachineParser.parse("inputs_test.txt")
 
 Machine.load_cache_from_file
 
