@@ -121,7 +121,7 @@ class Machine
                           dividend
                         else
                           dividend + 1
-                        end
+                        end * multiplier
   end
 
   def crude_min_pushes
@@ -129,7 +129,13 @@ class Machine
 
     joltages_sum = joltages.sum
 
-    joltages_sum / max_joltage_size
+    dividend = joltages_sum / max_joltage_size
+
+    if joltages_sum % max_joltage_size == 0
+      dividend
+    else
+      dividend + 1
+    end * multiplier
   end
 
   def minimum_pushes_required(top_level = true)
@@ -172,7 +178,7 @@ class Machine
       return nil
     end
 
-    target_joltage_index = joltage_index_with_most_occurrences(target_button)
+    target_joltage_index = minimum_nonzero_joltage_index(target_button)
 
     if target_joltage_index.nil?
       if done?
@@ -234,12 +240,14 @@ class Machine
           next
         end
 
+        # TODO: can we make use of min_submachine_pushes here? Or no because we short-circuit?
+        # maybe we can go back to the faster _min_ instead of _most_ if we use it instead of returning?
         if submachine.crude_min_pushes > worst_case_pushes
           if done?
             raise "not expecting done!"
             binding.pry
           end
-          next
+          # next
         end
 
         # submachine.update_multiplier!
@@ -260,12 +268,7 @@ class Machine
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
-          begin
-            return (target_joltage + min_pushes) * multiplier
-          rescue => e
-            binding.pry
-            raise
-          end
+          return (target_joltage + min_pushes) * multiplier
         end
       end
     end
@@ -335,7 +338,6 @@ class Machine
       self.joltages /= gcd
 
       clear_caches
-
     end
   end
 
