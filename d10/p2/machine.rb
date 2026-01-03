@@ -191,7 +191,7 @@ class Machine
 
     target_joltage = joltages[target_joltage_index]
 
-    worst_case_pushes = crude_max_pushes - target_joltage
+    worst_case_pushes = crude_max_pushes - (target_joltage * multiplier)
 
     relevant_buttons = buttons.select { |button| button.include?(target_joltage_index) }
     relevant_buttons.reject! do |button|
@@ -247,23 +247,8 @@ class Machine
             raise "not expecting done!"
             binding.pry
           end
-          # next
+          next
         end
-
-        # submachine.update_multiplier!
-        #
-        # if submachine.multiplier > 1
-        #   min_pushes = submachine.minimum_pushes_required(false)
-        #
-        #   if min_pushes
-        #     min_pushes *= submachine.multiplier
-        #     return target_joltage + min_pushes
-        #   else
-        #     # There was no solution for the multiplier submachine so revert
-        #     # to the real submachine and continue looking for a solution
-        #     submachine = Machine.new(new_joltages, new_buttons, false)
-        #   end
-        # end
 
         min_pushes = submachine.minimum_pushes_required(false)
 
@@ -424,6 +409,7 @@ class Machine
     end
 
     clear_caches
+    order_buttons!
   end
 
   def order_joltages!
