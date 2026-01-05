@@ -5,17 +5,21 @@
 
 require_relative "machine_parser"
 
-machines = MachineParser.parse("inputs.txt")
+machines = MachineParser.parse("inputs_test2.txt")
 
 Machine.load_cache_from_file
 
 machines.sort_by!(&:crude_max_pushes)
 
-sum = machines.map do |machine|
+pushes = machines.map do |machine|
   puts "#{Time.now}: starting new machine..."
   machine.minimum_pushes_required
-end.sum
+end
+
+sum = pushes.sum
 
 puts "found sum! #{sum}"
 
 Machine.close_cache_file
+
+# First possible answer submitted: 17554 but too low uggg
