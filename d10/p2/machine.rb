@@ -115,20 +115,30 @@ class Machine
   def crude_max_pushes
     return @crude_max_pushes if defined?(@crude_max_pushes)
 
+    @crude_max_pushes = crude_max_pushes_without_multiplier * multiplier
+  end
+
+  def crude_max_pushes_without_multiplier
+    return @crude_max_pushes_without_multiplier if defined?(@crude_max_pushes_without_multiplier)
+
     min_joltage_size = buttons.last.joltages_size
 
     joltages_sum = joltages.sum
 
     dividend = joltages_sum / min_joltage_size
 
-    @crude_max_pushes = if joltages_sum % min_joltage_size == 0
-                          dividend
-                        else
-                          dividend + 1
-                        end * multiplier
+    @crude_max_pushes_without_multiplier = if joltages_sum % min_joltage_size == 0
+                                             dividend
+                                           else
+                                             dividend + 1
+                                           end
   end
 
   def crude_min_pushes
+    crude_min_pushes_without_multiplier
+  end
+
+  def crude_min_pushes_without_multiplier
     max_joltage_size = buttons.first.joltages_size
 
     joltages_sum = joltages.sum
@@ -139,7 +149,7 @@ class Machine
       dividend
     else
       dividend + 1
-    end * multiplier
+    end
   end
 
   def minimum_pushes_required(top_level = true)
@@ -157,11 +167,14 @@ class Machine
       $previous_time = $current_time
     end
 
-    minimum_pushes_cached do
+    pushes = minimum_pushes_cached do
       minimum_pushes_required_without_cache(top_level)
     end
+
+    pushes && (pushes * multiplier)
   end
 
+  # NOTE: This "private" method does not apply the multiplier!!
   def minimum_pushes_required_without_cache(top_level = true)
     target_button = buttons.first
 
@@ -183,6 +196,7 @@ class Machine
     end
 
     target_joltage_index = minimum_nonzero_joltage_index(target_button)
+    # target_joltage_index = joltage_index_with_min_occurrences(target_button)
 
     if target_joltage_index.nil?
       if done?
@@ -195,7 +209,7 @@ class Machine
 
     target_joltage = joltages[target_joltage_index]
 
-    worst_case_pushes = crude_max_pushes - (target_joltage * multiplier)
+    worst_case_pushes = crude_max_pushes_without_multiplier - target_joltage
 
     relevant_buttons = buttons.select { |button| button.include?(target_joltage_index) }
     relevant_buttons.reject! do |button|
@@ -218,7 +232,8 @@ class Machine
 
       unless new_joltages.any?(&:negative?)
         if new_joltages.done?
-          return target_joltage * multiplier
+          binding.pry if top_level
+          return target_joltage
         end
 
         new_buttons = buttons - relevant_buttons
@@ -257,7 +272,11 @@ class Machine
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
-          return (target_joltage + min_pushes) * multiplier
+          return target_joltage + min_pushes
+
+          if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
+            minimum_submachine_pushes = min_pushes
+          end
         end
       end
     end
@@ -265,7 +284,8 @@ class Machine
     if minimum_submachine_pushes.nil?
       binding.pry if top_level
     else
-      (target_joltage + minimum_submachine_pushes) * multiplier
+      binding.pry if top_level
+      target_joltage + minimum_submachine_pushes
     end
   end
 
@@ -331,10 +351,11 @@ class Machine
   end
 
   def clear_caches
-    # binding.pry
     if instance_variable_defined?(:@crude_max_pushes)
-      # binding.pry
       remove_instance_variable(:@crude_max_pushes)
+    end
+    if instance_variable_defined?(:@crude_max_pushes_without_multiplier)
+      remove_instance_variable(:@crude_max_pushes_without_multiplier)
     end
   end
 
