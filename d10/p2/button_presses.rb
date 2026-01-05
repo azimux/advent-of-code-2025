@@ -23,4 +23,7 @@ class ButtonPresses
   end
 
   def eql?(other)= self == other
+
+  def to_s = "#{press_count}x#{button}"
+  def inspect = to_s
 end
