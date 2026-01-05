@@ -182,7 +182,6 @@ class Machine
       if done?
         return 0
       else
-        # binding.pry if top_level
         return nil
       end
     end
@@ -195,14 +194,13 @@ class Machine
       return nil
     end
 
-    target_joltage_index = minimum_nonzero_joltage_index(target_button)
-    # target_joltage_index = joltage_index_with_min_occurrences(target_button)
+    # target_joltage_index = minimum_nonzero_joltage_index(target_button)
+    target_joltage_index = joltage_index_with_min_occurrences(target_button)
 
     if target_joltage_index.nil?
       if done?
         return 0
       else
-        # binding.pry if top_level
         return nil
       end
     end
@@ -232,7 +230,6 @@ class Machine
 
       unless new_joltages.any?(&:negative?)
         if new_joltages.done?
-          binding.pry if top_level
           return target_joltage
         end
 
@@ -284,7 +281,6 @@ class Machine
     if minimum_submachine_pushes.nil?
       binding.pry if top_level
     else
-      binding.pry if top_level
       target_joltage + minimum_submachine_pushes
     end
   end
