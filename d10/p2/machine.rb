@@ -1,3 +1,5 @@
+require "fileutils"
+
 require_relative "array"
 
 class Machine
@@ -9,6 +11,8 @@ class Machine
         cache_file_name = "#{MachineParser.last_parsed_filename.gsub(/\.txt$/, "")}.cache"
 
         if File.exist?(cache_file_name)
+          FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
+
           begin
             File.open(cache_file_name) do |f|
               until f.eof?
