@@ -33,4 +33,6 @@ class Button
   end
 
   def eql?(other)= self == other
+
+  def each(&) = joltages_to_increment.each(&)
 end

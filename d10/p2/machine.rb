@@ -185,7 +185,8 @@ class Machine
 
   # NOTE: This "private" method does not apply the multiplier!!
   def minimum_pushes_required_without_cache(top_level = true)
-    target_button = buttons.first
+    # target_button = buttons.first
+    target_button = button_with_highest_odd_to_even_ratio
 
     if target_button.nil?
       if done?
@@ -326,6 +327,31 @@ class Machine
   def joltage_index_with_min_occurrences(button)
     button.joltages_to_increment.min_by do |joltage_index|
       buttons.count { it.include?(joltage_index) }
+    end
+  end
+
+  def button_with_highest_odd_to_even_ratio
+    buttons.max_by do |button|
+      evens = 0
+      odds = 0
+
+      button.each do |joltage_index|
+        if joltages[joltage_index].even?
+          evens += 1
+        else
+          odds += 1
+        end
+      end
+
+      if evens.zero?
+        if odds.zero?
+          raise "wtf"
+        else
+          1r
+        end
+      else
+        odds.to_r / evens
+      end
     end
   end
 
