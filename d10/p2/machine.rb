@@ -275,6 +275,13 @@ class Machine
           next
         end
 
+        if minimum_submachine_pushes
+          if submachine.crude_min_pushes >= minimum_submachine_pushes
+            puts "short circuit!!"
+            next
+          end
+        end
+
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
