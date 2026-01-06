@@ -4,6 +4,7 @@ require_relative "array"
 
 class Machine
   @minimum_pushes_cache = {}
+  @cache_writes = 0
 
   class << self
     def load_cache_from_file
@@ -53,6 +54,14 @@ class Machine
         if @cache_file
           @cache_file.write(Marshal.dump(cache_key))
           @cache_file.write(Marshal.dump(value))
+
+          @cache_writes += 1
+
+          # if @cache_writes % 1000 == 0
+          #   puts "flushing"
+          # print "."
+          @cache_file.flush
+          # end
         end
 
         @minimum_pushes_cache[cache_key] = value
@@ -194,8 +203,8 @@ class Machine
       return nil
     end
 
-    # target_joltage_index = minimum_nonzero_joltage_index(target_button)
-    target_joltage_index = joltage_index_with_min_occurrences(target_button)
+    target_joltage_index = minimum_nonzero_joltage_index(target_button)
+    # target_joltage_index = joltage_index_with_min_occurrences(target_button)
 
     if target_joltage_index.nil?
       if done?
@@ -269,7 +278,7 @@ class Machine
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
-          return target_joltage + min_pushes
+          # return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             minimum_submachine_pushes = min_pushes
