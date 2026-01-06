@@ -443,13 +443,25 @@ class Machine
   end
 
   def order_joltages!
+    already_in_order = true
+
+    joltage_levels.inject do |joltage_level_1, joltage_level_2|
+      if joltage_level_2 < joltage_level_1
+        already_in_order = false
+        break
+      end
+
+      joltage_level_2
+    end
+
+    return if already_in_order
+
     joltage_index_map = joltage_levels.map.with_index do |level, index|
       [level, index]
     end
 
-    sorted_joltage_index_map = joltage_index_map.sort
-
-    return if sorted_joltage_index_map == joltage_index_map
+    sorted_joltage_index_map = joltage_index_map
+    sorted_joltage_index_map.sort!
 
     self.joltages = Joltages.new(sorted_joltage_index_map.map(&:first))
 
