@@ -265,9 +265,11 @@ class Machine
           next
         end
 
+        submachine_crude_min_pushes = submachine.crude_min_pushes
+
         # TODO: can we make use of min_submachine_pushes here? Or no because we short-circuit?
         # maybe we can go back to the faster _min_ instead of _most_ if we use it instead of returning?
-        if submachine.crude_min_pushes > worst_case_pushes
+        if submachine_crude_min_pushes > worst_case_pushes
           if done?
             raise "not expecting done!"
             binding.pry
@@ -276,7 +278,7 @@ class Machine
         end
 
         if minimum_submachine_pushes
-          if submachine.crude_min_pushes >= minimum_submachine_pushes
+          if submachine_crude_min_pushes >= minimum_submachine_pushes
             puts "short circuit!!"
             next
           end
