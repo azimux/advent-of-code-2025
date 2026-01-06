@@ -189,8 +189,17 @@ class Machine
 
   # NOTE: This "private" method does not apply the multiplier!!
   def minimum_pushes_required_without_cache(top_level = true)
+    if cannot_have_a_solution?
+      if done?
+        raise "wtf"
+        binding.pry
+      end
+      return nil
+    end
+
     # target_button = buttons.first
-    target_button = button_with_highest_odd_to_even_ratio
+    # target_button = button_with_highest_odd_to_even_ratio
+    target_button = most_impactful_button_with_lowest_joltage
 
     if target_button.nil?
       if done?
@@ -198,14 +207,6 @@ class Machine
       else
         return nil
       end
-    end
-
-    if cannot_have_a_solution?
-      if done?
-        raise "wtf"
-        binding.pry
-      end
-      return nil
     end
 
     target_joltage_index = minimum_nonzero_joltage_index(target_button)
@@ -289,7 +290,7 @@ class Machine
 
         if minimum_submachine_pushes
           if submachine_crude_min_pushes >= minimum_submachine_pushes
-            puts "short circuit!!"
+            # puts "short circuit!!"
             next
           end
 
@@ -347,6 +348,14 @@ class Machine
     end
   end
 
+  def most_impactful_button_with_lowest_joltage
+    i = joltages.index_of_min
+
+    buttons.find do |button|
+      button.include?(i)
+    end
+  end
+
   def button_with_highest_odd_to_even_ratio
     buttons.max_by do |button|
       evens = 0
@@ -396,12 +405,22 @@ class Machine
 
   attr_writer :multiplier
 
+  # Are we even really allowed to do this??
   def update_multiplier!
     gcd = joltages.gcd
 
     if gcd
       self.multiplier *= gcd
       self.joltages /= gcd
+
+      if max_allowed_pushes
+        if max_allowed_pushes % gcd == 0
+          self.max_allowed_pushes /= gcd
+        else
+          self.max_allowed_pushes /= gcd
+          self.max_allowed_pushes += 1
+        end
+      end
 
       clear_caches
     end

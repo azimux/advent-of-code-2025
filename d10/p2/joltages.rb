@@ -35,4 +35,20 @@ class Joltages
   def size = joltage_levels.size
   def to_s = "{#{joltage_levels.join(",")}}"
   def inspect = to_s
+  def min = joltage_levels.min
+
+  def index_of_min
+    min_index = 0
+    min_joltage = joltage_levels.first
+
+    1.upto(joltage_levels.size - 1) do |i|
+      level = joltage_levels[i]
+      if level < min_joltage
+        min_joltage = level
+        min_index = i
+      end
+    end
+
+    min_index
+  end
 end
