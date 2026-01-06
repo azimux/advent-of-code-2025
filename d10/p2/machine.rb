@@ -73,13 +73,17 @@ class Machine
     end
   end
 
-  attr_accessor :joltages, :buttons, :original_to_s
+  attr_accessor :joltages, :buttons, :original_to_s, :max_allowed_pushes
 
-  def initialize(joltages, buttons, top_level = true)
+  def initialize(joltages, buttons, top_level = true, max_allowed_pushes = nil)
     self.joltages = joltages
     self.buttons = buttons
 
     self.original_to_s = to_s if top_level
+
+    if max_allowed_pushes
+      self.max_allowed_pushes = max_allowed_pushes
+    end
 
     normalize!
   end
@@ -252,7 +256,12 @@ class Machine
           next
         end
 
-        submachine = Machine.new(new_joltages, new_buttons, false)
+        submachine = Machine.new(
+          new_joltages,
+          new_buttons,
+          false,
+          minimum_submachine_pushes
+        )
 
         # should we cache the fact that this has no solution to skip checking it??
         # that would mean moving this check to the top so we don't skip caching
@@ -281,6 +290,14 @@ class Machine
           if submachine_crude_min_pushes >= minimum_submachine_pushes
             puts "short circuit!!"
             next
+          end
+
+          if max_allowed_pushes
+            if submachine_crude_min_pushes >= max_allowed_pushes
+              puts "short circuit2!"
+              raise "wtf!"
+              next
+            end
           end
         end
 
