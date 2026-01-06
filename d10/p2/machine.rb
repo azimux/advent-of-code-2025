@@ -114,9 +114,9 @@ class Machine
       end
     end
 
-    buttons_to_index.each_pair do |buttons, indices|
+    buttons_to_index.each_value do |indices|
       if indices.is_a?(Array)
-        remove_joltage_indices(indices.reverse[1..])
+        remove_joltage_indices(indices[1..].reverse)
       end
     end
   end
@@ -287,9 +287,9 @@ class Machine
       end
     end
 
-    if minimum_submachine_pushes.nil?
-      binding.pry if top_level
-    else
+    if minimum_submachine_pushes
+      #   binding.pry if top_level
+      # else
       target_joltage + minimum_submachine_pushes
     end
   end

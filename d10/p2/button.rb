@@ -14,9 +14,11 @@ class Button
   end
 
   def dup
-    super.tap do |j|
-      j.joltages_to_increment = j.joltages_to_increment.dup
-    end
+    j = super
+
+    j.joltages_to_increment = j.joltages_to_increment.dup
+
+    j
   end
 
   def joltages_size = joltages_to_increment.size

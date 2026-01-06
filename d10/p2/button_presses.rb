@@ -5,7 +5,7 @@ class ButtonPresses
     self.button = button
     self.press_count = press_count
 
-    raise "wtf" if press_count.zero?
+    # raise "wtf" if press_count.zero?
   end
 
   def joltages_size = button.joltages_size * press_count

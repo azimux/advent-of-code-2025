@@ -2,6 +2,7 @@ require_relative "button_presses"
 
 class Array
   PRIMES = [13, 11, 7, 5, 3, 2]
+
   def gcd_ish
     return nil if empty?
 
