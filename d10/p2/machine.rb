@@ -304,7 +304,7 @@ class Machine
         min_pushes = submachine.minimum_pushes_required(false)
 
         if min_pushes
-          # return target_joltage + min_pushes
+          return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             minimum_submachine_pushes = min_pushes
