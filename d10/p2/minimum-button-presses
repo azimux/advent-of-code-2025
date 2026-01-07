@@ -1,12 +1,14 @@
 #!/usr/bin/env ruby
 
-# require "pry"
+require "pry"
 # require "pry-byebug"
 
 require_relative "machine_parser"
 
 # machines = MachineParser.parse("inputs_test.txt")
-machines = MachineParser.parse("inputs_min_joltage_chaos.txt")
+# currently on 160:
+# machines = MachineParser.parse("inputs_min_joltage_chaos.txt")
+machines = MachineParser.parse("inputs_smallest_joltage.txt")
 
 Machine.load_cache_from_file
 
@@ -14,7 +16,13 @@ machines.sort_by!(&:crude_max_pushes)
 
 pushes = machines.map do |machine|
   puts "#{Time.now}: starting new machine..."
-  machine.minimum_pushes_required
+  push_count = machine.minimum_pushes_required
+
+  if push_count.nil?
+    puts "nil push count wtf!!"
+    puts machine
+    binding.pry
+  end
 end
 
 sum = pushes.sum

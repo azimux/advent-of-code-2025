@@ -148,11 +148,19 @@ class Machine
   end
 
   def crude_min_pushes
-    crude_min_pushes_without_multiplier * multiplier
+    return @crude_min_pushes if defined?(@crude_min_pushes)
+
+    pushes = crude_min_pushes_without_multiplier
+
+    @crude_min_pushes = if pushes
+                          pushes * multiplier
+                        end
   end
 
   def crude_min_pushes_without_multiplier
-    @crude_min_pushes_without_multiplier ||= better_min_pushes_estimate
+    return @crude_min_pushes_without_multiplier if defined?(@crude_min_pushes_without_multiplier)
+
+    @crude_min_pushes_without_multiplier = better_min_pushes_estimate
   end
 
   def minimum_pushes_required(top_level = true)
@@ -206,10 +214,13 @@ class Machine
     # joltage index with fewest buttons
     # index of biggest joltage
     # index of smallest joltage
-    target_joltage_index = joltage_index_with_fewest_buttons
+    # seems fast-ish!:
+    # target_joltage_index = joltage_index_with_fewest_buttons
+    # too slow:
     # target_joltage_index = joltage_index_of_biggest_joltage
-    # target_joltage_index = joltage_index_of_smallest_joltage
-    # to slow:
+    # seems fast-ish!
+    target_joltage_index = joltage_index_of_smallest_joltage
+    # too slow:
     # target_joltage_index = joltage_index_with_most_buttons
 
     if target_joltage_index.nil?
@@ -280,11 +291,20 @@ class Machine
 
         # TODO: can we make use of min_submachine_pushes here? Or no because we short-circuit?
         # maybe we can go back to the faster _min_ instead of _most_ if we use it instead of returning?
-        if submachine_crude_min_pushes > worst_case_pushes
-          if done?
-            raise "not expecting done!"
-            binding.pry
+        if submachine_crude_min_pushes
+          if submachine_crude_min_pushes > worst_case_pushes
+            if done?
+              raise "not expecting done!"
+              binding.pry
+            end
+            next
           end
+        # checking this again because min_crude_pushes can change it
+        elsif submachine.cannot_have_a_solution?
+          # if done?
+          #   raise "wtf"
+          #   binding.pry
+          # end
           next
         end
 
@@ -674,9 +694,20 @@ class Machine
       end
     end
 
-    smallest_button_per_index = smallest_button_per_index.map.with_index do |button, index|
-      [button, index]
+    a = []
+
+    0.upto(joltages.size - 1) do |index|
+      button = smallest_button_per_index[index]
+
+      unless button
+        @has_no_solution = true
+        return
+      end
+
+      a << [button, index]
     end
+
+    smallest_button_per_index = a
 
     smallest_button_per_index.sort_by! { |a| a.first.joltages_size }
     smallest_button_per_index.reverse!
@@ -691,5 +722,8 @@ class Machine
     end
 
     pushes
+  rescue => e
+    binding.pry
+    raise
   end
 end
