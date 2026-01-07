@@ -5,6 +5,7 @@ require_relative "array"
 class Machine
   @minimum_pushes_cache = {}
   @cache_writes = 0
+  @cache_file_queue = nil
 
   class << self
     def load_cache_from_file
@@ -38,6 +39,21 @@ class Machine
         end
 
         @cache_file ||= File.open(cache_file_name, "a")
+        @cache_file_queue ||= Queue.new
+        @cache_file_thread ||= cache_file_thread
+      end
+    end
+
+    def cache_file_thread
+      Thread.new do
+        loop do
+          key = @cache_file_queue.pop
+          value = @cache_file_queue.pop
+
+          @cache_file.write(Marshal.dump(key))
+          @cache_file.write(Marshal.dump(value))
+          @cache_file.flush
+        end
       end
     end
 
@@ -52,16 +68,8 @@ class Machine
         value = yield
 
         if @cache_file
-          @cache_file.write(Marshal.dump(cache_key))
-          @cache_file.write(Marshal.dump(value))
-
-          @cache_writes += 1
-
-          if @cache_writes % 1000 == 0
-            #   puts "flushing"
-            # print "."
-            @cache_file.flush
-          end
+          @cache_file_queue << cache_key
+          @cache_file_queue << value
         end
 
         @minimum_pushes_cache[cache_key] = value
@@ -139,6 +147,14 @@ class Machine
     return @crude_max_pushes_without_multiplier if defined?(@crude_max_pushes_without_multiplier)
 
     @crude_max_pushes_without_multiplier = crude_max_pushes_without_multiplier_for(buttons, joltages)
+
+    if max_allowed_pushes
+      if max_allowed_pushes < @crude_max_pushes_without_multiplier
+        @crude_max_pushes_without_multiplier = max_allowed_pushes
+      end
+    end
+
+    @crude_max_pushes_without_multiplier
   end
 
   def crude_max_pushes_without_multiplier_for(buttons, joltages)
@@ -303,7 +319,6 @@ class Machine
         # TODO: can we make use of min_submachine_pushes here? Or no because we short-circuit?
         # maybe we can go back to the faster _min_ instead of _most_ if we use it instead of returning?
         if submachine_crude_min_pushes
-
           if submachine_crude_min_pushes > worst_case_pushes
             # if done?
             #   raise "not expecting done!"
@@ -328,13 +343,13 @@ class Machine
             next
           end
 
-          if max_allowed_pushes
-            if submachine_crude_min_pushes > max_allowed_pushes
-              # puts "short circuit2!"
-              # raise "wtf!"
-              next
-            end
-          end
+          # if max_allowed_pushes
+          #   if submachine_crude_min_pushes > max_allowed_pushes
+          #     # puts "short circuit2!"
+          #     # raise "wtf!"
+          #     next
+          #   end
+          # end
         end
 
         min_pushes = submachine.minimum_pushes_required
