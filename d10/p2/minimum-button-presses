@@ -23,6 +23,8 @@ pushes = machines.map do |machine|
     puts machine
     binding.pry
   end
+
+  push_count
 end
 
 sum = pushes.sum

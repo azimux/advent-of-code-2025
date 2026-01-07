@@ -134,17 +134,21 @@ class Machine
   def crude_max_pushes_without_multiplier
     return @crude_max_pushes_without_multiplier if defined?(@crude_max_pushes_without_multiplier)
 
+    @crude_max_pushes_without_multiplier = crude_max_pushes_without_multiplier_for(buttons, joltages)
+  end
+
+  def crude_max_pushes_without_multiplier_for(buttons, joltages)
     min_joltage_size = buttons.last.joltages_size
 
     joltages_sum = joltages.sum
 
     dividend = joltages_sum / min_joltage_size
 
-    @crude_max_pushes_without_multiplier = if joltages_sum % min_joltage_size == 0
-                                             dividend
-                                           else
-                                             dividend + 1
-                                           end
+    if joltages_sum % min_joltage_size == 0
+      dividend
+    else
+      dividend + 1
+    end
   end
 
   def crude_min_pushes
@@ -233,7 +237,7 @@ class Machine
 
     target_joltage = joltages[target_joltage_index]
 
-    worst_case_pushes = crude_max_pushes_without_multiplier - target_joltage
+    # worst_case_pushes = crude_max_pushes_without_multiplier - target_joltage
 
     relevant_buttons = buttons.select { |button| button.include?(target_joltage_index) }
     relevant_buttons.reject! do |button|
@@ -253,6 +257,8 @@ class Machine
 
       new_joltages = joltages.dup
       button_presses.each { |button_press| button_press.push(new_joltages) }
+
+      worst_case_pushes = crude_max_pushes_without_multiplier_for(relevant_buttons, new_joltages)
 
       unless new_joltages.any?(&:negative?)
         if new_joltages.done?
@@ -297,7 +303,9 @@ class Machine
               raise "not expecting done!"
               binding.pry
             end
-            next
+            binding.pry
+            puts "would have skipped"
+            # next
           end
         # checking this again because min_crude_pushes can change it
         elsif submachine.cannot_have_a_solution?
@@ -539,7 +547,7 @@ class Machine
   # Normalize to allow for more cache hits
   def normalize!
     remove_all_zero_joltages!
-    update_multiplier!
+    # update_multiplier!
     order_joltages!
     order_buttons!
     merge_joined_joltage_indices!
