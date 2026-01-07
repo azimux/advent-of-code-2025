@@ -148,7 +148,7 @@ class Machine
   end
 
   def crude_min_pushes
-    crude_min_pushes_without_multiplier
+    crude_min_pushes_without_multiplier * multiplier
   end
 
   def crude_min_pushes_without_multiplier
