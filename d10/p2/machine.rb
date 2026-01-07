@@ -57,11 +57,11 @@ class Machine
 
           @cache_writes += 1
 
-          # if @cache_writes % 1000 == 0
-          #   puts "flushing"
-          # print "."
-          @cache_file.flush
-          # end
+          if @cache_writes % 1000 == 0
+            #   puts "flushing"
+            # print "."
+            @cache_file.flush
+          end
         end
 
         @minimum_pushes_cache[cache_key] = value
@@ -81,19 +81,21 @@ class Machine
     self.joltages = joltages
     self.buttons = buttons
 
-    self.original_to_s = to_s if top_level
-
-    if max_allowed_pushes
-      self.max_allowed_pushes = max_allowed_pushes
-    end
-
     normalize!
+
+    unless @has_no_solution
+      self.original_to_s = to_s if top_level
+
+      if max_allowed_pushes
+        self.max_allowed_pushes = max_allowed_pushes
+      end
+    end
   end
 
   def done? = joltages.done?
 
   def cannot_have_a_solution?
-    buttons.empty? || @has_no_solution
+    @has_no_solution || buttons.empty?
   end
 
   def merge_joined_joltage_indices!
@@ -561,7 +563,10 @@ class Machine
     order_joltages!
     order_buttons!
     merge_joined_joltage_indices!
-    crude_max_pushes_without_multiplier
+
+    unless @has_no_solution
+      crude_max_pushes_without_multiplier
+    end
   end
 
   def remove_all_zero_joltages!
