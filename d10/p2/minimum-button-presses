@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require "pry"
+# require "pry"
 # require "pry-byebug"
 
 require_relative "machine_parser"
@@ -8,7 +8,7 @@ require_relative "machine_parser"
 # machines = MachineParser.parse("inputs_test.txt")
 # currently on 160:
 # machines = MachineParser.parse("inputs_min_joltage_chaos.txt")
-machines = MachineParser.parse("inputs_smallest_joltage.txt")
+machines = MachineParser.parse("inputs_slight_opt.txt")
 
 Machine.load_cache_from_file
 

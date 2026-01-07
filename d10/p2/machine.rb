@@ -73,9 +73,11 @@ class Machine
     end
   end
 
-  attr_accessor :joltages, :buttons, :original_to_s, :max_allowed_pushes
+  attr_accessor :joltages, :buttons, :original_to_s, :max_allowed_pushes, :top_level
 
   def initialize(joltages, buttons, top_level = true, max_allowed_pushes = nil)
+    self.top_level = top_level if top_level
+
     self.joltages = joltages
     self.buttons = buttons
 
@@ -138,17 +140,7 @@ class Machine
   end
 
   def crude_max_pushes_without_multiplier_for(buttons, joltages)
-    min_joltage_size = buttons.last.joltages_size
-
-    joltages_sum = joltages.sum
-
-    dividend = joltages_sum / min_joltage_size
-
-    if joltages_sum % min_joltage_size == 0
-      dividend
-    else
-      dividend + 1
-    end
+    better_max_pushes_estimate(buttons, joltages)
   end
 
   def crude_min_pushes
@@ -162,12 +154,25 @@ class Machine
   end
 
   def crude_min_pushes_without_multiplier
-    return @crude_min_pushes_without_multiplier if defined?(@crude_min_pushes_without_multiplier)
-
-    @crude_min_pushes_without_multiplier = better_min_pushes_estimate
+    @crude_min_pushes_without_multiplier ||= better_min_pushes_estimate2(buttons, joltages)
+    # crude_min_pushes_without_multiplier_for(buttons, joltages)
   end
 
-  def minimum_pushes_required(top_level = true)
+  def crude_min_pushes_without_multiplier_for(buttons, joltages)
+    max_joltage_size = buttons.first.joltages_size
+
+    joltages_sum = joltages.sum
+
+    dividend = joltages_sum / max_joltage_size
+
+    if joltages_sum % max_joltage_size == 0
+      dividend
+    else
+      dividend + 1
+    end
+  end
+
+  def minimum_pushes_required
     if top_level
       # puts "#{Time.now}: starting #{self}"
       $i ||= 0
@@ -183,19 +188,19 @@ class Machine
     end
 
     pushes = minimum_pushes_cached do
-      minimum_pushes_required_without_cache(top_level)
+      minimum_pushes_required_without_cache
     end
 
     pushes && (pushes * multiplier)
   end
 
   # NOTE: This "private" method does not apply the multiplier!!
-  def minimum_pushes_required_without_cache(top_level = true)
+  def minimum_pushes_required_without_cache
     if cannot_have_a_solution?
-      if done?
-        raise "wtf"
-        binding.pry
-      end
+      # if done?
+      #   raise "wtf"
+      #   binding.pry
+      # end
       return nil
     end
 
@@ -246,19 +251,17 @@ class Machine
       end
     end
 
+    worst_case_pushes = crude_max_pushes_without_multiplier - target_joltage
+
     minimum_submachine_pushes = nil
 
-    # binding.pry
-
     relevant_buttons.button_presses(target_joltage) do |button_presses|
-      if top_level
-        # puts "#{Time.now}: #{self} creating a submachine for #{worst_case_pushes}"
-      end
+      # if top_level
+      #   # puts "#{Time.now}: #{self} creating a submachine for #{worst_case_pushes}"
+      # end
 
       new_joltages = joltages.dup
       button_presses.each { |button_press| button_press.push(new_joltages) }
-
-      worst_case_pushes = crude_max_pushes_without_multiplier_for(relevant_buttons, new_joltages)
 
       unless new_joltages.any?(&:negative?)
         if new_joltages.done?
@@ -268,10 +271,10 @@ class Machine
         new_buttons = buttons - relevant_buttons
 
         if new_buttons.empty?
-          if done?
-            raise "wtf"
-            binding.pry
-          end
+          # if done?
+          #   raise "wtf"
+          #   binding.pry
+          # end
           next
         end
 
@@ -295,20 +298,18 @@ class Machine
 
         submachine_crude_min_pushes = submachine.crude_min_pushes
 
-        would_skip = false
-
         # TODO: can we make use of min_submachine_pushes here? Or no because we short-circuit?
         # maybe we can go back to the faster _min_ instead of _most_ if we use it instead of returning?
         if submachine_crude_min_pushes
+
           if submachine_crude_min_pushes > worst_case_pushes
-            if done?
-              raise "not expecting done!"
-              binding.pry
-            end
-            # binding.pry
+            # if done?
+            #   raise "not expecting done!"
+            #   binding.pry
+            # end
+
             puts "would have skipped"
-            would_skip = true
-            # next
+            next
           end
         # checking this again because min_crude_pushes can change it
         elsif submachine.cannot_have_a_solution?
@@ -326,7 +327,7 @@ class Machine
           end
 
           if max_allowed_pushes
-            if submachine_crude_min_pushes >= max_allowed_pushes
+            if submachine_crude_min_pushes > max_allowed_pushes
               # puts "short circuit2!"
               # raise "wtf!"
               next
@@ -334,13 +335,12 @@ class Machine
           end
         end
 
-        min_pushes = submachine.minimum_pushes_required(false)
+        min_pushes = submachine.minimum_pushes_required
 
         if min_pushes
           # return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
-            binding.pry if would_skip
             minimum_submachine_pushes = min_pushes
           end
         end
@@ -529,6 +529,12 @@ class Machine
     if instance_variable_defined?(:@crude_max_pushes_without_multiplier)
       remove_instance_variable(:@crude_max_pushes_without_multiplier)
     end
+    if instance_variable_defined?(:@crude_min_pushes)
+      remove_instance_variable(:@crude_min_pushes)
+    end
+    if instance_variable_defined?(:@crude_min_pushes_without_multiplier)
+      remove_instance_variable(:@crude_min_pushes_without_multiplier)
+    end
   end
 
   def joltages_size = joltages.size
@@ -551,10 +557,11 @@ class Machine
   # Normalize to allow for more cache hits
   def normalize!
     remove_all_zero_joltages!
-    # update_multiplier!
+    update_multiplier!
     order_joltages!
     order_buttons!
     merge_joined_joltage_indices!
+    crude_max_pushes_without_multiplier
   end
 
   def remove_all_zero_joltages!
@@ -598,7 +605,11 @@ class Machine
 
         next if new_joltages.empty?
 
-        Button.new(new_joltages)
+        if button.joltages_to_increment == new_joltages
+          button
+        else
+          Button.new(new_joltages)
+        end
       end
 
       buttons.compact!
@@ -646,6 +657,7 @@ class Machine
   end
 
   def order_buttons!
+    buttons.sort_by!(&:joltages_to_increment)
     buttons.sort_by! { |button| -button.joltages_size }
   end
 
@@ -679,9 +691,8 @@ class Machine
     a
   end
 
-  def better_max_pushes_estimate
-    buttons = self.buttons
-    joltages = self.joltages.dup
+  def better_max_pushes_estimate(buttons, joltages)
+    joltages = joltages.dup
 
     # group buttons by joltage index
     # map these to the smallest button per joltage index
@@ -799,5 +810,27 @@ class Machine
   rescue => e
     binding.pry
     raise
+  end
+
+  def better_min_pushes_estimate2(buttons, joltages)
+    crude_min = crude_min_pushes_without_multiplier_for(buttons, joltages)
+
+    levels = joltages.joltage_levels.reverse
+
+    button_sizes = buttons.map(&:joltages_size)
+
+    pushes = 0
+
+    until levels.empty?
+      button_size = button_sizes.shift
+      covered_levels = levels.shift(button_size)
+      pushes += covered_levels.first
+
+      if crude_min < pushes
+        return crude_min
+      end
+    end
+
+    pushes
   end
 end
