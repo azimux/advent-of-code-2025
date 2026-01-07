@@ -295,6 +295,8 @@ class Machine
 
         submachine_crude_min_pushes = submachine.crude_min_pushes
 
+        would_skip = false
+
         # TODO: can we make use of min_submachine_pushes here? Or no because we short-circuit?
         # maybe we can go back to the faster _min_ instead of _most_ if we use it instead of returning?
         if submachine_crude_min_pushes
@@ -303,8 +305,9 @@ class Machine
               raise "not expecting done!"
               binding.pry
             end
-            binding.pry
+            # binding.pry
             puts "would have skipped"
+            would_skip = true
             # next
           end
         # checking this again because min_crude_pushes can change it
@@ -337,6 +340,7 @@ class Machine
           # return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
+            binding.pry if would_skip
             minimum_submachine_pushes = min_pushes
           end
         end
@@ -675,7 +679,7 @@ class Machine
     a
   end
 
-  def better_min_pushes_estimate
+  def better_max_pushes_estimate
     buttons = self.buttons
     joltages = self.joltages.dup
 
@@ -704,21 +708,20 @@ class Machine
 
     a = []
 
-    0.upto(joltages.size - 1) do |index|
-      button = smallest_button_per_index[index]
+    0.upto(joltages.size - 1) do |joltage_index|
+      button = smallest_button_per_index[joltage_index]
 
       unless button
         @has_no_solution = true
         return
       end
 
-      a << [button, index]
+      a << [button, joltage_index]
     end
 
     smallest_button_per_index = a
 
     smallest_button_per_index.sort_by! { |a| a.first.joltages_size }
-    smallest_button_per_index.reverse!
 
     smallest_button_per_index.each do |(button, joltage_index)|
       joltage = joltages[joltage_index]
@@ -728,6 +731,69 @@ class Machine
         button.push_multiple(joltages, joltage)
       end
     end
+
+    pushes
+  rescue => e
+    binding.pry
+    raise
+  end
+
+  # WARNING: this doesn't look right... we'd need to do something about the negative values
+  def better_min_pushes_estimate
+    buttons = self.buttons
+    joltages = self.joltages.dup
+
+    # group buttons by joltage index
+    # map these to the smallest button per joltage index
+    # take the biggest of these buttons
+    # apply it until its targets are negative or zero
+    # repeat if not done
+    #
+    # use this number of pushes as the worst-case-scenario to short-circuit more
+
+    biggest_button_per_index = []
+    pushes = 0
+
+    buttons.each do |button|
+      button_size = button.joltages_size
+
+      button.each do |joltage_index|
+        biggest_button = biggest_button_per_index[joltage_index]
+
+        if biggest_button.nil? || biggest_button.joltages_size < button_size
+          biggest_button_per_index[joltage_index] = button
+        end
+      end
+    end
+
+    a = []
+
+    0.upto(joltages.size - 1) do |joltage_index|
+      button = biggest_button_per_index[joltage_index]
+
+      unless button
+        @has_no_solution = true
+        return
+      end
+
+      a << [button, joltage_index]
+    end
+
+    biggest_button_per_index = a
+
+    biggest_button_per_index.sort_by! { |a| a.first.joltages_size }
+    biggest_button_per_index.reverse!
+
+    biggest_button_per_index.each do |(button, joltage_index)|
+      joltage = joltages[joltage_index]
+
+      if joltage > 0
+        pushes += joltage
+        button.push_multiple(joltages, joltage)
+      end
+    end
+
+    binding.pry
 
     pushes
   rescue => e
