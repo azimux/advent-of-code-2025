@@ -152,17 +152,7 @@ class Machine
   end
 
   def crude_min_pushes_without_multiplier
-    max_joltage_size = buttons.first.joltages_size
-
-    joltages_sum = joltages.sum
-
-    dividend = joltages_sum / max_joltage_size
-
-    if joltages_sum % max_joltage_size == 0
-      dividend
-    else
-      dividend + 1
-    end
+    @crude_min_pushes_without_multiplier ||= better_min_pushes_estimate
   end
 
   def minimum_pushes_required(top_level = true)
@@ -655,5 +645,51 @@ class Machine
     end
 
     a
+  end
+
+  def better_min_pushes_estimate
+    buttons = self.buttons
+    joltages = self.joltages.dup
+
+    # group buttons by joltage index
+    # map these to the smallest button per joltage index
+    # take the biggest of these buttons
+    # apply it until its targets are negative or zero
+    # repeat if not done
+    #
+    # use this number of pushes as the worst-case-scenario to short-circuit more
+
+    smallest_button_per_index = []
+    pushes = 0
+
+    buttons.each do |button|
+      button_size = button.joltages_size
+
+      button.each do |joltage_index|
+        smallest_button = smallest_button_per_index[joltage_index]
+
+        if smallest_button.nil? || smallest_button.joltages_size > button_size
+          smallest_button_per_index[joltage_index] = button
+        end
+      end
+    end
+
+    smallest_button_per_index = smallest_button_per_index.map.with_index do |button, index|
+      [button, index]
+    end
+
+    smallest_button_per_index.sort_by! { |a| a.first.joltages_size }
+    smallest_button_per_index.reverse!
+
+    smallest_button_per_index.each do |(button, joltage_index)|
+      joltage = joltages[joltage_index]
+
+      if joltage > 0
+        pushes += joltage
+        button.push_multiple(joltages, joltage)
+      end
+    end
+
+    pushes
   end
 end

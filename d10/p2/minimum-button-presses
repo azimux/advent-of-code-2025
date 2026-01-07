@@ -5,7 +5,8 @@
 
 require_relative "machine_parser"
 
-machines = MachineParser.parse("inputs_split_machines.txt")
+# machines = MachineParser.parse("inputs_test.txt")
+machines = MachineParser.parse("inputs_min_joltage_chaos.txt")
 
 Machine.load_cache_from_file
 
@@ -24,3 +25,4 @@ Machine.close_cache_file
 
 # First possible answer submitted:   17554 but too low uggg
 # Next possible answer we generated (I think min joltage selected): 17953 but too high uggggggg
+# 18010

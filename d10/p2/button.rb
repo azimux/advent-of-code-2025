@@ -6,7 +6,11 @@ class Button
   end
 
   def push(joltages)
-    joltages_to_increment.each { joltages.dec(it) }
+    joltages_to_increment.each { joltages.dec(it, times) }
+  end
+
+  def push_multiple(joltages, times)
+    joltages_to_increment.each { joltages.dec(it, times) }
   end
 
   def sort_joltage_indices!

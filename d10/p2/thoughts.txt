@@ -16,3 +16,17 @@ joltage index of the smallest joltage value.
 
 Great idea from ChaelCodes: persist cache and leverage/extend it between runs
 Use serialized hash key as the machine's hash key?
+
+
+
+current thinking:
+
+to get a much more accurate worst-case-scenario estimate
+
+group buttons by joltage index
+map these to the smallest button per joltage index
+take the biggest of these buttons
+apply it until its targets are negative or zero
+repeat if not done
+
+use this number of pushes as the worst-case-scenario to short-circuit more
