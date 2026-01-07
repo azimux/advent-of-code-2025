@@ -199,18 +199,28 @@ class Machine
 
     # target_button = buttons.first
     # target_button = button_with_highest_odd_to_even_ratio
-    target_button = most_impactful_button_with_lowest_joltage
+    # target_button = most_impactful_button_with_lowest_joltage
+    #
+    # if target_button.nil?
+    #   if done?
+    #     return 0
+    #   else
+    #     return nil
+    #   end
+    # end
 
-    if target_button.nil?
-      if done?
-        return 0
-      else
-        return nil
-      end
-    end
-
-    target_joltage_index = minimum_nonzero_joltage_index(target_button)
+    # target_joltage_index = minimum_nonzero_joltage_index(target_button)
     # target_joltage_index = joltage_index_with_min_occurrences(target_button)
+    # try
+    # joltage index with most buttons
+    # joltage index with fewest buttons
+    # index of biggest joltage
+    # index of smallest joltage
+    target_joltage_index = joltage_index_with_fewest_buttons
+    # target_joltage_index = joltage_index_of_biggest_joltage
+    # target_joltage_index = joltage_index_of_smallest_joltage
+    # to slow:
+    # target_joltage_index = joltage_index_with_most_buttons
 
     if target_joltage_index.nil?
       if done?
@@ -296,8 +306,8 @@ class Machine
 
           if max_allowed_pushes
             if submachine_crude_min_pushes >= max_allowed_pushes
-              puts "short circuit2!"
-              raise "wtf!"
+              # puts "short circuit2!"
+              # raise "wtf!"
               next
             end
           end
@@ -346,6 +356,70 @@ class Machine
     button.joltages_to_increment.min_by do |joltage_index|
       buttons.count { it.include?(joltage_index) }
     end
+  end
+
+  def joltage_index_of_biggest_joltage
+    max_joltage_index = 0
+    max_joltage = joltages[0]
+
+    1.upto(joltages_size - 1) do |index|
+      joltage = joltages[index]
+
+      if joltage > max_joltage
+        max_joltage_index = index
+        max_joltage = joltage
+      end
+    end
+
+    max_joltage_index
+  end
+
+  def joltage_index_of_smallest_joltage
+    min_joltage_index = 0
+    min_joltage = joltages[0]
+
+    1.upto(joltages_size - 1) do |index|
+      joltage = joltages[index]
+
+      if joltage < min_joltage
+        min_joltage_index = index
+        min_joltage = joltage
+      end
+    end
+
+    min_joltage_index
+  end
+
+  def joltage_index_with_fewest_buttons
+    min_joltage_index = nil
+    min_buttons_count = nil
+
+    0.upto(joltages_size - 1) do |index|
+      buttons_count = buttons.count { it.include?(index) }
+
+      if min_joltage_index.nil? || buttons_count < min_buttons_count
+        min_joltage_index = index
+        min_buttons_count = buttons_count
+      end
+    end
+
+    min_joltage_index
+  end
+
+  def joltage_index_with_most_buttons
+    max_joltage_index = nil
+    max_buttons_count = nil
+
+    0.upto(joltages_size - 1) do |index|
+      buttons_count = buttons.count { it.include?(index) }
+
+      if max_joltage_index.nil? || buttons_count > max_buttons_count
+        max_joltage_index = index
+        max_buttons_count = buttons_count
+      end
+    end
+
+    max_joltage_index
   end
 
   def most_impactful_button_with_lowest_joltage
