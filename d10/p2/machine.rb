@@ -234,23 +234,6 @@ class Machine
     #   end
     # end
 
-    # target_joltage_index = minimum_nonzero_joltage_index(target_button)
-    # target_joltage_index = joltage_index_with_min_occurrences(target_button)
-    # try
-    # joltage index with most buttons
-    # joltage index with fewest buttons
-    # index of biggest joltage
-    # index of smallest joltage
-    # seems fast-ish!:
-    # target_joltage_index = joltage_index_with_fewest_buttons
-    # too slow:
-    # target_joltage_index = joltage_index_of_biggest_joltage
-    # seems fast-ish!
-    # target_joltage_index = joltage_index_of_smallest_joltage
-    # too slow:
-    # target_joltage_index = joltage_index_with_most_buttons
-    # seems fast-ish!
-
     independent_machines = split_machine
 
     if independent_machines
@@ -271,6 +254,22 @@ class Machine
       return sum
     end
 
+    # target_joltage_index = minimum_nonzero_joltage_index(target_button)
+    # target_joltage_index = joltage_index_with_min_occurrences(target_button)
+    # try
+    # joltage index with most buttons
+    # joltage index with fewest buttons
+    # index of biggest joltage
+    # index of smallest joltage
+    # seems fast-ish!:
+    # target_joltage_index = joltage_index_with_fewest_buttons
+    # too slow:
+    # target_joltage_index = joltage_index_of_biggest_joltage
+    # seems fast-ish!
+    # target_joltage_index = joltage_index_of_smallest_joltage
+    # too slow:
+    # target_joltage_index = joltage_index_with_most_buttons
+    # seems fast-ish!
     target_joltage_index = index_of_min_joltage_for_biggest_buttons
 
     if target_joltage_index.nil?
