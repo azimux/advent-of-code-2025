@@ -6,7 +6,7 @@
 require_relative "machine_parser"
 
 # machines = MachineParser.parse("inputs_test.txt")
-machines = MachineParser.parse("inputs_index_of_min_joltage_for_biggest_buttons.txt")
+machines = MachineParser.parse("inputs_short_circuit_for_new_caps.txt")
 
 Machine.load_cache_from_file
 
