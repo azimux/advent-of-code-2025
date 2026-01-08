@@ -250,6 +250,27 @@ class Machine
     # too slow:
     # target_joltage_index = joltage_index_with_most_buttons
     # seems fast-ish!
+
+    independent_machines = split_machine
+
+    if independent_machines
+
+      sum = nil
+
+      independent_machines.each do |machine|
+        presses = machine.minimum_pushes_required
+        return unless presses
+
+        if sum
+          sum += presses
+        else
+          sum = presses
+        end
+      end
+
+      return sum
+    end
+
     target_joltage_index = index_of_min_joltage_for_biggest_buttons
 
     if target_joltage_index.nil?
@@ -884,5 +905,72 @@ class Machine
     end
 
     pushes
+  end
+
+  def non_overlapping_button_groups
+    groups = []
+
+    0.upto(buttons.size - 1) do |button_index|
+      button = buttons[button_index]
+
+      groups_containing_button = groups.select do |group|
+        button.joltages_to_increment.any? do |joltage_index|
+          group.any? do |group_button|
+            group_button.include?(joltage_index)
+          end
+        end
+      end
+
+      case groups_containing_button.size
+      when 0
+        groups << [button]
+      when 1
+        groups_containing_button[0] << button
+      else
+        to_keep, *to_delete = groups_containing_button
+
+        to_delete.each do |group_to_delete|
+          groups.delete(group_to_delete)
+
+          group_to_delete.each do |button|
+            to_keep << button
+          end
+        end
+      end
+    end
+
+    groups
+  end
+
+  def split_machine
+    groups = non_overlapping_button_groups
+    groups_size = groups.size
+
+    return if groups_size == 1
+    raise "wtf" if groups_size == 0
+
+    groups.map do |buttons|
+      joltage_indices = []
+
+      buttons.each do |button|
+        button.joltages_to_increment.each do |joltage_index|
+          unless joltage_indices.include?(joltage_index)
+            joltage_indices << joltage_index
+          end
+        end
+      end
+
+      new_joltages = []
+
+      joltages.joltage_levels.each.with_index do |joltage_level, joltage_index|
+        new_joltages << if joltage_indices.include?(joltage_index)
+                          joltage_level
+                        else
+                          0
+                        end
+      end
+
+      Machine.new(Joltages.new(new_joltages), buttons, false)
+    end
   end
 end
