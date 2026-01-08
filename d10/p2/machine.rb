@@ -262,7 +262,7 @@ class Machine
     # index of biggest joltage
     # index of smallest joltage
     # seems fast-ish!:
-    # target_joltage_index = joltage_index_with_fewest_buttons
+    target_joltage_index = joltage_index_with_fewest_buttons
     # too slow:
     # target_joltage_index = joltage_index_of_biggest_joltage
     # seems fast-ish!
@@ -270,7 +270,7 @@ class Machine
     # too slow:
     # target_joltage_index = joltage_index_with_most_buttons
     # seems fast-ish!
-    target_joltage_index = index_of_min_joltage_for_biggest_buttons
+    # target_joltage_index = index_of_min_joltage_for_biggest_buttons
 
     if target_joltage_index.nil?
       if done?
