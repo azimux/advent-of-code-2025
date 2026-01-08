@@ -3,3 +3,6 @@
 
 [didn't work] Pick target joltage index that appears in the most buttons first instead of the
 joltage index of the smallest joltage value.
+
+* Get index of smallest joltage for biggest buttons
+* write out results and use them as new maxes for the top-level machines if we are too high on pushes!
