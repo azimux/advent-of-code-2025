@@ -1,32 +1,5 @@
-* normalizing machines...
-  * optional: can we detect if two joltages are always in the same buttons?
-    * if the joltages are the same, merge the joltages
-    * if the joltages are different, there's no answer, return nil
-
-
-
-note: no solution if button joltage index count of the only button is not the same as joltages index count
-      and if they do match, no solution if all joltage values are not the same
-
 [didn't work] NOTE!: instead of driving smallest joltage to 0, drive any odd joltage to an even joltage??
 [didn't work] maybe always choose path with fewest odd joltages with hopes of a 2x multiplier to cut problem in half?
 
 [didn't work] Pick target joltage index that appears in the most buttons first instead of the
 joltage index of the smallest joltage value.
-
-Great idea from ChaelCodes: persist cache and leverage/extend it between runs
-Use serialized hash key as the machine's hash key?
-
-
-
-current thinking:
-
-to get a much more accurate worst-case-scenario estimate
-
-group buttons by joltage index
-map these to the smallest button per joltage index
-take the biggest of these buttons
-apply it until its targets are negative or zero
-repeat if not done
-
-use this number of pushes as the worst-case-scenario to short-circuit more
