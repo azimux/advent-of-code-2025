@@ -45,7 +45,22 @@ class MachineParser
       joltages = joltages.gsub(/[{}]/, "").split(",").map(&:to_i)
       joltages = Joltages.new(joltages)
 
-      Machine.new(joltages, buttons)
+      machine = Machine.new(joltages.dup, buttons.dup)
+
+      cap = caps[machine.to_s_parsable]
+
+      unless cap
+        raise "missing cap!"
+      end
+
+      Machine.new(joltages, buttons, true, cap)
+    end
+
+    def caps
+      return @caps if defined?(@caps)
+
+      require "yaml"
+      @caps = YAML.load_file("caps.yml")
     end
   end
 end
