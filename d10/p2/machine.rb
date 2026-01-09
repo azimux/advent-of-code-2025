@@ -326,6 +326,10 @@ class Machine
       new_joltages = joltages.dup
       button_presses.each { |button_press| button_press.push(new_joltages) }
 
+      # Is there a way we can break out of this loop?
+      # Each set of button presses should be less and less impactful, leaving us further
+      # and further from a solution. Can't we short circuit using this info??
+
       unless new_joltages.any?(&:negative?)
         if new_joltages.done?
           return target_joltage
@@ -345,11 +349,22 @@ class Machine
           raise "wtf"
         end
 
+        cap = minimum_submachine_pushes
+
+        if cap
+          if worst_case_pushes < cap
+            raise "yay!"
+            cap = worst_case_pushes + 1
+          end
+        else
+          cap = worst_case_pushes + 1
+        end
+
         submachine = Machine.new(
           new_joltages,
           new_buttons,
           false,
-          minimum_submachine_pushes
+          cap
         )
 
         # should we cache the fact that this has no solution to skip checking it??
@@ -407,6 +422,10 @@ class Machine
           # return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
+            if min_pushes == worst_case_pushes
+              return target_joltage + min_pushes
+            end
+
             minimum_submachine_pushes = min_pushes
           end
         end
