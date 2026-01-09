@@ -293,7 +293,9 @@ class Machine
     # too slow:
     # target_joltage_index = joltage_index_with_most_buttons
     # seems fast-ish!
-    target_joltage_index = index_of_min_joltage_for_biggest_buttons
+    # target_joltage_index = index_of_min_joltage_for_biggest_buttons
+    # ?
+    target_joltage_index = index_of_fewest_button_joltage_for_biggest_buttons
 
     if target_joltage_index.nil?
       if done?
@@ -551,6 +553,34 @@ class Machine
     end
 
     min_joltage_index
+  end
+
+  def index_of_fewest_button_joltage_for_biggest_buttons
+    button_index = 0
+    button = buttons[0]
+
+    max_size = button_size = button.joltages_size
+
+    joltages_indices_to_consider = []
+
+    while button_size == max_size
+      button.joltages_to_increment.each do |joltage_index|
+        unless joltages_indices_to_consider.include?(joltage_index)
+          joltages_indices_to_consider << joltage_index
+        end
+      end
+
+      button_index += 1
+      button = buttons[button_index]
+
+      break unless button
+
+      button_size = button.joltages_size
+    end
+
+    joltages_indices_to_consider.min_by do |joltage_index|
+      buttons.count { it.include?(joltage_index) }
+    end
   end
 
   def joltage_index_with_fewest_buttons
