@@ -6,3 +6,11 @@ joltage index of the smallest joltage value.
 
 * Get index of smallest joltage for biggest buttons
 * write out results and use them as new maxes for the top-level machines if we are too high on pushes!
+* put inputs text files in their own directory to reduce top-level clutter?
+* pass in cache name to script?
+* move caches to tmp/ ?
+* if there's non-overlapping groups of buttons, split them into separate machines??
+* Choose joltage index from button in most groups??
+
+* bummer that passing a block to a method that doesn't take a block silently ignores
+  the block instead of raising

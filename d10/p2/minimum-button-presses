@@ -12,7 +12,7 @@ require_relative "machine_parser"
 # machines = MachineParser.parse("inputs_attempt_splitting_machines_by_button_groups_index_from_min_buttons.txt")
 # machines = MachineParser.parse("inputs_split_min_joltage_for_biggest_buttons.txt")
 # machines = MachineParser.parse("inputs_smorg.txt")
-machines = MachineParser.parse("inputs_no_short_circuit.txt")
+machines = MachineParser.parse("most_buttons.txt")
 
 Machine.load_cache_from_file
 
