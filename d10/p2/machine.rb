@@ -34,7 +34,9 @@ class Machine
               cache_file.write(Marshal.dump(value))
             end
 
-            @cache_file = cache_file
+            cache_file.close
+
+            FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
           end
         end
 
@@ -89,11 +91,17 @@ class Machine
     self.joltages = joltages
     self.buttons = buttons
 
+    self.original_to_s = to_s if top_level
+
     normalize!
 
-    unless @has_no_solution
-      self.original_to_s = to_s if top_level
+    if @has_no_solution
+      if top_level
+        binding.pry
+      end
+    end
 
+    unless @has_no_solution
       if max_allowed_pushes
         self.max_allowed_pushes = max_allowed_pushes
       end
@@ -119,6 +127,7 @@ class Machine
 
         to_check.each do |other_index|
           if joltages[joltage_index] != joltages[other_index]
+            binding.pry if top_level
             @has_no_solution = true
             return
           end
@@ -140,7 +149,25 @@ class Machine
   def crude_max_pushes
     return @crude_max_pushes if defined?(@crude_max_pushes)
 
-    @crude_max_pushes = crude_max_pushes_without_multiplier * multiplier
+    without_multiplier = crude_max_pushes_without_multiplier
+
+    unless without_multiplier
+      if top_level
+        binding.pry
+        remove_instance_variable(:@crude_max_pushes_without_multiplier)
+        crude_max_pushes_without_multiplier
+      end
+    end
+
+    @crude_max_pushes = if without_multiplier
+                          crude_max_pushes_without_multiplier * multiplier
+                        else
+                          unless @has_no_solution
+                            raise "unexpected nil crude_max_pushes_without_multiplier"
+                          end
+
+                          nil
+                        end
   end
 
   def crude_max_pushes_without_multiplier
@@ -314,6 +341,10 @@ class Machine
           next
         end
 
+        if minimum_submachine_pushes && worst_case_pushes < minimum_submachine_pushes
+          raise "wtf"
+        end
+
         submachine = Machine.new(
           new_joltages,
           new_buttons,
@@ -343,7 +374,7 @@ class Machine
             #   binding.pry
             # end
 
-            puts "would have skipped"
+            puts "skipped, but is this unreachable now??"
             next
           end
         # checking this again because min_crude_pushes can change it
@@ -373,7 +404,7 @@ class Machine
         min_pushes = submachine.minimum_pushes_required
 
         if min_pushes
-          return target_joltage + min_pushes
+          # return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             minimum_submachine_pushes = min_pushes
@@ -640,6 +671,10 @@ class Machine
     end
   end
 
+  def to_s_parsable
+    "#{buttons.map(&:to_s).join(" ")} #{joltages}"
+  end
+
   # Normalize to allow for more cache hits
   def normalize!
     remove_all_zero_joltages!
@@ -812,6 +847,7 @@ class Machine
       button = smallest_button_per_index[joltage_index]
 
       unless button
+        binding.pry if top_level
         @has_no_solution = true
         return
       end
@@ -872,6 +908,7 @@ class Machine
       button = biggest_button_per_index[joltage_index]
 
       unless button
+        binding.pry if top_level
         @has_no_solution = true
         return
       end
@@ -892,8 +929,6 @@ class Machine
         button.push_multiple(joltages, joltage)
       end
     end
-
-    binding.pry
 
     pushes
   rescue => e
