@@ -434,7 +434,7 @@ class Machine
             # HERE! There's a bad assumption here!!
             # puts "short circuit!!"
             # raise "wtf!!"
-            return target_joltage + minimum_submachine_pushes
+            # return target_joltage + minimum_submachine_pushes
             next
           end
 
@@ -450,7 +450,7 @@ class Machine
         min_pushes = submachine.minimum_pushes_required
 
         if min_pushes
-          return target_joltage + min_pushes
+          # return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             # if min_pushes == worst_case_pushes
