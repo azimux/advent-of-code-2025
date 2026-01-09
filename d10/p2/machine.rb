@@ -213,7 +213,7 @@ class Machine
   end
 
   # NOTE: This "private" method does not apply the multiplier!!
-  def minimum_pushes_required_without_cache
+  def minimum_pushes_required_without_cache(skip_split_solution = false)
     if cannot_have_a_solution?
       # if done?
       #   raise "wtf"
@@ -234,10 +234,20 @@ class Machine
     #   end
     # end
 
-    split_solution = split_machine_solution
+    unless skip_split_solution
+      split_solution = split_machine_solution
 
-    if split_solution
-      return split_solution
+      if split_solution
+        return split_solution
+      else
+        solution = minimum_pushes_required_without_cache(true)
+
+        if solution && split_machine
+          binding.pry
+        end
+
+        return solution
+      end
     end
 
     # target_joltage_index = minimum_nonzero_joltage_index(target_button)
@@ -942,6 +952,8 @@ class Machine
             to_keep << button
           end
         end
+
+        to_keep << button
       end
     end
 
@@ -949,13 +961,18 @@ class Machine
   end
 
   def split_machine
+    return @split_machine if defined?(@split_machine)
+
     groups = non_overlapping_button_groups
     groups_size = groups.size
 
-    return if groups_size == 1
+    if groups_size == 1
+      @split_machine = nil
+      return
+    end
     raise "wtf" if groups_size == 0
 
-    groups.map do |buttons|
+    @split_machine = groups.map do |buttons|
       joltage_indices = []
 
       buttons.each do |button|
