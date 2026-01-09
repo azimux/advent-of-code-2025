@@ -234,24 +234,10 @@ class Machine
     #   end
     # end
 
-    independent_machines = split_machine
+    split_solution = split_machine_solution
 
-    if independent_machines
-
-      sum = nil
-
-      independent_machines.each do |machine|
-        presses = machine.minimum_pushes_required
-        return unless presses
-
-        if sum
-          sum += presses
-        else
-          sum = presses
-        end
-      end
-
-      return sum
+    if split_solution
+      return split_solution
     end
 
     # target_joltage_index = minimum_nonzero_joltage_index(target_button)
@@ -390,6 +376,27 @@ class Machine
       #   binding.pry if top_level
       # else
       target_joltage + minimum_submachine_pushes
+    end
+  end
+
+  def split_machine_solution
+    independent_machines = split_machine
+
+    if independent_machines
+      sum = nil
+
+      independent_machines.each do |machine|
+        presses = machine.minimum_pushes_required
+        return unless presses
+
+        if sum
+          sum += presses
+        else
+          sum = presses
+        end
+      end
+
+      sum
     end
   end
 
