@@ -49,11 +49,11 @@ class MachineParser
 
       cap = caps[machine.to_s_parsable]
 
-      unless cap
-        raise "missing cap!"
+      if cap
+        Machine.new(joltages, buttons, true, cap)
+      else
+        Machine.new(joltages, buttons)
       end
-
-      Machine.new(joltages, buttons, true, cap)
     end
 
     def caps

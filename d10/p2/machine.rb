@@ -352,6 +352,7 @@ class Machine
         cap = minimum_submachine_pushes
 
         if cap
+          cap -= 1
           if worst_case_pushes < cap
             raise "yay!"
             cap = worst_case_pushes + 1
@@ -403,6 +404,7 @@ class Machine
 
         if minimum_submachine_pushes
           if submachine_crude_min_pushes >= minimum_submachine_pushes
+            # HERE! There's a bad assumption here!!
             # puts "short circuit!!"
             # raise "wtf!!"
             return target_joltage + minimum_submachine_pushes
@@ -421,7 +423,7 @@ class Machine
         min_pushes = submachine.minimum_pushes_required
 
         if min_pushes
-          # return target_joltage + min_pushes
+          return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             # if min_pushes == worst_case_pushes
@@ -827,7 +829,12 @@ class Machine
         a << joltage_index
       end
 
-      a << 10
+      a << -1
+    end
+
+    if max_allowed_pushes
+      a << -2
+      a << max_allowed_pushes
     end
 
     joltages.joltage_levels.each do |joltage_level|

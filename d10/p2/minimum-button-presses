@@ -49,8 +49,9 @@ pushes = machines.map do |machine|
 
     File.write("caps.yml", YAML.dump(caps))
   elsif push_count > cap
-    binding.pry
-    raise "wtf how can we have a solution above the cap???"
+    puts "unexpected worse push_count: #{push_count} > #{cap} for: #{caps_key}"
+    # binding.pry
+    # raise "wtf how can we have a solution above the cap???"
   end
 
   push_count
