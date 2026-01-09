@@ -5,15 +5,18 @@
 
 require_relative "machine_parser"
 
-# machines = MachineParser.parse("inputs_attempt_splitting_machines_by_button_groups.txt")
-# machines = MachineParser.parse("inputs_attempt_splitting_machines_by_button_groups_other_cache.txt")
-# machines = MachineParser.parse("inputs_debug.txt")
-# machines = MachineParser.parse("inputs_test.txt")
-# machines = MachineParser.parse("inputs_attempt_splitting_machines_by_button_groups_index_from_min_buttons.txt")
-# machines = MachineParser.parse("inputs_split_min_joltage_for_biggest_buttons.txt")
-# machines = MachineParser.parse("inputs_smorg.txt")
-# machines = MachineParser.parse("most_buttons.txt")
-machines = MachineParser.parse("min_joltage_biggest_button.txt")
+# inputs_file = "inputs_attempt_splitting_machines_by_button_groups.txt"
+# inputs_file = "inputs_attempt_splitting_machines_by_button_groups_other_cache.txt"
+# inputs_file = "inputs_debug.txt"
+# inputs_file = "inputs_test.txt"
+# inputs_file = "inputs_attempt_splitting_machines_by_button_groups_index_from_min_buttons.txt"
+# inputs_file = "inputs_split_min_joltage_for_biggest_buttons.txt"
+# inputs_file = "inputs_smorg.txt"
+# inputs_file = "fewest_buttons.txt"
+# inputs_file = "most_buttons.txt"
+inputs_file = "min_joltage_biggest_button.txt"
+puts "running for #{inputs_file}"
+machines = MachineParser.parse(inputs_file)
 
 Machine.load_cache_from_file
 
