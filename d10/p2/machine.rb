@@ -8,10 +8,10 @@ class Machine
   @cache_file_queue = nil
 
   class << self
-    def load_cache_from_file
-      if MachineParser.last_parsed_filename
-        cache_file_name = "#{MachineParser.last_parsed_filename.gsub(/\.txt$/, "")}.cache"
+    attr_accessor :cache_file_name
 
+    def load_cache_from_file
+      if cache_file_name
         if File.exist?(cache_file_name)
           FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
 

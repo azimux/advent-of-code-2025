@@ -5,20 +5,11 @@
 
 require_relative "machine_parser"
 
-# inputs_file = "inputs_attempt_splitting_machines_by_button_groups.txt"
-# inputs_file = "inputs_attempt_splitting_machines_by_button_groups_other_cache.txt"
-# inputs_file = "inputs_debug.txt"
-# inputs_file = "inputs_test.txt"
-# inputs_file = "inputs_attempt_splitting_machines_by_button_groups_index_from_min_buttons.txt"
-# inputs_file = "inputs_split_min_joltage_for_biggest_buttons.txt"
-# inputs_file = "inputs_smorg.txt"
-# inputs_file = "fewest_buttons.txt"
-# inputs_file = "most_buttons.txt"
-# inputs_file = "min_joltage_biggest_button.txt"
-# inputs_file = "fewest_button_joltage_for_biggest_buttons.txt"
-inputs_file = "two_key_cache.txt"
+Machine.cache_file_name = "two_key.cache"
 
-puts "running for #{inputs_file}"
+inputs_file = "inputs.txt"
+
+puts "running for #{inputs_file} #{Machine.cache_file_name}"
 machines = MachineParser.parse(inputs_file)
 
 Machine.load_cache_from_file
