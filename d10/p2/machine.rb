@@ -424,9 +424,10 @@ class Machine
           # return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
-            if min_pushes == worst_case_pushes
-              return target_joltage + min_pushes
-            end
+            # if min_pushes == worst_case_pushes
+            #   # is this safe?? seems like it's not safe!
+            #   return target_joltage + min_pushes
+            # end
 
             minimum_submachine_pushes = min_pushes
           end

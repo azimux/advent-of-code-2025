@@ -43,10 +43,14 @@ pushes = machines.map do |machine|
   puts
 
   caps_key = machine.to_s_parsable
-  if caps[caps_key] > push_count
+  cap = caps[caps_key]
+  if cap.nil? || cap > push_count
     caps[caps_key] = push_count
 
     File.write("caps.yml", YAML.dump(caps))
+  elsif push_count > cap
+    binding.pry
+    raise "wtf how can we have a solution above the cap???"
   end
 
   push_count
