@@ -112,6 +112,7 @@ class Machine
 
   def initialize(joltages, buttons, top_level = true, max_allowed_pushes = nil)
     self.top_level = top_level if top_level
+    self.max_allowed_pushes = max_allowed_pushes if max_allowed_pushes
 
     self.joltages = joltages
     self.buttons = buttons
@@ -119,18 +120,6 @@ class Machine
     self.original_to_s = to_s if top_level
 
     normalize!
-
-    if @has_no_solution
-      if top_level
-        binding.pry
-      end
-    end
-
-    unless @has_no_solution
-      if max_allowed_pushes
-        self.max_allowed_pushes = max_allowed_pushes
-      end
-    end
   end
 
   def done? = joltages.done?
@@ -201,7 +190,7 @@ class Machine
     @crude_max_pushes_without_multiplier = crude_max_pushes_without_multiplier_for(buttons, joltages)
 
     if max_allowed_pushes
-      if max_allowed_pushes < @crude_max_pushes_without_multiplier
+      if !@has_no_solution && max_allowed_pushes < @crude_max_pushes_without_multiplier
         @crude_max_pushes_without_multiplier = max_allowed_pushes
       end
     end
@@ -267,24 +256,8 @@ class Machine
   # NOTE: This "private" method does not apply the multiplier!!
   def minimum_pushes_required_without_cache(skip_split_solution = false)
     if cannot_have_a_solution?
-      # if done?
-      #   raise "wtf"
-      #   binding.pry
-      # end
       return nil
     end
-
-    # target_button = buttons.first
-    # target_button = button_with_highest_odd_to_even_ratio
-    # target_button = most_impactful_button_with_lowest_joltage
-    #
-    # if target_button.nil?
-    #   if done?
-    #     return 0
-    #   else
-    #     return nil
-    #   end
-    # end
 
     unless skip_split_solution
       split_solution = split_machine_solution
@@ -294,21 +267,14 @@ class Machine
       else
         solution = minimum_pushes_required_without_cache(true)
 
-        if solution && split_machine
-          binding.pry
-        end
+        # if solution && split_machine
+        #   binding.pry
+        # end
 
         return solution
       end
     end
 
-    # target_joltage_index = minimum_nonzero_joltage_index(target_button)
-    # target_joltage_index = joltage_index_with_min_occurrences(target_button)
-    # try
-    # joltage index with most buttons
-    # joltage index with fewest buttons
-    # index of biggest joltage
-    # index of smallest joltage
     # seems fast-ish!:
     # target_joltage_index = joltage_index_with_fewest_buttons
     # too slow:
@@ -323,16 +289,10 @@ class Machine
     target_joltage_index = index_of_fewest_button_joltage_for_biggest_buttons
 
     if target_joltage_index.nil?
-      if done?
-        return 0
-      else
-        return nil
-      end
+      return done? ? 0 : nil
     end
 
     target_joltage = joltages[target_joltage_index]
-
-    # worst_case_pushes = crude_max_pushes_without_multiplier - target_joltage
 
     relevant_buttons = buttons.select { |button| button.include?(target_joltage_index) }
     relevant_buttons.reject! do |button|
@@ -346,10 +306,6 @@ class Machine
     minimum_submachine_pushes = nil
 
     relevant_buttons.button_presses(target_joltage) do |button_presses|
-      # if top_level
-      #   # puts "#{Time.now}: #{self} creating a submachine for #{worst_case_pushes}"
-      # end
-
       new_joltages = joltages.dup
       button_presses.each { |button_press| button_press.push(new_joltages) }
 
@@ -365,28 +321,16 @@ class Machine
         new_buttons = buttons - relevant_buttons
 
         if new_buttons.empty?
-          # if done?
-          #   raise "wtf"
-          #   binding.pry
-          # end
           next
-        end
-
-        if minimum_submachine_pushes && worst_case_pushes < minimum_submachine_pushes
-          raise "wtf"
         end
 
         cap = minimum_submachine_pushes
 
-        if cap
-          cap -= 1
-          if worst_case_pushes < cap
-            raise "yay!"
-            cap = worst_case_pushes + 1
-          end
-        else
-          cap = worst_case_pushes + 1
-        end
+        cap = if cap
+                cap - 1
+              else
+                worst_case_pushes + 1
+              end
 
         submachine = Machine.new(
           new_joltages,
@@ -395,29 +339,18 @@ class Machine
           cap
         )
 
-        # should we cache the fact that this has no solution to skip checking it??
-        # that would mean moving this check to the top so we don't skip caching
-        # the submachine
         if submachine.cannot_have_a_solution?
-          # if done?
-          #   raise "wtf"
-          #   binding.pry
-          # end
           next
         end
 
         submachine_crude_min_pushes = submachine.crude_min_pushes
 
-        # TODO: can we make use of min_submachine_pushes here? Or no because we short-circuit?
-        # maybe we can go back to the faster _min_ instead of _most_ if we use it instead of returning?
         if submachine_crude_min_pushes
           if submachine_crude_min_pushes > worst_case_pushes
-            # if done?
-            raise "not expecting done!"
-            #   binding.pry
-            # end
+            if minimum_submachine_pushes
+              return target_joltage + minimum_submachine_pushes
+            end
 
-            puts "skipped, but is this unreachable now??"
             next
           end
         # checking this again because min_crude_pushes can change it
@@ -450,14 +383,9 @@ class Machine
         min_pushes = submachine.minimum_pushes_required
 
         if min_pushes
-          # return target_joltage + min_pushes
+          return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
-            # if min_pushes == worst_case_pushes
-            #   # is this safe?? seems like it's not safe!
-            #   return target_joltage + min_pushes
-            # end
-
             minimum_submachine_pushes = min_pushes
           end
         end
@@ -465,8 +393,6 @@ class Machine
     end
 
     if minimum_submachine_pushes
-      #   binding.pry if top_level
-      # else
       target_joltage + minimum_submachine_pushes
     end
   end

@@ -1,11 +1,13 @@
 #!/usr/bin/env ruby
 
+require "yaml"
+
 # require "pry"
 # require "pry-byebug"
 
 require_relative "machine_parser"
 
-Machine.cache_file_name = "two_key.cache"
+Machine.cache_file_name = "max_bug_fix.cache"
 
 inputs_file = "inputs.txt"
 
@@ -16,10 +18,7 @@ Machine.load_cache_from_file
 
 machines.sort_by!(&:crude_max_pushes)
 
-# caps = {}
-
-require "yaml"
-caps = YAML.load_file("caps.yml")
+caps = MachineParser.caps
 
 pushes = machines.map do |machine|
   puts "#{Time.now}: starting new machine..."

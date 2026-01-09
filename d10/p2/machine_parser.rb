@@ -55,8 +55,13 @@ class MachineParser
     def caps
       return @caps if defined?(@caps)
 
-      require "yaml"
-      @caps = YAML.load_file("caps.yml")
+      caps_file = "caps.yml"
+
+      @caps = if File.exist?(caps_file)
+                YAML.load_file(caps_file)
+              else
+                {}
+              end
     end
   end
 end
