@@ -385,7 +385,7 @@ class Machine
         if submachine_crude_min_pushes
           if submachine_crude_min_pushes > worst_case_pushes
             # if done?
-            #   raise "not expecting done!"
+            raise "not expecting done!"
             #   binding.pry
             # end
 
@@ -404,6 +404,8 @@ class Machine
         if minimum_submachine_pushes
           if submachine_crude_min_pushes >= minimum_submachine_pushes
             # puts "short circuit!!"
+            # raise "wtf!!"
+            return target_joltage + minimum_submachine_pushes
             next
           end
 
