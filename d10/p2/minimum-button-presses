@@ -13,13 +13,16 @@ require_relative "machine_parser"
 # machines = MachineParser.parse("inputs_split_min_joltage_for_biggest_buttons.txt")
 # machines = MachineParser.parse("inputs_smorg.txt")
 # machines = MachineParser.parse("most_buttons.txt")
-machines = MachineParser.parse("fewest_buttons_with_cap.txt")
+machines = MachineParser.parse("min_joltage_biggest_button.txt")
 
 Machine.load_cache_from_file
 
 machines.sort_by!(&:crude_max_pushes)
 
 # caps = {}
+
+require "yaml"
+caps = YAML.load_file("caps.yml")
 
 pushes = machines.map do |machine|
   puts "#{Time.now}: starting new machine..."
@@ -35,7 +38,13 @@ pushes = machines.map do |machine|
   puts machine.to_s_parsable
   puts push_count
   puts
-  # caps[machine.to_s_parsable] = push_count
+
+  caps_key = machine.to_s_parsable
+  if caps[caps_key] > push_count
+    caps[caps_key] = push_count
+
+    File.write("caps.yml", YAML.dump(caps))
+  end
 
   push_count
 end
