@@ -78,6 +78,31 @@ class Machine
       end
     end
 
+    def minimum_pushes_cached2(machine)
+      success_cache_key = machine.success_cache_key
+
+      if @minimum_pushes_cache.key?(success_cache_key)
+        return @minimum_pushes_cache[success_cache_key]
+      end
+
+      cache_key = machine.cache_key
+
+      if @minimum_pushes_cache.key?(cache_key)
+        return @minimum_pushes_cache[cache_key]
+      end
+
+      value = yield
+
+      key = value.nil? ? cache_key : success_cache_key
+
+      if @cache_file
+        @cache_file_queue << key
+        @cache_file_queue << value
+      end
+
+      @minimum_pushes_cache[key] = value
+    end
+
     def cache_size
       @minimum_pushes_cache.size
     end
@@ -294,7 +319,7 @@ class Machine
     # target_joltage_index = joltage_index_with_most_buttons
     # seems fast-ish!
     # target_joltage_index = index_of_min_joltage_for_biggest_buttons
-    # ?
+    # seems even faster!! (ish?)
     target_joltage_index = index_of_fewest_button_joltage_for_biggest_buttons
 
     if target_joltage_index.nil?
@@ -468,7 +493,7 @@ class Machine
   end
 
   def minimum_pushes_cached(&)
-    self.class.minimum_pushes_cached(cache_key, &)
+    self.class.minimum_pushes_cached2(self, &)
   end
 
   def button_with_most_joltage_indices
@@ -852,6 +877,14 @@ class Machine
   def eql?(other) = self == other
 
   def cache_key
+    if max_allowed_pushes
+      [-2, max_allowed_pushes, *success_cache_key]
+    else
+      success_cache_key
+    end
+  end
+
+  def success_cache_key
     a = []
 
     buttons.each do |button|
@@ -860,11 +893,6 @@ class Machine
       end
 
       a << -1
-    end
-
-    if max_allowed_pushes
-      a << -2
-      a << max_allowed_pushes
     end
 
     joltages.joltage_levels.each do |joltage_level|

@@ -15,7 +15,9 @@ require_relative "machine_parser"
 # inputs_file = "fewest_buttons.txt"
 # inputs_file = "most_buttons.txt"
 # inputs_file = "min_joltage_biggest_button.txt"
-inputs_file = "fewest_button_joltage_for_biggest_buttons.txt"
+# inputs_file = "fewest_button_joltage_for_biggest_buttons.txt"
+inputs_file = "two_key_cache.txt"
+
 puts "running for #{inputs_file}"
 machines = MachineParser.parse(inputs_file)
 
