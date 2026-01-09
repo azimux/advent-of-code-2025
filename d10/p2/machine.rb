@@ -255,9 +255,7 @@ class Machine
 
   # NOTE: This "private" method does not apply the multiplier!!
   def minimum_pushes_required_without_cache(skip_split_solution = false)
-    if cannot_have_a_solution?
-      return nil
-    end
+    return nil if cannot_have_a_solution?
 
     unless skip_split_solution
       split_solution = split_machine_solution
@@ -267,9 +265,9 @@ class Machine
       else
         solution = minimum_pushes_required_without_cache(true)
 
-        # if solution && split_machine
-        #   binding.pry
-        # end
+        if solution && split_machine
+          binding.pry
+        end
 
         return solution
       end
@@ -314,20 +312,14 @@ class Machine
       # and further from a solution. Can't we short circuit using this info??
 
       unless new_joltages.any?(&:negative?)
-        if new_joltages.done?
-          return target_joltage
-        end
+        return target_joltage if new_joltages.done?
 
         new_buttons = buttons - relevant_buttons
 
-        if new_buttons.empty?
-          next
-        end
+        next if new_buttons.empty?
 
-        cap = minimum_submachine_pushes
-
-        cap = if cap
-                cap - 1
+        cap = if minimum_submachine_pushes
+                minimum_submachine_pushes - 1
               else
                 worst_case_pushes + 1
               end
@@ -339,9 +331,7 @@ class Machine
           cap
         )
 
-        if submachine.cannot_have_a_solution?
-          next
-        end
+        next if submachine.cannot_have_a_solution?
 
         submachine_crude_min_pushes = submachine.crude_min_pushes
 
@@ -407,11 +397,11 @@ class Machine
         presses = machine.minimum_pushes_required
         return unless presses
 
-        if sum
-          sum += presses
-        else
-          sum = presses
-        end
+        sum = if sum
+                sum + presses
+              else
+                presses
+              end
       end
 
       sum
@@ -831,14 +821,6 @@ class Machine
   def better_max_pushes_estimate(buttons, joltages)
     joltages = joltages.dup
 
-    # group buttons by joltage index
-    # map these to the smallest button per joltage index
-    # take the biggest of these buttons
-    # apply it until its targets are negative or zero
-    # repeat if not done
-    #
-    # use this number of pushes as the worst-case-scenario to short-circuit more
-
     smallest_button_per_index = []
     pushes = 0
 
@@ -882,23 +864,12 @@ class Machine
     end
 
     pushes
-  rescue => e
-    binding.pry
-    raise
   end
 
   # WARNING: this doesn't look right... we'd need to do something about the negative values
   def better_min_pushes_estimate
     buttons = self.buttons
     joltages = self.joltages.dup
-
-    # group buttons by joltage index
-    # map these to the smallest button per joltage index
-    # take the biggest of these buttons
-    # apply it until its targets are negative or zero
-    # repeat if not done
-    #
-    # use this number of pushes as the worst-case-scenario to short-circuit more
 
     biggest_button_per_index = []
     pushes = 0
@@ -944,9 +915,6 @@ class Machine
     end
 
     pushes
-  rescue => e
-    binding.pry
-    raise
   end
 
   def better_min_pushes_estimate2(buttons, joltages)
@@ -1018,7 +986,6 @@ class Machine
       @split_machine = nil
       return
     end
-    raise "wtf" if groups_size == 0
 
     @split_machine = groups.map do |buttons|
       joltage_indices = []
