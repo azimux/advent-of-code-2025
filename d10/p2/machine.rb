@@ -956,17 +956,14 @@ class Machine
   end
 
   def split_machine
-    return @split_machine if defined?(@split_machine)
-
     groups = non_overlapping_button_groups
     groups_size = groups.size
 
     if groups_size == 1
-      @split_machine = nil
       return
     end
 
-    @split_machine = groups.map do |buttons|
+    groups.map do |buttons|
       joltage_indices = []
 
       buttons.each do |button|
