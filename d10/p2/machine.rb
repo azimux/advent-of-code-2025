@@ -257,6 +257,12 @@ class Machine
   def minimum_pushes_required_without_cache(skip_split_solution = false)
     return nil if cannot_have_a_solution?
 
+    if crude_min_pushes_without_multiplier && max_allowed_pushes
+      if crude_min_pushes_without_multiplier > max_allowed_pushes
+        binding.pry
+      end
+    end
+
     unless skip_split_solution
       split_solution = split_machine_solution
       return split_solution if split_solution
@@ -324,6 +330,7 @@ class Machine
         if submachine_crude_min_pushes
           if submachine_crude_min_pushes > worst_case_pushes
             if minimum_submachine_pushes
+              # uh oh... might need to remove this?
               return target_joltage + minimum_submachine_pushes
             end
 
@@ -340,13 +347,13 @@ class Machine
             next
           end
 
-          # if max_allowed_pushes
-          #   if submachine_crude_min_pushes > max_allowed_pushes
-          #     # puts "short circuit2!"
-          #     # raise "wtf!"
-          #     next
-          #   end
-          # end
+          if max_allowed_pushes
+            if submachine_crude_min_pushes > max_allowed_pushes
+              puts "short circuit2!"
+              raise "wtf!"
+              next
+            end
+          end
         end
 
         min_pushes = submachine.minimum_pushes_required
@@ -672,6 +679,10 @@ class Machine
     end
 
     return if indices_to_remove.empty?
+
+    self.buttons = buttons.reject do |button|
+      button.joltages_to_increment.intersect?(indices_to_remove)
+    end
 
     remove_joltage_indices(indices_to_remove)
   end
