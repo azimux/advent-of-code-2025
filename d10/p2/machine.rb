@@ -259,18 +259,7 @@ class Machine
 
     unless skip_split_solution
       split_solution = split_machine_solution
-
-      if split_solution
-        return split_solution
-      else
-        solution = minimum_pushes_required_without_cache(true)
-
-        if solution && split_machine
-          binding.pry
-        end
-
-        return solution
-      end
+      return split_solution if split_solution
     end
 
     # seems fast-ish!:
@@ -324,16 +313,13 @@ class Machine
                 worst_case_pushes + 1
               end
 
-        submachine = Machine.new(
-          new_joltages,
-          new_buttons,
-          false,
-          cap
-        )
+        submachine = Machine.new(new_joltages, new_buttons, false, cap)
 
         next if submachine.cannot_have_a_solution?
 
         submachine_crude_min_pushes = submachine.crude_min_pushes
+        # checking this again because min_crude_pushes can change it
+        next if submachine.cannot_have_a_solution?
 
         if submachine_crude_min_pushes
           if submachine_crude_min_pushes > worst_case_pushes
@@ -343,13 +329,6 @@ class Machine
 
             next
           end
-        # checking this again because min_crude_pushes can change it
-        elsif submachine.cannot_have_a_solution?
-          # if done?
-          #   raise "wtf"
-          #   binding.pry
-          # end
-          next
         end
 
         if minimum_submachine_pushes
@@ -373,7 +352,7 @@ class Machine
         min_pushes = submachine.minimum_pushes_required
 
         if min_pushes
-          return target_joltage + min_pushes
+          # return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             minimum_submachine_pushes = min_pushes
