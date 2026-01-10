@@ -14,3 +14,11 @@ joltage index of the smallest joltage value.
 
 * bummer that passing a block to a method that doesn't take a block silently ignores
   the block instead of raising
+
+
+* idea... iterate through buttons and use last joltage index found? Idea is it would be
+  furthest from the biggest buttons increasing chances that they can split?
+* oh, how about we take the joltage indices not in the biggest button, and use the last one we find of those?
+
+
+left off debugging this: rm decouple_cap_and_min_bug.cache*; ./minimum-button-presses

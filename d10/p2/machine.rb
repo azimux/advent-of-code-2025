@@ -123,7 +123,10 @@ class Machine
   def done? = joltages.done?
 
   def cannot_have_a_solution?
-    @has_no_solution || buttons.empty?
+    return @has_no_solution if defined?(@has_no_solution)
+
+    @has_no_solution = buttons.empty? ||
+                       (max_allowed_pushes && crude_min_pushes > max_allowed_pushes)
   end
 
   def merge_joined_joltage_indices!
@@ -186,14 +189,6 @@ class Machine
     return @crude_max_pushes_without_multiplier if defined?(@crude_max_pushes_without_multiplier)
 
     @crude_max_pushes_without_multiplier = crude_max_pushes_without_multiplier_for(buttons, joltages)
-
-    if max_allowed_pushes
-      if !@has_no_solution && max_allowed_pushes < @crude_max_pushes_without_multiplier
-        @crude_max_pushes_without_multiplier = max_allowed_pushes
-      end
-    end
-
-    @crude_max_pushes_without_multiplier
   end
 
   def crude_max_pushes_without_multiplier_for(buttons, joltages)
@@ -291,9 +286,15 @@ class Machine
       end
     end
 
+    if relevant_buttons.empty?
+      raise "sholudn't be empty!"
+    end
+
     worst_case_pushes = crude_max_pushes_without_multiplier - target_joltage
 
     minimum_submachine_pushes = nil
+
+    new_buttons = buttons - relevant_buttons
 
     relevant_buttons.button_presses(target_joltage) do |button_presses|
       new_joltages = joltages.dup
@@ -306,52 +307,31 @@ class Machine
       unless new_joltages.any?(&:negative?)
         return target_joltage if new_joltages.done?
 
-        new_buttons = buttons - relevant_buttons
-
+        # We don't want to create a machine with no buttons
         next if new_buttons.empty?
 
-        cap = if minimum_submachine_pushes
-                minimum_submachine_pushes - 1
-              else
-                worst_case_pushes + 1
-              end
-
-        submachine = Machine.new(new_joltages, new_buttons, false, cap)
-
-        next if submachine.cannot_have_a_solution?
-
-        submachine_crude_min_pushes = submachine.crude_min_pushes
-        # checking this again because min_crude_pushes can change it
-        next if submachine.cannot_have_a_solution?
-
-        if submachine_crude_min_pushes
-          if submachine_crude_min_pushes > worst_case_pushes
-            if minimum_submachine_pushes
-              # uh oh... might need to remove this?
-              return target_joltage + minimum_submachine_pushes
-            end
-
-            next
-          end
-        end
+        cap = worst_case_pushes
 
         if minimum_submachine_pushes
-          if submachine_crude_min_pushes >= minimum_submachine_pushes
-            # HERE! There's a bad assumption here!!
-            # puts "short circuit!!"
-            # raise "wtf!!"
-            # return target_joltage + minimum_submachine_pushes
-            next
-          end
-
-          if max_allowed_pushes
-            if submachine_crude_min_pushes > max_allowed_pushes
-              puts "short circuit2!"
-              raise "wtf!"
-              next
-            end
+          if cap == minimum_submachine_pushes
+            # Is this OK?? should be!
+            return minimum_submachine_pushes + target_joltage
+          elsif cap > minimum_submachine_pushes
+            cap = minimum_submachine_pushes - 1
           end
         end
+
+        if max_allowed_pushes
+          new_cap = max_allowed_pushes - target_joltage
+
+          if cap > new_cap
+            cap = new_cap
+          end
+        end
+
+        submachine = Machine.new(new_joltages, new_buttons.dup, false, cap)
+
+        next if submachine.cannot_have_a_solution?
 
         min_pushes = submachine.minimum_pushes_required
 

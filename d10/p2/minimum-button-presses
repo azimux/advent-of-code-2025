@@ -7,9 +7,9 @@ require "yaml"
 
 require_relative "machine_parser"
 
-Machine.cache_file_name = "max_bug_fix.cache"
+Machine.cache_file_name = "decouple_cap_and_min_bug.cache"
 
-inputs_file = "inputs.txt"
+inputs_file = "inputs_test.txt"
 
 puts "running for #{inputs_file} #{Machine.cache_file_name}"
 machines = MachineParser.parse(inputs_file)
