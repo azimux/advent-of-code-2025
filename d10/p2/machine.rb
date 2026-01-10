@@ -79,12 +79,6 @@ class Machine
     end
 
     def minimum_pushes_cached2(machine)
-      success_cache_key = machine.success_cache_key
-
-      if @minimum_pushes_cache.key?(success_cache_key)
-        return @minimum_pushes_cache[success_cache_key]
-      end
-
       cache_key = machine.cache_key
 
       if @minimum_pushes_cache.key?(cache_key)
@@ -93,14 +87,18 @@ class Machine
 
       value = yield
 
-      key = value.nil? ? cache_key : success_cache_key
+      if value.nil? && machine.skipped_due_to_cap?
+        # Do not skip due to artificial nil from cap. There could
+        # be a solution in a context with a different cap.
+        return
+      end
 
       if @cache_file
-        @cache_file_queue << key
+        @cache_file_queue << cache_key
         @cache_file_queue << value
       end
 
-      @minimum_pushes_cache[key] = value
+      @minimum_pushes_cache[cache_key] = value
     end
 
     def cache_size
@@ -254,19 +252,18 @@ class Machine
   end
 
   # NOTE: This "private" method does not apply the multiplier!!
-  def minimum_pushes_required_without_cache(skip_split_solution = false)
-    return nil if cannot_have_a_solution?
+  def minimum_pushes_required_without_cache
+    return if cannot_have_a_solution?
 
-    if crude_min_pushes_without_multiplier && max_allowed_pushes
+    if max_allowed_pushes
       if crude_min_pushes_without_multiplier > max_allowed_pushes
-        binding.pry
+        @skipped_due_to_cap = true
+        return
       end
     end
 
-    unless skip_split_solution
-      split_solution = split_machine_solution
-      return split_solution if split_solution
-    end
+    split_solution = split_machine_solution
+    return split_solution if split_solution
 
     # seems fast-ish!:
     # target_joltage_index = joltage_index_with_fewest_buttons
@@ -396,6 +393,10 @@ class Machine
 
   def minimum_pushes_cached(&)
     self.class.minimum_pushes_cached2(self, &)
+  end
+
+  def skipped_due_to_cap?
+    @skipped_due_to_cap
   end
 
   def button_with_most_joltage_indices
@@ -783,14 +784,6 @@ class Machine
   def eql?(other) = self == other
 
   def cache_key
-    if max_allowed_pushes
-      [-2, max_allowed_pushes, *success_cache_key]
-    else
-      success_cache_key
-    end
-  end
-
-  def success_cache_key
     a = []
 
     buttons.each do |button|
