@@ -77,21 +77,57 @@ class Machine
       max_allowed_pushes = machine.max_allowed_pushes
       cache_key = machine.cache_key
 
-      cache = @machine_push_caches[max_allowed_pushes] ||= {}
+      cache = @minimum_push_caches[max_allowed_pushes] ||= {}
 
       if cache.key?(cache_key)
         return cache[cache_key]
+      else
+        caches_for_cap_bigger_than(max_allowed_pushes).each do |other_cache|
+          next if other_cache.equal?(cache)
+
+          if other_cache.key?(cache_key)
+            value = other_cache[cache_key]
+
+            write_cache_entry_to_disk(max_allowed_pushes, cache_key, value)
+            return cache[cache_key] = value
+          end
+        end
       end
 
       value = yield
 
-      if @cache_file
-        @cache_file_queue << max_allowed_pushes
-        @cache_file_queue << cache_key
-        @cache_file_queue << value
-      end
+      write_cache_entry_to_disk(max_allowed_pushes, cache_key, value)
 
       cache[cache_key] = value
+    end
+
+    def caches_for_cap_bigger_than(cap)
+      caches = @minimum_push_caches.keys
+
+      if cap
+        caches.select! { it && it > cap }
+      else
+        caches.compact!
+      end
+
+      caches.sort!
+      caches.map! { |key| @minimum_push_caches[key] }
+
+      no_cap = @minimum_push_caches[nil]
+
+      if no_cap
+        caches << no_cap
+      end
+
+      caches
+    end
+
+    def write_cache_entry_to_disk(cap, key, value)
+      if @cache_file
+        @cache_file_queue << cap
+        @cache_file_queue << key
+        @cache_file_queue << value
+      end
     end
 
     def cache_size
