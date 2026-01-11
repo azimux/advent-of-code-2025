@@ -125,6 +125,7 @@ class Machine
   def cannot_have_a_solution?
     return @has_no_solution if defined?(@has_no_solution)
 
+    # bug here, don't want to use multiplier...
     @has_no_solution = buttons.empty? ||
                        (max_allowed_pushes && crude_min_pushes > max_allowed_pushes)
   end
@@ -154,11 +155,15 @@ class Machine
       end
     end
 
+    indices_to_remove = []
+
     buttons_to_index.each_value do |indices|
       if indices.is_a?(Array)
-        remove_joltage_indices(indices[1..].reverse)
+        indices_to_remove += indices[1..]
       end
     end
+
+    remove_joltage_indices(indices_to_remove)
   end
 
   def crude_max_pushes
@@ -287,7 +292,7 @@ class Machine
     end
 
     if relevant_buttons.empty?
-      raise "sholudn't be empty!"
+      raise "shouldn't be empty!"
     end
 
     worst_case_pushes = crude_max_pushes_without_multiplier - target_joltage
@@ -669,6 +674,8 @@ class Machine
   end
 
   def remove_joltage_indices(indices_to_remove)
+    return if indices_to_remove.empty?
+
     updated_joltages = []
 
     joltages.each.with_index do |joltage_level, index|
@@ -679,6 +686,7 @@ class Machine
 
     self.joltages = Joltages.new(updated_joltages)
 
+    indices_to_remove = indices_to_remove.sort
     indices_to_remove.reverse!
 
     indices_to_remove.each do |index|
