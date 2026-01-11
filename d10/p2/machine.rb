@@ -3,7 +3,7 @@ require "fileutils"
 require_relative "array"
 
 class Machine
-  @minimum_pushes_cache = {}
+  @minimum_push_caches = {}
   @cache_writes = 0
   @cache_file_queue = nil
 
@@ -19,19 +19,26 @@ class Machine
             File.open(cache_file_name) do |f|
               until f.eof?
                 # rubocop:disable Security/MarshalLoad
+                max_allowed_pushes = Marshal.load(f)
                 cache_key = Marshal.load(f)
                 cache_value = Marshal.load(f)
                 # rubocop:enable Security/MarshalLoad
-                @minimum_pushes_cache[cache_key] = cache_value
+                cache = @minimum_push_caches[max_allowed_pushes] ||= {}
+                cache[cache_key] = cache_value
               end
             end
           rescue EOFError
             puts "cache corrupted, dumping out good values"
             cache_file = File.open(cache_file_name, "w")
 
-            @minimum_pushes_cache.each_pair do |key, value|
-              cache_file.write(Marshal.dump(key))
-              cache_file.write(Marshal.dump(value))
+            @minimum_push_caches.each_pair do |max_allowed_pushes, cache|
+              max_allowed_pushes_blob = Marshal.dump(max_allowed_pushes)
+
+              cache.each_pair do |key, value|
+                cache_file.write(max_allowed_pushes_blob)
+                cache_file.write(Marshal.dump(key))
+                cache_file.write(Marshal.dump(value))
+              end
             end
 
             cache_file.close
@@ -49,11 +56,14 @@ class Machine
     def cache_file_thread
       Thread.new do
         loop do
+          max_allowed_pushes = @cache_file_queue.pop
           key = @cache_file_queue.pop
           value = @cache_file_queue.pop
 
+          @cache_file.write(Marshal.dump(max_allowed_pushes))
           @cache_file.write(Marshal.dump(key))
           @cache_file.write(Marshal.dump(value))
+
           @cache_file.flush
         end
       end
@@ -64,30 +74,28 @@ class Machine
     end
 
     def minimum_pushes_cached(machine)
+      max_allowed_pushes = machine.max_allowed_pushes
       cache_key = machine.cache_key
 
-      if @minimum_pushes_cache.key?(cache_key)
-        return @minimum_pushes_cache[cache_key]
+      cache = @machine_push_caches[max_allowed_pushes] ||= {}
+
+      if cache.key?(cache_key)
+        return cache[cache_key]
       end
 
       value = yield
 
-      if value.nil? && machine.skipped_due_to_cap?
-        # Do not skip due to artificial nil from cap. There could
-        # be a solution in a context with a different cap.
-        return
-      end
-
       if @cache_file
+        @cache_file_queue << max_allowed_pushes
         @cache_file_queue << cache_key
         @cache_file_queue << value
       end
 
-      @minimum_pushes_cache[cache_key] = value
+      cache[cache_key] = value
     end
 
     def cache_size
-      @minimum_pushes_cache.size
+      @minimum_push_caches.values.map(&:size).sum
     end
   end
 
@@ -108,16 +116,10 @@ class Machine
   def done? = joltages.done?
 
   def cannot_have_a_solution?
-    return @has_no_solution if defined?(@has_no_solution)
+    return @cannot_have_a_solution if defined?(@cannot_have_a_solution)
 
-    if buttons.empty?
-      @has_no_solution = true
-    elsif max_allowed_pushes && crude_min_pushes > max_allowed_pushes
-      @has_no_solution = true
-      @skipped_due_to_cap = true
-    end
-
-    @has_no_solution
+    @cannot_have_a_solution = buttons.empty? ||
+                              (max_allowed_pushes && crude_min_pushes > max_allowed_pushes)
   end
 
   def merge_joined_joltage_indices!
@@ -133,8 +135,7 @@ class Machine
 
         to_check.each do |other_index|
           if joltages[joltage_index] != joltages[other_index]
-            binding.pry if top_level
-            @has_no_solution = true
+            @cannot_have_a_solution = true
             return
           end
         end
@@ -244,7 +245,6 @@ class Machine
     worst_case_pushes = crude_max_pushes - target_joltage
 
     minimum_submachine_pushes = nil
-    any_skipped_due_to_cap = false
 
     new_buttons = buttons - relevant_buttons
 
@@ -283,12 +283,7 @@ class Machine
 
         submachine = Machine.new(new_joltages, new_buttons.dup, false, cap)
 
-        if submachine.cannot_have_a_solution?
-          if submachine.skipped_due_to_cap?
-            any_skipped_due_to_cap = true
-          end
-          next
-        end
+        next if submachine.cannot_have_a_solution?
 
         min_pushes = submachine.minimum_pushes_required
 
@@ -298,17 +293,12 @@ class Machine
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             minimum_submachine_pushes = min_pushes
           end
-        elsif submachine.skipped_due_to_cap?
-          any_skipped_due_to_cap = true
         end
       end
     end
 
     if minimum_submachine_pushes
       target_joltage + minimum_submachine_pushes
-    elsif any_skipped_due_to_cap
-      @skipped_due_to_cap = true
-      nil
     end
   end
 
@@ -335,10 +325,6 @@ class Machine
 
   def minimum_pushes_cached(&)
     self.class.minimum_pushes_cached(self, &)
-  end
-
-  def skipped_due_to_cap?
-    @skipped_due_to_cap
   end
 
   def button_with_most_joltage_indices
@@ -601,7 +587,7 @@ class Machine
     order_buttons!
     merge_joined_joltage_indices!
 
-    unless @has_no_solution
+    unless @cannot_have_a_solution
       crude_max_pushes
     end
   end
@@ -764,8 +750,7 @@ class Machine
       button = smallest_button_per_index[joltage_index]
 
       unless button
-        binding.pry if top_level
-        @has_no_solution = true
+        @cannot_have_a_solution = true
         return
       end
 
@@ -814,8 +799,7 @@ class Machine
       button = biggest_button_per_index[joltage_index]
 
       unless button
-        binding.pry if top_level
-        @has_no_solution = true
+        @cannot_have_a_solution = true
         return
       end
 
