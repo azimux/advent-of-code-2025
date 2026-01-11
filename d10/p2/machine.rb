@@ -128,6 +128,12 @@ class Machine
     # bug here, don't want to use multiplier...
     @has_no_solution = buttons.empty? ||
                        (max_allowed_pushes && crude_min_pushes > max_allowed_pushes)
+
+    if @has_no_solution
+      @skipped_due_to_cap = true
+    end
+
+    @has_no_solution
   end
 
   def merge_joined_joltage_indices!
