@@ -51,6 +51,10 @@ class Machine
         @cache_file_queue ||= Queue.new
         @cache_file_thread ||= cache_file_thread
       end
+
+      if defined?(@sorted_keys)
+        remove_instance_variable(:@sorted_keys)
+      end
     end
 
     def cache_file_thread
@@ -77,19 +81,27 @@ class Machine
       max_allowed_pushes = machine.max_allowed_pushes
       cache_key = machine.cache_key
 
-      cache = @minimum_push_caches[max_allowed_pushes] ||= {}
+      cache = if @minimum_push_caches.keys?(max_allowed_pushes)
+                @minimum_push_caches[max_allowed_pushes]
+              else
+                @minimum_push_caches[max_allowed_pushes] = {}
+
+                if defined?(@sorted_keys)
+                  remove_instance_variable(:@sorted_keys)
+                end
+              end
 
       if cache.key?(cache_key)
         return cache[cache_key]
       else
-        caches_for_cap_bigger_than(max_allowed_pushes).each do |other_cache|
-          next if other_cache.equal?(cache)
-
+        each_cache_in_order do |other_cap, other_cache|
           if other_cache.key?(cache_key)
             value = other_cache[cache_key]
 
-            write_cache_entry_to_disk(max_allowed_pushes, cache_key, value)
-            return cache[cache_key] = value
+            if !value.nil? || other_cap > max_allowed_pushes
+              write_cache_entry_to_disk(max_allowed_pushes, cache_key, value)
+              return cache[cache_key] = value
+            end
           end
         end
       end
@@ -101,25 +113,30 @@ class Machine
       cache[cache_key] = value
     end
 
-    def caches_for_cap_bigger_than(cap)
-      caches = @minimum_push_caches.keys
+    def each_cache_in_order
+      caches = @minimum_push_caches
 
-      if cap
-        caches.select! { it && it > cap }
-      else
-        caches.compact!
+      cache_keys = @sorted_keys
+
+      unless cache_keys
+        cache_keys = caches.keys
+        cache_keys.compact!
+        cache_keys.sort!
+
+        @sorted_keys = cache_keys
       end
 
-      caches.sort!
-      caches.map! { |key| @minimum_push_caches[key] }
+      # TODO: memoize these sorted keys
 
-      no_cap = @minimum_push_caches[nil]
-
-      if no_cap
-        caches << no_cap
+      cache_keys.each do |cap|
+        if caches.key?(cap)
+          yield cap, caches[cap]
+        end
       end
 
-      caches
+      if caches.key?(nil)
+        yield nil, caches[nil]
+      end
     end
 
     def write_cache_entry_to_disk(cap, key, value)

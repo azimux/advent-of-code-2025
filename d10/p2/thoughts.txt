@@ -22,3 +22,12 @@ joltage index of the smallest joltage value.
 
 
 left off debugging this: rm decouple_cap_and_min_bug.cache*; ./minimum-button-presses
+
+
+compacting cache thoughts?
+
+hmmmm... worth trying?
+if a machine is nil at multiple caps... keep the biggest cap, delete the others
+if a machine is non-nil at multiple caps, keep the biggest??
+
+maybe not worth trying...
