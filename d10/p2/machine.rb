@@ -29,19 +29,16 @@ class Machine
             end
           rescue EOFError
             puts "cache corrupted, dumping out good values"
-            cache_file = File.open(cache_file_name, "w")
+            @cache_file ||= File.open(cache_file_name, "w")
 
             @minimum_push_caches.each_pair do |max_allowed_pushes, cache|
-              max_allowed_pushes_blob = Marshal.dump(max_allowed_pushes)
-
               cache.each_pair do |key, value|
-                cache_file.write(max_allowed_pushes_blob)
-                cache_file.write(Marshal.dump(key))
-                cache_file.write(Marshal.dump(value))
+                write_cache_entry_to_disk(max_allowed_pushes, key, value)
               end
             end
 
-            cache_file.close
+            @cache_file.close
+            remove_instance_variable(:@cache_file)
 
             FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
           end
@@ -64,9 +61,7 @@ class Machine
           key = @cache_file_queue.pop
           value = @cache_file_queue.pop
 
-          @cache_file.write(Marshal.dump(max_allowed_pushes))
-          @cache_file.write(Marshal.dump(key))
-          @cache_file.write(Marshal.dump(value))
+          write_cache_entry_to_disk(max_allowed_pushes, key, value)
 
           @cache_file.flush
         end
@@ -81,14 +76,14 @@ class Machine
       max_allowed_pushes = machine.max_allowed_pushes
       cache_key = machine.cache_key
 
-      cache = if @minimum_push_caches.keys?(max_allowed_pushes)
+      cache = if @minimum_push_caches.key?(max_allowed_pushes)
                 @minimum_push_caches[max_allowed_pushes]
               else
-                @minimum_push_caches[max_allowed_pushes] = {}
-
                 if defined?(@sorted_keys)
                   remove_instance_variable(:@sorted_keys)
                 end
+
+                @minimum_push_caches[max_allowed_pushes] = {}
               end
 
       if cache.key?(cache_key)
@@ -99,7 +94,7 @@ class Machine
             value = other_cache[cache_key]
 
             if !value.nil? || other_cap > max_allowed_pushes
-              write_cache_entry_to_disk(max_allowed_pushes, cache_key, value)
+              enqueue_write_cache_entry_to_disk(max_allowed_pushes, cache_key, value)
               return cache[cache_key] = value
             end
           end
@@ -108,7 +103,7 @@ class Machine
 
       value = yield
 
-      write_cache_entry_to_disk(max_allowed_pushes, cache_key, value)
+      enqueue_write_cache_entry_to_disk(max_allowed_pushes, cache_key, value)
 
       cache[cache_key] = value
     end
@@ -139,12 +134,18 @@ class Machine
       end
     end
 
-    def write_cache_entry_to_disk(cap, key, value)
+    def enqueue_write_cache_entry_to_disk(cap, key, value)
       if @cache_file
         @cache_file_queue << cap
         @cache_file_queue << key
         @cache_file_queue << value
       end
+    end
+
+    def write_cache_entry_to_disk(cap, key, value)
+      @cache_file.write(Marshal.dump(cap))
+      @cache_file.write(Marshal.dump(key))
+      @cache_file.write(Marshal.dump(value))
     end
 
     def cache_size
