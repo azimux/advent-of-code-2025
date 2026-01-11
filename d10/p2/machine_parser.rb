@@ -1,6 +1,7 @@
 require_relative "machine"
 require_relative "button"
 require_relative "joltages"
+require_relative "caps"
 
 class MachineParser
   class << self
@@ -43,25 +44,13 @@ class MachineParser
 
       machine = Machine.new(joltages.dup, buttons.dup)
 
-      cap = caps[machine.to_s_parsable]
+      cap = Caps.caps[machine.to_s_parsable]
 
       if cap
         Machine.new(joltages, buttons, true, cap)
       else
         Machine.new(joltages, buttons)
       end
-    end
-
-    def caps
-      return @caps if defined?(@caps)
-
-      caps_file = "caps.yml"
-
-      @caps = if File.exist?(caps_file)
-                YAML.load_file(caps_file)
-              else
-                {}
-              end
     end
   end
 end

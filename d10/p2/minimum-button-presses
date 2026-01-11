@@ -9,6 +9,7 @@ require_relative "minimum_pushes_cache"
 require_relative "machine_parser"
 
 MinimumPushesCache.cache_file_name = "inputs.cache"
+Caps.caps_file = "caps.yml"
 
 inputs_file = "inputs.txt"
 
@@ -18,8 +19,6 @@ machines = MachineParser.parse(inputs_file)
 MinimumPushesCache.load_cache_from_file
 
 machines.sort_by!(&:crude_max_pushes)
-
-caps = MachineParser.caps
 
 pushes = machines.map do |machine|
   puts "#{Time.now}: starting new machine..."
@@ -36,23 +35,10 @@ pushes = machines.map do |machine|
   puts push_count
   puts
 
-  caps_key = machine.to_s_parsable
-  cap = caps[caps_key]
-  if cap.nil? || cap > push_count
-    caps[caps_key] = push_count
-
-    File.write("caps.yml", YAML.dump(caps))
-  elsif push_count > cap
-    puts "unexpected worse push_count: #{push_count} > #{cap} for: #{caps_key}"
-    # binding.pry
-    # raise "wtf how can we have a solution above the cap???"
-  end
+  Caps.update_cap_if_needed(machine, push_count)
 
   push_count
 end
-
-# require "yaml"
-# File.write("caps.yml", YAML.dump(caps))
 
 sum = pushes.sum
 
