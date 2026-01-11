@@ -169,53 +169,20 @@ class Machine
   def crude_max_pushes
     return @crude_max_pushes if defined?(@crude_max_pushes)
 
-    without_multiplier = crude_max_pushes_without_multiplier
-
-    unless without_multiplier
-      if top_level
-        binding.pry
-        remove_instance_variable(:@crude_max_pushes_without_multiplier)
-        crude_max_pushes_without_multiplier
-      end
-    end
-
-    @crude_max_pushes = if without_multiplier
-                          crude_max_pushes_without_multiplier * multiplier
-                        else
-                          unless @has_no_solution
-                            raise "unexpected nil crude_max_pushes_without_multiplier"
-                          end
-
-                          nil
-                        end
+    @crude_max_pushes = crude_max_pushes_for(buttons, joltages)
   end
 
-  def crude_max_pushes_without_multiplier
-    return @crude_max_pushes_without_multiplier if defined?(@crude_max_pushes_without_multiplier)
-
-    @crude_max_pushes_without_multiplier = crude_max_pushes_without_multiplier_for(buttons, joltages)
-  end
-
-  def crude_max_pushes_without_multiplier_for(buttons, joltages)
+  def crude_max_pushes_for(buttons, joltages)
     better_max_pushes_estimate(buttons, joltages)
   end
 
   def crude_min_pushes
     return @crude_min_pushes if defined?(@crude_min_pushes)
 
-    pushes = crude_min_pushes_without_multiplier
-
-    @crude_min_pushes = if pushes
-                          pushes * multiplier
-                        end
+    @crude_min_pushes = better_min_pushes_estimate2(buttons, joltages)
   end
 
-  def crude_min_pushes_without_multiplier
-    @crude_min_pushes_without_multiplier ||= better_min_pushes_estimate2(buttons, joltages)
-    # crude_min_pushes_without_multiplier_for(buttons, joltages)
-  end
-
-  def crude_min_pushes_without_multiplier_for(buttons, joltages)
+  def crude_min_pushes_for(buttons, joltages)
     max_joltage_size = buttons.first.joltages_size
 
     joltages_sum = joltages.sum
@@ -256,7 +223,7 @@ class Machine
     return if cannot_have_a_solution?
 
     if max_allowed_pushes
-      if crude_min_pushes_without_multiplier > max_allowed_pushes
+      if crude_min_pushes > max_allowed_pushes
         @skipped_due_to_cap = true
         return
       end
@@ -295,7 +262,7 @@ class Machine
       raise "shouldn't be empty!"
     end
 
-    worst_case_pushes = crude_max_pushes_without_multiplier - target_joltage
+    worst_case_pushes = crude_max_pushes - target_joltage
 
     minimum_submachine_pushes = nil
 
@@ -610,14 +577,8 @@ class Machine
     if instance_variable_defined?(:@crude_max_pushes)
       remove_instance_variable(:@crude_max_pushes)
     end
-    if instance_variable_defined?(:@crude_max_pushes_without_multiplier)
-      remove_instance_variable(:@crude_max_pushes_without_multiplier)
-    end
     if instance_variable_defined?(:@crude_min_pushes)
       remove_instance_variable(:@crude_min_pushes)
-    end
-    if instance_variable_defined?(:@crude_min_pushes_without_multiplier)
-      remove_instance_variable(:@crude_min_pushes_without_multiplier)
     end
   end
 
@@ -651,7 +612,7 @@ class Machine
     merge_joined_joltage_indices!
 
     unless @has_no_solution
-      crude_max_pushes_without_multiplier
+      crude_max_pushes
     end
   end
 
@@ -889,7 +850,7 @@ class Machine
   end
 
   def better_min_pushes_estimate2(buttons, joltages)
-    crude_min = crude_min_pushes_without_multiplier_for(buttons, joltages)
+    crude_min = crude_min_pushes_for(buttons, joltages)
 
     levels = joltages.joltage_levels.reverse
 

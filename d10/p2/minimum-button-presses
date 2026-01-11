@@ -9,7 +9,7 @@ require_relative "machine_parser"
 
 Machine.cache_file_name = "decouple_cap_and_min_bug.cache"
 
-inputs_file = "inputs_test_bug.txt"
+inputs_file = "inputs_test.txt"
 
 puts "running for #{inputs_file} #{Machine.cache_file_name}"
 machines = MachineParser.parse(inputs_file)
