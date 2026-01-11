@@ -5,16 +5,17 @@ require "yaml"
 # require "pry"
 # require "pry-byebug"
 
+require_relative "minimum_pushes_cache"
 require_relative "machine_parser"
 
-Machine.cache_file_name = "inputs.cache"
+MinimumPushesCache.cache_file_name = "inputs.cache"
 
 inputs_file = "inputs.txt"
 
-puts "running for #{inputs_file} #{Machine.cache_file_name}"
+puts "running for #{inputs_file} #{MinimumPushesCache.cache_file_name}"
 machines = MachineParser.parse(inputs_file)
 
-Machine.load_cache_from_file
+MinimumPushesCache.load_cache_from_file
 
 machines.sort_by!(&:crude_max_pushes)
 
@@ -57,7 +58,7 @@ sum = pushes.sum
 
 puts "found sum! #{sum}"
 
-Machine.close_cache_file
+MinimumPushesCache.close_cache_file
 
 # First possible answer submitted:   17554 but too low uggg
 # Next possible answer we generated (I think min joltage selected): 17953 but too high uggggggg
