@@ -63,22 +63,7 @@ class Machine
       @cache_file&.close
     end
 
-    def minimum_pushes_cached(cache_key)
-      if @minimum_pushes_cache.key?(cache_key)
-        @minimum_pushes_cache[cache_key]
-      else
-        value = yield
-
-        if @cache_file
-          @cache_file_queue << cache_key
-          @cache_file_queue << value
-        end
-
-        @minimum_pushes_cache[cache_key] = value
-      end
-    end
-
-    def minimum_pushes_cached2(machine)
+    def minimum_pushes_cached(machine)
       cache_key = machine.cache_key
 
       if @minimum_pushes_cache.key?(cache_key)
@@ -125,11 +110,10 @@ class Machine
   def cannot_have_a_solution?
     return @has_no_solution if defined?(@has_no_solution)
 
-    # bug here, don't want to use multiplier...
-    @has_no_solution = buttons.empty? ||
-                       (max_allowed_pushes && crude_min_pushes > max_allowed_pushes)
-
-    if @has_no_solution
+    if buttons.empty?
+      @has_no_solution = true
+    elsif max_allowed_pushes && crude_min_pushes > max_allowed_pushes
+      @has_no_solution = true
       @skipped_due_to_cap = true
     end
 
@@ -228,13 +212,6 @@ class Machine
   def minimum_pushes_required_without_cache
     return if cannot_have_a_solution?
 
-    if max_allowed_pushes
-      if crude_min_pushes > max_allowed_pushes
-        @skipped_due_to_cap = true
-        return
-      end
-    end
-
     split_solution = split_machine_solution
     return split_solution if split_solution
 
@@ -264,13 +241,10 @@ class Machine
       end
     end
 
-    if relevant_buttons.empty?
-      raise "shouldn't be empty!"
-    end
-
     worst_case_pushes = crude_max_pushes - target_joltage
 
     minimum_submachine_pushes = nil
+    any_skipped_due_to_cap = false
 
     new_buttons = buttons - relevant_buttons
 
@@ -309,7 +283,12 @@ class Machine
 
         submachine = Machine.new(new_joltages, new_buttons.dup, false, cap)
 
-        next if submachine.cannot_have_a_solution?
+        if submachine.cannot_have_a_solution?
+          if submachine.skipped_due_to_cap?
+            any_skipped_due_to_cap = true
+          end
+          next
+        end
 
         min_pushes = submachine.minimum_pushes_required
 
@@ -319,12 +298,17 @@ class Machine
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             minimum_submachine_pushes = min_pushes
           end
+        elsif submachine.skipped_due_to_cap?
+          any_skipped_due_to_cap = true
         end
       end
     end
 
     if minimum_submachine_pushes
       target_joltage + minimum_submachine_pushes
+    elsif any_skipped_due_to_cap
+      @skipped_due_to_cap = true
+      nil
     end
   end
 
@@ -350,7 +334,7 @@ class Machine
   end
 
   def minimum_pushes_cached(&)
-    self.class.minimum_pushes_cached2(self, &)
+    self.class.minimum_pushes_cached(self, &)
   end
 
   def skipped_due_to_cap?
@@ -870,6 +854,7 @@ class Machine
       pushes += covered_levels.first
 
       if crude_min < pushes
+        # unreachable?
         return crude_min
       end
     end
