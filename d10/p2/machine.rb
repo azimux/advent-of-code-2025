@@ -2,7 +2,7 @@ require_relative "array"
 
 class Machine
   class << self
-    attr_accessor :strategy, :skip_multiplier
+    attr_accessor :strategy, :skip_multiplier, :short_circuit
   end
 
   attr_accessor :joltages, :buttons, :original_to_s, :max_allowed_pushes, :top_level
@@ -199,7 +199,9 @@ class Machine
         min_pushes = submachine.minimum_pushes_required
 
         if min_pushes
-          # return target_joltage + min_pushes
+          if Machine.short_circuit
+            return target_joltage + min_pushes
+          end
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             minimum_submachine_pushes = min_pushes

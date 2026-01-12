@@ -17,7 +17,10 @@ strategy = "joltage_index_with_fewest_buttons"
 # inputs_file = "inputs_test"
 inputs_file = "inputs"
 
-skip_multiplier = false
+skip_multiplier = true
+
+# Short circuiting does not seem to work... we get solutions bigger than the cap
+short_circuit = false
 
 suffix = strategy
 
@@ -28,6 +31,11 @@ end
 if skip_multiplier
   suffix = "#{suffix}_without_multiplier"
   Machine.skip_multiplier = true
+end
+
+if short_circuit
+  suffix = "#{suffix}_short_circuit"
+  Machine.short_circuit = short_circuit
 end
 
 Machine.strategy = strategy
