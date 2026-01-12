@@ -18,7 +18,28 @@ class Joltages
   def all?(&) = joltage_levels.all?(&)
   def sum = joltage_levels.sum
   def done? = joltage_levels.all?(&:zero?)
-  def gcd = joltage_levels.gcd_ish
+
+  def gcd
+    joltage_levels = self.joltage_levels
+
+    best_gcd = joltage_levels.gcd_ish
+    gcd = best_gcd
+
+    while gcd
+      joltage_levels = joltage_levels.map { |i| i / gcd }
+
+      gcd = joltage_levels.gcd_ish
+
+      if gcd
+        best_gcd *= gcd
+      else
+        return best_gcd
+      end
+    end
+
+    best_gcd
+  end
+
   def /(other) = Joltages.new(joltage_levels.map { it / other })
 
   def any_over?(target)
