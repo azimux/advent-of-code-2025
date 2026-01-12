@@ -3,6 +3,10 @@ require "fileutils"
 require_relative "array"
 
 class Machine
+  class << self
+    attr_accessor :strategy
+  end
+
   attr_accessor :joltages, :buttons, :original_to_s, :max_allowed_pushes, :top_level
 
   def initialize(joltages, buttons, top_level = true, max_allowed_pushes = nil)
@@ -130,8 +134,9 @@ class Machine
     # target_joltage_index = joltage_index_with_most_buttons
     # seems fast-ish!
     # target_joltage_index = index_of_min_joltage_for_biggest_buttons
-    # seems even faster!! (ish?)
-    target_joltage_index = index_of_fewest_button_joltage_for_biggest_buttons
+    # seems even faster!! (ish?) [inputs.cache]
+    # target_joltage_index = index_of_fewest_button_joltage_for_biggest_buttons
+    target_joltage_index = send(Machine.strategy)
 
     if target_joltage_index.nil?
       return done? ? 0 : nil
@@ -192,7 +197,7 @@ class Machine
         min_pushes = submachine.minimum_pushes_required
 
         if min_pushes
-          # return target_joltage + min_pushes
+          return target_joltage + min_pushes
 
           if minimum_submachine_pushes.nil? || min_pushes < minimum_submachine_pushes
             minimum_submachine_pushes = min_pushes

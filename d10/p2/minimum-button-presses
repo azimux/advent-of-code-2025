@@ -8,14 +8,24 @@ require "yaml"
 require_relative "minimum_pushes_cache"
 require_relative "machine_parser"
 
-# suffix = "index_of_min_joltage_for_biggest_buttons"
-# suffix = "joltage_index_with_fewest_buttons"
-# suffix = "joltage_index_of_smallest_joltage"
-suffix = "joltage_index_of_biggest_joltage"
+# strategy = "index_of_min_joltage_for_biggest_buttons"
+# strategy = "joltage_index_with_fewest_buttons"
+# strategy = "joltage_index_of_smallest_joltage"
+# strategy = "joltage_index_of_biggest_joltage"
+strategy = "index_of_fewest_button_joltage_for_biggest_buttons"
+# inputs_file = "inputs"
+inputs_file = "inputs_test"
 
+suffix = strategy
+
+if inputs_file != "inputs"
+  suffix = "#{suffix}_#{inputs_file}"
+end
+
+Machine.strategy = strategy
 MinimumPushesCache.cache_file_name = "#{suffix}.cache"
 Caps.caps_file = "caps_#{suffix}.yml"
-inputs_file = "inputs.txt"
+inputs_file = "#{inputs_file}.txt"
 
 print_files_in_use = proc do
   puts "running for #{inputs_file} #{MinimumPushesCache.cache_file_name} with #{Caps.caps_file}"
