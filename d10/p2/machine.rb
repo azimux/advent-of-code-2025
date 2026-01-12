@@ -236,28 +236,6 @@ class Machine
     MinimumPushesCache.minimum_pushes_cached(self, &)
   end
 
-  def button_with_most_joltage_indices
-    buttons.max_by do |button|
-      button.joltages_to_increment.count do |joltage_index|
-        joltages[joltage_index].positive?
-      end
-    end
-  end
-
-  def joltage_index_with_most_occurrences(button)
-    joltages_to_increment = button.joltages_to_increment
-
-    joltages_to_increment.max_by do |joltage_index|
-      buttons.count { it.include?(joltage_index) }
-    end
-  end
-
-  def joltage_index_with_min_occurrences(button)
-    button.joltages_to_increment.min_by do |joltage_index|
-      buttons.count { it.include?(joltage_index) }
-    end
-  end
-
   def joltage_index_of_biggest_joltage
     max_joltage_index = 0
     max_joltage = joltages[0]
@@ -378,57 +356,6 @@ class Machine
     end
 
     max_joltage_index
-  end
-
-  def most_impactful_button_with_lowest_joltage
-    i = joltages.index_of_min
-
-    buttons.find do |button|
-      button.include?(i)
-    end
-  end
-
-  def button_with_highest_odd_to_even_ratio
-    buttons.max_by do |button|
-      evens = 0
-      odds = 0
-
-      button.each do |joltage_index|
-        if joltages[joltage_index].even?
-          evens += 1
-        else
-          odds += 1
-        end
-      end
-
-      if evens.zero?
-        if odds.zero?
-          raise "wtf"
-        else
-          1r
-        end
-      else
-        odds.to_r / evens
-      end
-    end
-  end
-
-  def minimum_nonzero_joltage_index(button)
-    joltages_to_increment = button.joltages_to_increment
-
-    min_index = nil
-    min_joltage = nil
-
-    joltages_to_increment.each do |joltage_index|
-      value = joltages[joltage_index]
-
-      if value.positive? && (min_joltage.nil? || value < min_joltage)
-        min_joltage = value
-        min_index = joltage_index
-      end
-    end
-
-    min_index
   end
 
   def multiplier
