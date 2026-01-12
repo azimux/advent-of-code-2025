@@ -8,12 +8,21 @@ require "yaml"
 require_relative "minimum_pushes_cache"
 require_relative "machine_parser"
 
-MinimumPushesCache.cache_file_name = "inputs.cache"
-Caps.caps_file = "caps.yml"
+# suffix = "index_of_min_joltage_for_biggest_buttons"
+# suffix = "joltage_index_with_fewest_buttons"
+# suffix = "joltage_index_of_smallest_joltage"
+suffix = "joltage_index_of_biggest_joltage"
 
+MinimumPushesCache.cache_file_name = "#{suffix}.cache"
+Caps.caps_file = "caps_#{suffix}.yml"
 inputs_file = "inputs.txt"
 
-puts "running for #{inputs_file} #{MinimumPushesCache.cache_file_name}"
+print_files_in_use = proc do
+  puts "running for #{inputs_file} #{MinimumPushesCache.cache_file_name} with #{Caps.caps_file}"
+end
+
+print_files_in_use.call
+
 machines = MachineParser.parse(inputs_file)
 
 MinimumPushesCache.load_cache_from_file
@@ -34,6 +43,8 @@ pushes = machines.map do |machine|
   puts machine.to_s_parsable
   puts push_count
   puts
+
+  print_files_in_use.call
 
   Caps.update_cap_if_needed(machine, push_count)
 
