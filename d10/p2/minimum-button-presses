@@ -17,7 +17,7 @@ strategy = "index_of_fewest_button_joltage_for_biggest_buttons"
 # inputs_file = "inputs_test"
 inputs_file = "inputs"
 
-skip_multiplier = true
+skip_multiplier = false
 
 suffix = strategy
 

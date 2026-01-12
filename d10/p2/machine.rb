@@ -121,6 +121,11 @@ class Machine
   def minimum_pushes_required_without_cache
     return if cannot_have_a_solution?
 
+    unless joltages_covered_by_buttons?
+      raise "yay!!"
+      return
+    end
+
     split_solution = split_machine_solution
     return split_solution if split_solution
 
@@ -230,6 +235,22 @@ class Machine
 
       sum
     end
+  end
+
+  def joltages_covered_by_buttons?
+    if joltage_levels.any?(&:zero?)
+      raise "wtf"
+    end
+
+    covered = Array.new(joltage_levels.size)
+
+    buttons.each do |button|
+      button.joltages_to_increment.each do |joltage_index|
+        covered[joltage_index] = true
+      end
+    end
+
+    covered.all?
   end
 
   def minimum_pushes_cached(&)

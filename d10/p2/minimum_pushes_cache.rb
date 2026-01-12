@@ -117,8 +117,6 @@ module MinimumPushesCache
         @sorted_keys = cache_keys
       end
 
-      # TODO: memoize these sorted keys
-
       cache_keys.each do |cap|
         if caches.key?(cap)
           yield cap, caches[cap]
