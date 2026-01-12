@@ -13,13 +13,21 @@ require_relative "machine_parser"
 # strategy = "joltage_index_of_smallest_joltage"
 # strategy = "joltage_index_of_biggest_joltage"
 strategy = "index_of_fewest_button_joltage_for_biggest_buttons"
+
 # inputs_file = "inputs_test"
 inputs_file = "inputs"
+
+skip_multiplier = true
 
 suffix = strategy
 
 if inputs_file != "inputs"
   suffix = "#{suffix}_#{inputs_file}"
+end
+
+if skip_multiplier
+  suffix = "#{suffix}_without_multiplier"
+  Machine.skip_multiplier = true
 end
 
 Machine.strategy = strategy

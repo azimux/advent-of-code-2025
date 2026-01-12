@@ -4,7 +4,7 @@ require_relative "array"
 
 class Machine
   class << self
-    attr_accessor :strategy
+    attr_accessor :strategy, :skip_multiplier
   end
 
   attr_accessor :joltages, :buttons, :original_to_s, :max_allowed_pushes, :top_level
@@ -418,7 +418,7 @@ class Machine
   # Normalize to allow for more cache hits
   def normalize!
     remove_all_zero_joltages!
-    update_multiplier!
+    update_multiplier! unless Machine.skip_multiplier
     order_joltages!
     order_buttons!
     merge_joined_joltage_indices!
