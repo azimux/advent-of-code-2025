@@ -89,7 +89,7 @@ module MinimumPushesCache
           if other_cache.key?(cache_key)
             value = other_cache[cache_key]
 
-            if !value.nil? || other_cap > max_allowed_pushes
+            if !value.nil? || other_cap.nil? || (max_allowed_pushes && other_cap > max_allowed_pushes)
               enqueue_write_cache_entry_to_disk(max_allowed_pushes, cache_key, value)
               return cache[cache_key] = value
             end

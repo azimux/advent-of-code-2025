@@ -13,8 +13,8 @@ require_relative "machine_parser"
 # strategy = "joltage_index_of_smallest_joltage"
 # strategy = "joltage_index_of_biggest_joltage"
 strategy = "index_of_fewest_button_joltage_for_biggest_buttons"
-# inputs_file = "inputs"
-inputs_file = "inputs_test"
+# inputs_file = "inputs_test"
+inputs_file = "inputs"
 
 suffix = strategy
 
