@@ -1,5 +1,3 @@
-require "fileutils"
-
 require_relative "array"
 
 class Machine
@@ -117,7 +115,6 @@ class Machine
     pushes && (pushes * multiplier)
   end
 
-  # NOTE: This "private" method does not apply the multiplier!!
   def minimum_pushes_required_without_cache
     return if cannot_have_a_solution?
 

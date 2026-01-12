@@ -1,3 +1,5 @@
+require "fileutils"
+
 module MinimumPushesCache
   @minimum_push_caches = {}
   @cache_writes = 0
