@@ -83,3 +83,17 @@ running for inputs.txt index_of_fewest_button_joltage_for_biggest_buttons_withou
 
 did we ever make caps using no multiplier and short-circuiting?
 TODO: that ^
+
+
+left off:
+
+running for inputs.txt index_of_fewest_button_joltage_for_biggest_buttons_without_multiplier.cache with caps_index_of_fewest_button_joltage_for_biggest_buttons_without_multiplier.yml
+2026-01-13 09:08:53 -0800: starting new machine...
+2026-01-13 09:08:53 -0800 0s #134 0.0026552537313432835 s/m cache: 4580379
+(0,2,3,4,5,6,7,8) (1,2,4,5,6,7,8,9) (2,3,4,5,6,7,8,9) (0,1,2,5,7,9) (0,2,4,7,8,9) (0,4,5,6,7,9) (3,4,6,7,8,9) (1,3,5,8,9) (1,4,7,8,9) (1,3,5,8) (2,5,6,7) (0,6,8) (3,9) {36,44,58,65,71,72,84,86,95,99} cache size: 4580379 originally: (0,1,3,4,5,6,8,9) (0,1,3,4,5,7,8,9) (0,2,3,4,5,6,8,9) (0,1,2,4,7,9) (0,1,2,3,4,8) (0,1,3,5,6,8) (0,1,2,5,8,9) (0,1,5,7,8) (1,4,5,6,7) (4,5,6,7) (0,3,4,9) (2,3,5) (1,6) {86,99,36,84,72,95,65,44,71,58} cache size: 0
+
+
+running for inputs.txt index_of_fewest_button_joltage_for_biggest_buttons_without_multiplier_short_circuit.cache with caps_index_of_fewest_button_joltage_for_biggest_buttons_without_multiplier_short_circuit.yml
+2026-01-13 09:11:10 -0800: starting new machine...
+2026-01-13 09:11:10 -0800 0s #134 0.002426604477611941 s/m cache: 4589702
+(0,2,3,4,5,6,7,8) (1,2,4,5,6,7,8,9) (2,3,4,5,6,7,8,9) (0,1,2,5,7,9) (0,2,4,7,8,9) (0,4,5,6,7,9) (3,4,6,7,8,9) (1,3,5,8,9) (1,4,7,8,9) (1,3,5,8) (2,5,6,7) (0,6,8) (3,9) {36,44,58,65,71,72,84,86,95,99} cache size: 4589702 originally: (0,1,3,4,5,6,8,9) (0,1,3,4,5,7,8,9) (0,2,3,4,5,6,8,9) (0,1,2,4,7,9) (0,1,2,3,4,8) (0,1,3,5,6,8) (0,1,2,5,8,9) (0,1,5,7,8) (1,4,5,6,7) (4,5,6,7) (0,3,4,9) (2,3,5) (1,6) {86,99,36,84,72,95,65,44,71,58} cache size: 0
