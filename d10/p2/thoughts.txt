@@ -31,3 +31,25 @@ if a machine is nil at multiple caps... keep the biggest cap, delete the others
 if a machine is non-nil at multiple caps, keep the biggest??
 
 maybe not worth trying...
+
+left off with 3 running:
+
+running for inputs.txt index_of_fewest_button_joltage_for_biggest_buttons.cache with caps_index_of_fewest_button_joltage_for_biggest_buttons.yml
+2026-01-12 13:42:51 -0800: starting new machine...
+2026-01-12 13:42:51 -0800 0s #133 0.0036899398496240605 s/m cache: 1032735
+(0,1,2,3,4,5,6,8) (1,3,4,5,6,7,8,9) (0,2,5,6,7,8,9) (0,2,4,5,7,9) (0,5,6,7,8,9) (2,3,4,7,8,9) (0,1,5,6,9) (3,4,5,7,9) (1,2,7) (1,9) (2,3) (6,8) {43,51,53,53,56,61,62,70,81,83} cache size: 1032735 originally: (0,2,3,5,6,7,8,9) (0,1,2,4,5,7,8,9) (0,1,2,3,4,5,6) (1,2,4,6,8,9) (0,1,2,3,4,5) (1,3,4,5,6,8) (0,1,3,5,7) (1,4,5,8,9) (4,6,7) (1,7) (6,9) (0,2) {62,83,81,43,70,61,53,51,56,53} cache size: 0
+
+
+# This one consistently writes to the cache but might take longer overall. Maybe not worth it.
+# Note: doesn't consistently write to the cache on machine 128 wtf
+running for inputs.txt joltage_index_with_fewest_buttons.cache with caps_joltage_index_with_fewest_buttons.yml
+2026-01-12 14:40:14 -0800: starting new machine...
+2026-01-12 14:40:14 -0800 0s #128 13.080420453124997 s/m cache: 1318749
+(0,1,2,3,4,6,7,9) (0,1,2,3,4,7,8,9) (0,1,4,5,6,7,8,9) (1,3,5,6,7,8,9) (2,3,4,5,6,8,9) (3,4,5,6,7,8,9) (0,1,3,6,7,8) (0,2,5,6,9) (0,2,7,8,9) (1,2,3,5,6) (1,3,4,7) (2) {60,66,76,85,88,89,90,91,93,107} cache size: 1318749 originally: (0,1,2,3,4,5,6,9) (0,1,2,4,5,7,8,9) (0,1,2,3,4,5,6,7) (1,3,4,6,7,8,9) (0,4,5,6,7,8,9) (1,4,5,6,7,8,9) (0,2,5,6,7,9) (2,3,4,5,7) (2,3,4,8,9) (0,3,6,8,9) (0,1,5,6) (3) {66,88,60,76,107,91,85,93,89,90} cache size: 0
+
+
+# probably the most important because it doesn't use the multiplier which might give the wrong answer
+running for inputs.txt index_of_fewest_button_joltage_for_biggest_buttons_without_multiplier.cache with caps_index_of_fewest_button_joltage_for_biggest_buttons_without_multiplier.yml
+2026-01-12 14:05:37 -0800: starting new machine...
+2026-01-12 14:05:37 -0800 1s #133 10.55952609774436 s/m cache: 877304
+(0,1,2,3,4,5,6,8) (1,3,4,5,6,7,8,9) (0,2,5,6,7,8,9) (0,2,4,5,7,9) (0,5,6,7,8,9) (2,3,4,7,8,9) (0,1,5,6,9) (3,4,5,7,9) (1,2,7) (1,9) (2,3) (6,8) {43,51,53,53,56,61,62,70,81,83} cache size: 877304 originally: (0,2,3,5,6,7,8,9) (0,1,2,4,5,7,8,9) (0,1,2,3,4,5,6) (1,2,4,6,8,9) (0,1,2,3,4,5) (1,3,4,5,6,8) (0,1,3,5,7) (1,4,5,8,9) (4,6,7) (1,7) (6,9) (0,2) {62,83,81,43,70,61,53,51,56,53} cache size: 0

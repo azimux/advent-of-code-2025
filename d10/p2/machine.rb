@@ -702,6 +702,31 @@ class Machine
     pushes
   end
 
+  def joltage_index_that_when_removed_results_in_most_non_overlapping_groups
+    max_group_size = 1
+    max_group_joltage_index = nil
+
+    (0...joltages_size).each do |joltage_index|
+      new_joltages = joltages.dup
+      new_joltages[joltage_index] = 0
+
+      submachine = Machine.new(new_joltages, buttons.map(&:dup))
+
+      group_size = submachine.non_overlapping_button_groups.size
+
+      if group_size > max_group_size
+        max_group_size = group_size
+        max_group_joltage_index = joltage_index
+      end
+    end
+
+    if max_group_joltage_index && top_level
+      puts "yay! splitting into #{max_group_size}"
+    end
+
+    max_group_joltage_index || index_of_fewest_button_joltage_for_biggest_buttons
+  end
+
   def non_overlapping_button_groups
     groups = []
 

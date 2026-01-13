@@ -9,17 +9,18 @@ require_relative "minimum_pushes_cache"
 require_relative "machine_parser"
 
 # strategy = "index_of_min_joltage_for_biggest_buttons"
-strategy = "joltage_index_with_fewest_buttons"
+# strategy = "joltage_index_with_fewest_buttons"
 # strategy = "joltage_index_of_smallest_joltage"
 # strategy = "joltage_index_of_biggest_joltage"
 # strategy = "index_of_fewest_button_joltage_for_biggest_buttons"
+strategy = "joltage_index_that_when_removed_results_in_most_non_overlapping_groups"
 
-# inputs_file = "inputs_test"
 inputs_file = "inputs"
+# inputs_file = "inputs"
 
-skip_multiplier = true
+skip_multiplier = false
 
-# Short circuiting does not seem to work... we get solutions bigger than the cap
+# Short-circuiting does not seem to work... we get solutions bigger than the cap
 short_circuit = false
 
 suffix = strategy
