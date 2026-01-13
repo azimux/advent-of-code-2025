@@ -53,3 +53,33 @@ running for inputs.txt index_of_fewest_button_joltage_for_biggest_buttons_withou
 2026-01-12 14:05:37 -0800: starting new machine...
 2026-01-12 14:05:37 -0800 1s #133 10.55952609774436 s/m cache: 877304
 (0,1,2,3,4,5,6,8) (1,3,4,5,6,7,8,9) (0,2,5,6,7,8,9) (0,2,4,5,7,9) (0,5,6,7,8,9) (2,3,4,7,8,9) (0,1,5,6,9) (3,4,5,7,9) (1,2,7) (1,9) (2,3) (6,8) {43,51,53,53,56,61,62,70,81,83} cache size: 877304 originally: (0,2,3,5,6,7,8,9) (0,1,2,4,5,7,8,9) (0,1,2,3,4,5,6) (1,2,4,6,8,9) (0,1,2,3,4,5) (1,3,4,5,6,8) (0,1,3,5,7) (1,4,5,8,9) (4,6,7) (1,7) (6,9) (0,2) {62,83,81,43,70,61,53,51,56,53} cache size: 0
+
+
+
+seems like what hurts most is having to deal with large permutations of buttons?
+what can I possibly do about that?
+
+
+did we ever make caps using no multiplier and short-circuiting?
+
+
+left off:
+
+running for inputs.txt index_of_fewest_button_joltage_for_biggest_buttons.cache with caps_index_of_fewest_button_joltage_for_biggest_buttons.yml
+2026-01-13 06:46:37 -0800: starting new machine...
+2026-01-13 06:46:37 -0800 1320s #134 9.861131216417911 s/m cache: 4304965
+(0,2,3,4,5,6,7,8) (1,2,4,5,6,7,8,9) (2,3,4,5,6,7,8,9) (0,1,2,5,7,9) (0,2,4,7,8,9) (0,4,5,6,7,9) (3,4,6,7,8,9) (1,3,5,8,9) (1,4,7,8,9) (1,3,5,8) (2,5,6,7) (0,6,8) (3,9) {36,44,58,65,71,72,84,86,95,99} cache size: 4304965 originally: (0,1,3,4,5,6,8,9) (0,1,3,4,5,7,8,9) (0,2,3,4,5,6,8,9) (0,1,2,4,7,9) (0,1,2,3,4,8) (0,1,3,5,6,8) (0,1,2,5,8,9) (0,1,5,7,8) (1,4,5,6,7) (4,5,6,7) (0,3,4,9) (2,3,5) (1,6) {86,99,36,84,72,95,65,44,71,58} cache size: 0
+
+
+running for inputs.txt joltage_index_with_fewest_buttons.cache with caps_joltage_index_with_fewest_buttons.yml
+2026-01-13 06:50:36 -0800: starting new machine...
+2026-01-13 06:50:36 -0800 0s #133 10.915601924812032 s/m cache: 1335592
+(0,1,2,3,4,5,6,8) (1,3,4,5,6,7,8,9) (0,2,5,6,7,8,9) (0,2,4,5,7,9) (0,5,6,7,8,9) (2,3,4,7,8,9) (0,1,5,6,9) (3,4,5,7,9) (1,2,7) (1,9) (2,3) (6,8) {43,51,53,53,56,61,62,70,81,83} cache size: 1335592 originally: (0,2,3,5,6,7,8,9) (0,1,2,4,5,7,8,9) (0,1,2,3,4,5,6) (1,2,4,6,8,9) (0,1,2,3,4,5) (1,3,4,5,6,8) (0,1,3,5,7) (1,4,5,8,9) (4,6,7) (1,7) (6,9) (0,2) {62,83,81,43,70,61,53,51,56,53} cache size: 0
+
+running for inputs.txt index_of_fewest_button_joltage_for_biggest_buttons_without_multiplier.cache with caps_index_of_fewest_button_joltage_for_biggest_buttons_without_multiplier.yml
+2026-01-13 07:19:13 -0800: starting new machine...
+2026-01-13 07:19:13 -0800 3451s #134 25.759607425373137 s/m cache: 4305595
+(0,2,3,4,5,6,7,8) (1,2,4,5,6,7,8,9) (2,3,4,5,6,7,8,9) (0,1,2,5,7,9) (0,2,4,7,8,9) (0,4,5,6,7,9) (3,4,6,7,8,9) (1,3,5,8,9) (1,4,7,8,9) (1,3,5,8) (2,5,6,7) (0,6,8) (3,9) {36,44,58,65,71,72,84,86,95,99} cache size: 4305595 originally: (0,1,3,4,5,6,8,9) (0,1,3,4,5,7,8,9) (0,2,3,4,5,6,8,9) (0,1,2,4,7,9) (0,1,2,3,4,8) (0,1,3,5,6,8) (0,1,2,5,8,9) (0,1,5,7,8) (1,4,5,6,7) (4,5,6,7) (0,3,4,9) (2,3,5) (1,6) {86,99,36,84,72,95,65,44,71,58} cache size: 0
+
+did we ever make caps using no multiplier and short-circuiting?
+TODO: that ^

@@ -702,6 +702,7 @@ class Machine
     pushes
   end
 
+  # this experiment seems to not be worth it... way to slow after splitting
   def joltage_index_that_when_removed_results_in_most_non_overlapping_groups
     max_group_size = 1
     max_group_joltage_index = nil

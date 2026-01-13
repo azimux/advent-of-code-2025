@@ -21,7 +21,7 @@ inputs_file = "inputs"
 skip_multiplier = false
 
 # Short-circuiting does not seem to work... we get solutions bigger than the cap
-short_circuit = false
+short_circuit = true
 
 suffix = strategy
 
