@@ -52,6 +52,10 @@ class Joltages
 
   def [](index) = joltage_levels[index]
 
+  def []=(index, value)
+    joltage_levels[index] = value
+  end
+
   def each(&) = joltage_levels.each(&)
   def size = joltage_levels.size
   def to_s = "{#{joltage_levels.join(",")}}"
