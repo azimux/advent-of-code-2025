@@ -22,7 +22,7 @@ inputs_file = "inputs"
 skip_multiplier = true
 
 # Short-circuiting does not seem to work... we get solutions bigger than the cap
-short_circuit = true
+short_circuit = false
 
 suffix = strategy
 
@@ -87,5 +87,7 @@ MinimumPushesCache.close_cache_file
 
 # First possible answer submitted:   17554 but too low uggg
 # Next possible answer we generated (I think min joltage selected): 17953 but too high uggggggg
-# 18010
+# 18010 didn't try because already know 17953 was too high
 # 17920 too high
+# 17909 wrong but no longer says if too high or two low, dang
+# 17848
