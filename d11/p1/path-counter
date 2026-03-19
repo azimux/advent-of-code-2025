@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+require "pry"
+# require "pry-byebug"
+
+inputs_file = "inputs_test.txt"
+inputs_file = "inputs.txt"
+
+class Network
+  attr_accessor :graph
+
+  def initialize(inputs_file)
+    inputs = File.read(inputs_file)
+
+    lines = inputs.split("\n")
+
+    self.graph = {}
+
+    lines.each do |line|
+      if line =~ /(\w+):(.*)/
+        source = $1
+        destination = $2.scan(/\w+/)
+
+        graph[source.to_sym] = destination.map(&:to_sym)
+      else
+        raise "Unexpected line #{line}"
+      end
+    end
+  end
+
+  def answer = path_count_from(:you)
+
+  def path_count_from(node)
+    destinations = graph[node]
+
+    destinations.map do |destination|
+      destination == :out ? 1 : path_count_from(destination)
+    end.sum
+  end
+end
+
+network = Network.new(inputs_file)
+puts network.answer
