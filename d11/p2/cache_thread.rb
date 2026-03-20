@@ -3,44 +3,6 @@ require_relative "network_path"
 
 class CacheThread < Thread
   class << self
-    def load_cache(inputs_file_name, start_at:, end_at:)
-      cache_file_name = self.cache_file_name(inputs_file_name, start_at:, end_at:)
-      cache = {}
-
-      if File.exist?(cache_file_name)
-        FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
-
-        begin
-          File.open(cache_file_name) do |f|
-            until f.eof?
-              path = read_path(f)
-              count = read_result(f)
-              cache[path] = count
-            end
-          end
-        rescue EOFError
-          warn "cache corrupted, dumping out good values"
-          # rubocop:disable Style/FileOpen
-          cache_file = File.open(cache_file_name, "w")
-          # rubocop:enable Style/FileOpen
-
-          cache.each_pair do |path, count|
-            write(cache_file, path, count)
-          end
-
-          cache_file.close
-
-          FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
-        end
-      end
-
-      cache
-    end
-
-    def cache_file_name(inputs_file_name, start_at:, end_at:)
-      "#{inputs_file_name}.#{start_at}_#{end_at}.cache"
-    end
-
     def write(file, path, result)
       path.each_part do |path_part|
         file.write(Marshal.dump(path_part))
@@ -75,15 +37,56 @@ class CacheThread < Thread
     end
   end
 
-  attr_accessor :inputs_file_name, :start_at, :end_at, :cache, :queue
+  attr_accessor :start_at,
+                :end_at,
+                :cache,
+                :queue,
+                :cache_file_name
 
   def initialize(inputs_file_name, cache, start_at:, end_at:)
-    self.inputs_file_name = inputs_file_name
+    self.cache_file_name = "#{inputs_file_name}.#{start_at}_#{end_at}.cache"
     self.start_at = start_at
     self.end_at = end_at
     self.queue = Queue.new
 
+    load_cache
+
     super { do_it }
+  end
+
+  def load_cache
+    return @cache if @cache
+
+    cache = {}
+
+    if File.exist?(cache_file_name)
+      FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
+
+      begin
+        File.open(cache_file_name) do |f|
+          until f.eof?
+            path = self.class.read_path(f)
+            count = self.class.read_result(f)
+            cache[path] = count
+          end
+        end
+      rescue EOFError
+        warn "cache corrupted, dumping out good values"
+        # rubocop:disable Style/FileOpen
+        cache_file = File.open(cache_file_name, "w")
+        # rubocop:enable Style/FileOpen
+
+        cache.each_pair do |path, count|
+          self.class.write(cache_file, path, count)
+        end
+
+        cache_file.close
+
+        FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
+      end
+    end
+
+    @cache = cache
   end
 
   def do_it
@@ -118,8 +121,6 @@ class CacheThread < Thread
   def cache_file
     return @cache_file if @cache_file
 
-    cache_file_name = self.class.cache_file_name(inputs_file_name, start_at:, end_at:)
-
     if File.exist?(cache_file_name)
       FileUtils.mv(cache_file_name, "#{cache_file_name}.bak")
     end
@@ -127,9 +128,5 @@ class CacheThread < Thread
     # rubocop:disable Style/FileOpen
     @cache_file = File.open(cache_file_name, "a")
     # rubocop:enable Style/FileOpen
-  end
-
-  def cache_file_name
-    @cache_file_name ||= self.class.cache_file_name(inputs_file_name, start_at:, end_at:)
   end
 end

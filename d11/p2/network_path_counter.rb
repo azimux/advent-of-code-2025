@@ -18,8 +18,9 @@ class NetworkPathCounter
 
   def answer
     self.seen = Set.new
-    self.cache = CacheThread.load_cache(inputs_file_name, start_at:, end_at:)
+
     self.cache_thread = CacheThread.new(inputs_file_name, cache, start_at:, end_at:)
+    self.cache = cache_thread.cache
 
     path_count_from(start_at, seen_fft: false, seen_dac: false, path: nil)
   ensure
