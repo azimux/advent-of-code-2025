@@ -2,41 +2,6 @@ require "fileutils"
 require_relative "network_path"
 
 class CacheThread < Thread
-  class << self
-    def write(file, path, result)
-      path.each_part do |path_part|
-        file.write(Marshal.dump(path_part))
-      end
-
-      file.write(Marshal.dump(:path_end))
-      file.write(Marshal.dump(result))
-    end
-
-    def read_path(file)
-      path_array = []
-
-      loop do
-        path_part = Marshal.load(file)
-
-        break if path_part == :path_end
-
-        unless path_part.is_a?(Symbol)
-          raise "wtf"
-        end
-
-        path_array << path_part
-      end
-
-      path_array.reverse.inject(nil) do |path, path_part_symbol|
-        NetworkPath.new(path_part_symbol, path)
-      end
-    end
-
-    def read_result(file)
-      Marshal.load(file)
-    end
-  end
-
   attr_accessor :start_at,
                 :end_at,
                 :cache,
@@ -64,9 +29,12 @@ class CacheThread < Thread
 
       begin
         File.open(cache_file_name) do |f|
+          @cache_file = f
+
           until f.eof?
-            path = self.class.read_path(f)
-            count = self.class.read_result(f)
+            path = read_path
+            count = read_result
+
             cache[path] = count
           end
         end
@@ -83,6 +51,8 @@ class CacheThread < Thread
         cache_file.close
 
         FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
+      ensure
+        @cache_file = nil
       end
     end
 
@@ -98,15 +68,15 @@ class CacheThread < Thread
       count = queue.pop
 
       if path && count
-        file = cache_file
-        self.class.write(file, path, count)
-        file.flush
+        write(path, count)
+        flush
       end
     end
   end
 
   def dirty! = queue << true
   def stop = queue << :stop
+  def flush = cache_file.flush
 
   def close!
     stop
@@ -129,4 +99,35 @@ class CacheThread < Thread
     @cache_file = File.open(cache_file_name, "a")
     # rubocop:enable Style/FileOpen
   end
+
+  def write(path, result)
+    path.each_part do |path_part|
+      cache_file.write(Marshal.dump(path_part))
+    end
+
+    cache_file.write(Marshal.dump(:path_end))
+    cache_file.write(Marshal.dump(result))
+  end
+
+  def read_path
+    path_array = []
+
+    loop do
+      path_part = Marshal.load(cache_file)
+
+      break if path_part == :path_end
+
+      unless path_part.is_a?(Symbol)
+        raise "wtf"
+      end
+
+      path_array << path_part
+    end
+
+    path_array.reverse.inject(nil) do |path, path_part_symbol|
+      NetworkPath.new(path_part_symbol, path)
+    end
+  end
+
+  def read_result = Marshal.load(cache_file)
 end
