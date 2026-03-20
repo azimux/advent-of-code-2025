@@ -7,9 +7,12 @@ class NetworkPathCounter
                 :seen,
                 :cache,
                 :cache_thread,
-                :wait_on_cache
+                :wait_on_cache,
+                :exclude,
+                :cache_file_name
 
-  def initialize(network, start_at:, end_at:, wait_on_cache: false)
+  def initialize(network, start_at:, end_at:, wait_on_cache: false, exclude: nil)
+    self.exclude = exclude
     self.network = network
     self.start_at = start_at
     self.end_at = end_at
@@ -19,7 +22,9 @@ class NetworkPathCounter
   def answer
     self.seen = Set.new
 
-    self.cache_thread = CacheThread.new(inputs_file_name, cache, start_at:, end_at:)
+    self.cache_file_name = [inputs_file_name, start_at, end_at, *exclude, "cache"].join(".")
+
+    self.cache_thread = CacheThread.new(cache_file_name)
     self.cache = cache_thread.cache
 
     path_count_from(start_at, seen_fft: false, seen_dac: false, path: nil)
@@ -57,6 +62,8 @@ class NetworkPathCounter
   end
 
   def path_count_from(node, seen_fft:, seen_dac:, path:)
+    return 0 if exclude && exclude == node
+
     path = NetworkPath.new(node, path)
 
     return 0 if seen.include?(path)

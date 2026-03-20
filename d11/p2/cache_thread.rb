@@ -2,16 +2,12 @@ require "fileutils"
 require_relative "network_path"
 
 class CacheThread < Thread
-  attr_accessor :start_at,
-                :end_at,
-                :cache,
+  attr_accessor :cache,
                 :queue,
                 :cache_file_name
 
-  def initialize(inputs_file_name, cache, start_at:, end_at:)
-    self.cache_file_name = "#{inputs_file_name}.#{start_at}_#{end_at}.cache"
-    self.start_at = start_at
-    self.end_at = end_at
+  def initialize(cache_file_name)
+    self.cache_file_name = cache_file_name
     self.queue = Queue.new
 
     load_cache
