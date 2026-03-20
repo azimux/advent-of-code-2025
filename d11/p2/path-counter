@@ -14,11 +14,56 @@ wait_on_cache = inputs_file != "inputs.txt"
 
 network = Network.new(inputs_file)
 
-path_counter = NetworkPathCounter.new(network,
-                                      start_at: :svr,
-                                      end_at: :out,
-                                      must_see: [:fft, :dac],
-                                      wait_on_cache:)
-puts path_counter.answer
+# path_counter = NetworkPathCounter.new(network,
+#                                       start_at: :svr,
+#                                       end_at: :out,
+#                                       must_see: [:fft, :dac],
+#                                       wait_on_cache:)
+# puts path_counter.answer
+#
+# path_counter.join
 
-path_counter.join
+# take:
+#
+# start -> fft
+# fft -> dac
+# dac -> out
+#
+# Multiple those together, call this "fft_first_path"
+#
+# then, take
+#
+# start -> dac
+# dac -> fft
+# fft -> out
+#
+# multiple these together and add it to fft_first_path.
+fft_first_path_count = [
+  [:svr, :fft, :dac],
+  [:fft, :dac, :svr],
+  [:dac, :out, [:svr, :fft]]
+].map do |(start_at, end_at, exclude)|
+  NetworkPathCounter.new(
+    network,
+    start_at:,
+    end_at:,
+    exclude:,
+    wait_on_cache:
+  ).answer
+end.inject(:*)
+
+dac_first_path_count = [
+  [:svr, :dac, :fft],
+  [:dac, :fft, :svr],
+  [:fft, :out, [:svr, :dac]]
+].map do |(start_at, end_at, exclude)|
+  NetworkPathCounter.new(
+    network,
+    start_at:,
+    end_at:,
+    exclude:,
+    wait_on_cache:
+  ).answer
+end.inject(:*)
+
+puts dac_first_path_count + fft_first_path_count

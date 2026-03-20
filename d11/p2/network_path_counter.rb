@@ -14,7 +14,7 @@ class NetworkPathCounter
 
   def initialize(network, start_at:, end_at:, wait_on_cache: false, must_see: nil, exclude: nil)
     self.must_see = must_see == [] ? nil : must_see
-    self.exclude = exclude
+    self.exclude = [*exclude] if exclude
     self.network = network
     self.start_at = start_at
     self.end_at = end_at
@@ -51,7 +51,6 @@ class NetworkPathCounter
   end
 
   def inputs_file_name = network.inputs_file_name
-  def join = cache_thread.join
 
   private
 
@@ -74,7 +73,7 @@ class NetworkPathCounter
   end
 
   def path_count_from(node, path:, must_see:)
-    return 0 if exclude && exclude == node
+    return 0 if exclude&.include?(node)
 
     path = NetworkPath.new(node, path)
 
@@ -91,7 +90,7 @@ class NetworkPathCounter
                    end
       end
 
-      destinations = network[node]
+      destinations = network[node] || []
 
       destinations.map do |destination|
         if destination == end_at

@@ -6,3 +6,22 @@ Find all paths from dac to fft
 
 Find all paths from fft to out
 Find all paths from dac to out
+
+So, take:
+
+start -> fft
+fft -> dac
+dac -> out
+
+Multiple those together, call this "fft_first_path"
+
+then, take
+
+start -> dac
+dac -> fft
+fft -> out
+
+multiple these together and add it to fft_first_path.
+
+I'm scared this will give the wrong answer either
+due to not counting cycles that should be counted or by double counting cycles
