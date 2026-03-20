@@ -4,12 +4,17 @@
 # require "pry-byebug"
 
 require_relative "network"
+require_relative "network_path_counter"
 
 inputs_file = "inputs_test.txt"
 # inputs_file = "inputs.txt"
 wait_on_cache = inputs_file != "inputs.txt"
 
-network = Network.new(inputs_file, start_at: :svr, end_at: :out, wait_on_cache:)
-puts network.answer
+# svr -> out while passing through both fft and dac
 
-network.join
+network = Network.new(inputs_file)
+
+path_counter = NetworkPathCounter.new(network, start_at: :svr, end_at: :out, wait_on_cache:)
+puts path_counter.answer
+
+path_counter.join
