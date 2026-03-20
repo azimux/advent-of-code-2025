@@ -7,9 +7,11 @@ inputs_file = "inputs_test.txt"
 inputs_file = "inputs.txt"
 
 class Network
-  attr_accessor :graph
+  attr_accessor :graph, :start_at
 
-  def initialize(inputs_file)
+  def initialize(inputs_file, start_at)
+    self.start_at = start_at
+
     inputs = File.read(inputs_file)
 
     lines = inputs.split("\n")
@@ -28,16 +30,29 @@ class Network
     end
   end
 
-  def answer = path_count_from(:you)
+  def answer = path_count_from(start_at, seen_fft: false, seen_dac: false)
 
-  def path_count_from(node)
+  private
+
+  def path_count_from(node, seen_fft:, seen_dac:)
+    case node
+    when :fft
+      seen_fft = true
+    when :dac
+      seen_dac = true
+    end
+
     destinations = graph[node]
 
     destinations.map do |destination|
-      destination == :out ? 1 : path_count_from(destination)
+      if destination == :out
+        seen_fft && seen_dac ? 1 : 0
+      else
+        path_count_from(destination, seen_fft:, seen_dac:)
+      end
     end.sum
   end
 end
 
-network = Network.new(inputs_file)
+network = Network.new(inputs_file, :svr)
 puts network.answer
