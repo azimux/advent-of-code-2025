@@ -17,3 +17,6 @@ Naming/MethodParameterName:
 
 Style/MinMaxComparison:
   Enabled: false
+
+Style/OneClassPerFile:
+  Enabled: false

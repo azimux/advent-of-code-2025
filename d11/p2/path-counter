@@ -1,13 +1,34 @@
 #!/usr/bin/env ruby
 
-require "pry"
+# require "pry"
 # require "pry-byebug"
 
 inputs_file = "inputs_test.txt"
 inputs_file = "inputs.txt"
 
+class NetworkPath
+  attr_accessor :value, :list
+
+  def initialize(value, list = nil)
+    self.value = value
+    self.list = list
+  end
+
+  def hash
+    # rubocop:disable Security/CompoundHash
+    value.hash + list.hash
+    # rubocop:enable Security/CompoundHash
+  end
+
+  def ==(other)
+    other.class == self.class && other.value == value && other.list == list
+  end
+
+  def eql?(other) = self == other
+end
+
 class Network
-  attr_accessor :graph, :start_at
+  attr_accessor :graph, :start_at, :seen
 
   def initialize(inputs_file, start_at)
     self.start_at = start_at
@@ -30,11 +51,20 @@ class Network
     end
   end
 
-  def answer = path_count_from(start_at, seen_fft: false, seen_dac: false)
+  def answer
+    self.seen = Set.new
+    path_count_from(start_at, seen_fft: false, seen_dac: false, path: nil)
+  end
 
   private
 
-  def path_count_from(node, seen_fft:, seen_dac:)
+  def path_count_from(node, seen_fft:, seen_dac:, path:)
+    path = NetworkPath.new(node, path)
+
+    return 0 if seen.include?(path)
+
+    seen << path
+
     case node
     when :fft
       seen_fft = true
@@ -48,7 +78,7 @@ class Network
       if destination == :out
         seen_fft && seen_dac ? 1 : 0
       else
-        path_count_from(destination, seen_fft:, seen_dac:)
+        path_count_from(destination, seen_fft:, seen_dac:, path:)
       end
     end.sum
   end
