@@ -77,7 +77,10 @@ class NetworkPathCounter
 
     path = NetworkPath.new(node, path)
 
-    return 0 if seen.include?(path)
+    if seen.include?(path)
+      puts "cycle found!!!"
+      return 0
+    end
 
     seen << path
 

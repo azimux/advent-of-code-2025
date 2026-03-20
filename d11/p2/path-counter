@@ -7,7 +7,7 @@ require_relative "network"
 require_relative "network_path_counter"
 
 inputs_file = "inputs_test.txt"
-# inputs_file = "inputs.txt"
+inputs_file = "inputs.txt"
 wait_on_cache = inputs_file != "inputs.txt"
 
 # svr -> out while passing through both fft and dac

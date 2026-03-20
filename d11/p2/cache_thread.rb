@@ -21,10 +21,8 @@ class CacheThread < Thread
     cache = {}
 
     if File.exist?(cache_file_name)
-      FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
-
       begin
-        File.open(cache_file_name) do |f|
+        File.open(cache_file_name, "rb") do |f|
           @cache_file = f
 
           until f.eof?
@@ -41,12 +39,10 @@ class CacheThread < Thread
         # rubocop:enable Style/FileOpen
 
         cache.each_pair do |path, count|
-          self.class.write(cache_file, path, count)
+          write(path, count)
         end
 
         cache_file.close
-
-        FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
       ensure
         @cache_file = nil
       end
@@ -88,11 +84,11 @@ class CacheThread < Thread
     return @cache_file if @cache_file
 
     if File.exist?(cache_file_name)
-      FileUtils.mv(cache_file_name, "#{cache_file_name}.bak")
+      FileUtils.cp cache_file_name, "#{cache_file_name}.bak"
     end
 
     # rubocop:disable Style/FileOpen
-    @cache_file = File.open(cache_file_name, "a")
+    @cache_file = File.open(cache_file_name, "ab")
     # rubocop:enable Style/FileOpen
   end
 
