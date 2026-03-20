@@ -9,9 +9,11 @@ class NetworkPathCounter
                 :cache_thread,
                 :wait_on_cache,
                 :exclude,
+                :must_see,
                 :cache_file_name
 
-  def initialize(network, start_at:, end_at:, wait_on_cache: false, exclude: nil)
+  def initialize(network, start_at:, end_at:, wait_on_cache: false, must_see: nil, exclude: nil)
+    self.must_see = must_see == [] ? nil : must_see
     self.exclude = exclude
     self.network = network
     self.start_at = start_at
@@ -22,12 +24,22 @@ class NetworkPathCounter
   def answer
     self.seen = Set.new
 
-    self.cache_file_name = [inputs_file_name, start_at, end_at, *exclude, "cache"].join(".")
+    cache_file_name_parts = [inputs_file_name, start_at, end_at]
+
+    if exclude
+      cache_file_name_parts = [*cache_file_name_parts, *exclude]
+    end
+
+    if must_see
+      cache_file_name_parts = [*cache_file_name_parts, "m", *must_see]
+    end
+
+    self.cache_file_name = [*cache_file_name_parts, "cache"].join(".")
 
     self.cache_thread = CacheThread.new(cache_file_name)
     self.cache = cache_thread.cache
 
-    path_count_from(start_at, seen_fft: false, seen_dac: false, path: nil)
+    path_count_from(start_at, path: nil, must_see: must_see.dup)
   ensure
     self.seen = nil
 
@@ -61,7 +73,7 @@ class NetworkPathCounter
     result
   end
 
-  def path_count_from(node, seen_fft:, seen_dac:, path:)
+  def path_count_from(node, path:, must_see:)
     return 0 if exclude && exclude == node
 
     path = NetworkPath.new(node, path)
@@ -71,25 +83,26 @@ class NetworkPathCounter
     seen << path
 
     cached(path) do
-      case node
-      when :fft
-        seen_fft = true
-      when :dac
-        seen_dac = true
+      if must_see&.include?(node)
+        must_see = if must_see.size == 1
+                     nil
+                   else
+                     must_see.reject { it == node }
+                   end
       end
 
       destinations = network[node]
 
       destinations.map do |destination|
         if destination == end_at
-          if seen_fft && seen_dac
+          if must_see.nil?
             puts "found a path!!"
             1
           else
             0
           end
         else
-          path_count_from(destination, seen_fft:, seen_dac:, path:)
+          path_count_from(destination, path:, must_see:)
         end
       end.sum
     end

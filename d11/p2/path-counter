@@ -14,7 +14,11 @@ wait_on_cache = inputs_file != "inputs.txt"
 
 network = Network.new(inputs_file)
 
-path_counter = NetworkPathCounter.new(network, start_at: :svr, end_at: :out, wait_on_cache:)
+path_counter = NetworkPathCounter.new(network,
+                                      start_at: :svr,
+                                      end_at: :out,
+                                      must_see: [:fft, :dac],
+                                      wait_on_cache:)
 puts path_counter.answer
 
 path_counter.join
