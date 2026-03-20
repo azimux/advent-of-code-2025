@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+# This experiment demonstrates that in CRuby, Queue#<< counts as an
+# IO operation that allows the thread scheduler to run a different thread
+
+# require "pry"
+# require "pry-byebug"
+
+values = []
+
+queue = Queue.new
+thread = Thread.new do
+  loop do
+    value = queue.pop
+    break if value == :stop
+
+    puts "value: #{value}"
+    puts "last_value: #{values.last}"
+  end
+end
+
+(0..100).each do |i|
+  1000001.times { it * it }
+  values << i
+  queue << i
+  # sleep 0.000001
+end
+
+queue << :stop
+
+thread.join
