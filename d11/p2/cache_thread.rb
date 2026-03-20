@@ -3,8 +3,8 @@ require_relative "network_path"
 
 class CacheThread < Thread
   class << self
-    def load_cache(inputs_file_name)
-      cache_file_name = self.cache_file_name(inputs_file_name)
+    def load_cache(inputs_file_name, start_at:, end_at:)
+      cache_file_name = self.cache_file_name(inputs_file_name, start_at:, end_at:)
       cache = {}
 
       if File.exist?(cache_file_name)
@@ -37,8 +37,8 @@ class CacheThread < Thread
       cache
     end
 
-    def cache_file_name(inputs_file_name)
-      "#{inputs_file_name}.cache"
+    def cache_file_name(inputs_file_name, start_at:, end_at:)
+      "#{inputs_file_name}.#{start_at}_#{end_at}.cache"
     end
 
     def write(file, path, result)
@@ -75,10 +75,12 @@ class CacheThread < Thread
     end
   end
 
-  attr_accessor :inputs_file_name, :cache, :queue
+  attr_accessor :inputs_file_name, :start_at, :end_at, :cache, :queue
 
-  def initialize(inputs_file_name, cache)
+  def initialize(inputs_file_name, cache, start_at:, end_at:)
     self.inputs_file_name = inputs_file_name
+    self.start_at = start_at
+    self.end_at = end_at
     self.queue = Queue.new
 
     super { do_it }
@@ -116,7 +118,7 @@ class CacheThread < Thread
   def cache_file
     return @cache_file if @cache_file
 
-    cache_file_name = self.class.cache_file_name(inputs_file_name)
+    cache_file_name = self.class.cache_file_name(inputs_file_name, start_at:, end_at:)
 
     if File.exist?(cache_file_name)
       FileUtils.mv(cache_file_name, "#{cache_file_name}.bak")
@@ -128,6 +130,6 @@ class CacheThread < Thread
   end
 
   def cache_file_name
-    @cache_file_name ||= self.class.cache_file_name(inputs_file_name)
+    @cache_file_name ||= self.class.cache_file_name(inputs_file_name, start_at:, end_at:)
   end
 end

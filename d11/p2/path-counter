@@ -9,7 +9,7 @@ inputs_file = "inputs_test.txt"
 # inputs_file = "inputs.txt"
 wait_on_cache = inputs_file != "inputs.txt"
 
-network = Network.new(inputs_file, :svr, wait_on_cache:)
+network = Network.new(inputs_file, start_at: :svr, end_at: :out, wait_on_cache:)
 puts network.answer
 
 network.join

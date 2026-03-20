@@ -1,11 +1,19 @@
 require_relative "cache_thread"
 
 class Network
-  attr_accessor :graph, :start_at, :seen, :cache, :inputs_file, :cache_thread, :wait_on_cache
+  attr_accessor :graph,
+                :start_at,
+                :end_at,
+                :seen,
+                :cache,
+                :inputs_file,
+                :cache_thread,
+                :wait_on_cache
 
-  def initialize(inputs_file, start_at, wait_on_cache: false)
+  def initialize(inputs_file, start_at:, end_at:, wait_on_cache: false)
     self.inputs_file = inputs_file
     self.start_at = start_at
+    self.end_at = end_at
     self.wait_on_cache = wait_on_cache
 
     inputs = File.read(inputs_file)
@@ -28,8 +36,8 @@ class Network
 
   def answer
     self.seen = Set.new
-    self.cache = CacheThread.load_cache(inputs_file)
-    self.cache_thread = CacheThread.new(inputs_file, cache)
+    self.cache = CacheThread.load_cache(inputs_file, start_at:, end_at:)
+    self.cache_thread = CacheThread.new(inputs_file, cache, start_at:, end_at:)
 
     path_count_from(start_at, seen_fft: false, seen_dac: false, path: nil)
   ensure
@@ -81,8 +89,12 @@ class Network
 
       destinations = graph[node]
 
+      if destinations.nil?
+        require "pry"
+        binding.pry
+      end
       destinations.map do |destination|
-        if destination == :out
+        if destination == end_at
           if seen_fft && seen_dac
             puts "found a path!!"
             1
