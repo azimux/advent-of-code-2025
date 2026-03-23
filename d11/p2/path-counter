@@ -37,7 +37,7 @@ network = Network.new(inputs_file)
 # dac -> fft
 # fft -> out
 #
-# multiple these together and add it to fft_first_path.
+# multiply these together and add it to fft_first_path.
 fft_first_path_count = [
   [:svr, :fft, :dac],
   [:fft, :dac, :svr],

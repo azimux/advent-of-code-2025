@@ -25,4 +25,28 @@ class Network
   end
 
   def [](key) = graph[key]
+
+  def has_cycles?(node, seen = Set.new, has_no_cycles = Set.new)
+    return false if has_no_cycles.include?(node)
+    return true if seen.include?(node)
+
+    destinations = graph[node]
+
+    unless destinations
+      puts "#{node} has no cycles!"
+      has_no_cycles << node
+      return false
+    end
+
+    seen |= Set[node]
+
+    return true if destinations.any? do |destination|
+      has_cycles?(destination, seen, has_no_cycles)
+    end
+
+    puts "#{node} has no cycles!"
+    has_no_cycles << node
+
+    false
+  end
 end

@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+# require "pry"
+# require "pry-byebug"
+
+require_relative "network"
+require_relative "network_path_counter"
+
+# inputs_file = "inputs_test.txt"
+inputs_file = "inputs.txt"
+
+network = Network.new(inputs_file)
+
+puts "has cycles? #{network.has_cycles?(:svr)}"
