@@ -4,7 +4,6 @@ class NetworkPathCounter
   attr_accessor :network,
                 :start_at,
                 :end_at,
-                :seen,
                 :cache,
                 :cache_thread,
                 :wait_on_cache,
@@ -22,8 +21,6 @@ class NetworkPathCounter
   end
 
   def answer
-    self.seen = Set.new
-
     cache_file_name_parts = [inputs_file_name, start_at, end_at]
 
     if exclude
@@ -39,10 +36,8 @@ class NetworkPathCounter
     self.cache_thread = CacheThread.new(cache_file_name)
     self.cache = cache_thread.cache
 
-    path_count_from(start_at, path: nil, must_see: must_see.dup)
+    path_count_from(start_at, must_see: must_see.dup)
   ensure
-    self.seen = nil
-
     if wait_on_cache
       cache_thread.stop
     else
@@ -54,37 +49,28 @@ class NetworkPathCounter
 
   private
 
-  def cached(path)
-    result = cache[path]
+  def cached(node)
+    result = cache[node]
 
     if result
-      puts "Cache hit on #{path}: #{result}"
+      puts "Cache hit on #{node}: #{result}"
     end
 
     unless result
       result = yield
 
-      cache[path] = result
+      cache[node] = result
 
-      cache_thread.write_to_cache(path, result)
+      cache_thread.write_to_cache(node, result)
     end
 
     result
   end
 
-  def path_count_from(node, path:, must_see:)
+  def path_count_from(node, must_see:)
     return 0 if exclude&.include?(node)
 
-    path = NetworkPath.new(node, path)
-
-    if seen.include?(path)
-      puts "cycle found!!!"
-      return 0
-    end
-
-    seen << path
-
-    cached(path) do
+    cached(node) do
       if must_see&.include?(node)
         must_see = if must_see.size == 1
                      nil
@@ -104,7 +90,7 @@ class NetworkPathCounter
             0
           end
         else
-          path_count_from(destination, path:, must_see:)
+          path_count_from(destination, must_see:)
         end
       end.sum
     end
