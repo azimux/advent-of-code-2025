@@ -3,48 +3,11 @@
 # require "pry"
 # require "pry-byebug"
 
+require_relative "presents_and_regions"
+
 inputs_file = "inputs_test.txt"
 # inputs_file = "inputs.txt"
 
-class Present
-  attr_accessor :index, :spaces
-
-  def initialize(index, spaces)
-    self.index = index
-    self.spaces = spaces
-  end
-end
-
-class Region
-  attr_accessor :height, :width, :present_counts
-
-  def initialize(height:, width:, present_counts:)
-    self.height = height
-    self.width = width
-    self.present_counts = present_counts
-  end
-end
-
-class PresentsAndRegions
-  attr_accessor :presents, :regions
-
-  def initialize(inputs_file)
-    presents_regex = /^(\d+):\n((?:[.#]+\n)+)/
-
-    inputs_file_text = File.read(inputs_file)
-
-    self.presents = inputs_file_text.scan(presents_regex).map do |(index, spaces)|
-      Present.new(index.to_i, spaces.chomp.split("\n"))
-    end
-
-    regions_regex = /^(\d+)x(\d+):\s+((?:\d+(?:\s+|$))+)/
-
-    self.regions = inputs_file_text.scan(regions_regex).map do |(height, width, present_counts)|
-      present_counts = present_counts.chomp.split(/\s+|$/).map(&:to_i)
-
-      Region.new(height: height.to_i, width: width.to_i, present_counts:)
-    end
-  end
-end
-
 presents_and_regions = PresentsAndRegions.new(inputs_file)
+
+puts presents_and_regions
