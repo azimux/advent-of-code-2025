@@ -35,4 +35,54 @@ class PresentShape
       end
     end
   end
+
+  def each_variant
+    variants.each { yield it }
+  end
+
+  def variants
+    return @variants if @variants
+
+    @variants = []
+
+    seen = Set.new
+    seen << spaces
+
+    shape = self
+
+    @variants << self
+
+    3.times do
+      shape = shape.rotate
+
+      new_spaces = shape.spaces
+
+      unless seen.include?(new_spaces)
+        seen << new_spaces
+        @variants << shape
+      end
+    end
+
+    shape = flip
+
+    new_spaces = shape.spaces
+
+    unless seen.include?(new_spaces)
+      seen << new_spaces
+      @variants << shape
+    end
+
+    3.times do
+      shape = shape.rotate
+
+      new_spaces = shape.spaces
+
+      unless seen.include?(new_spaces)
+        seen << new_spaces
+        @variants << shape
+      end
+    end
+
+    @variants
+  end
 end

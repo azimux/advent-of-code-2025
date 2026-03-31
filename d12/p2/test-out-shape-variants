@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+# require "pry"
+# require "pry-byebug"
+
+
+require_relative "presents_and_regions"
+
+inputs_file = "inputs_test.txt"
+# inputs_file = "inputs.txt"
+
+presents_and_regions = PresentsAndRegions.new(inputs_file)
+
+presents_and_regions.present_shapes.each do |present_shape|
+  puts present_shape.variants.size
+end
