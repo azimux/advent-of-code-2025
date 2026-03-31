@@ -1,4 +1,4 @@
-class Present
+class PresentShape
   attr_accessor :index, :spaces
 
   def initialize(index, spaces)
@@ -7,7 +7,7 @@ class Present
   end
 
   def flip
-    Present.new(index, spaces.map(&:reverse))
+    self.class.new(index, spaces.map(&:reverse))
   end
 
   def rotate
@@ -15,7 +15,7 @@ class Present
       spaces.map { |row| row[column] }.reverse.join
     end
 
-    Present.new(index, rotated_spaces)
+    self.class.new(index, rotated_spaces)
   end
 
   def width = spaces.first.size

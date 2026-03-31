@@ -10,21 +10,21 @@ inputs_file = "inputs_test.txt"
 
 presents_and_regions = PresentsAndRegions.new(inputs_file)
 
-present = presents_and_regions.presents[1]
+present_shape = presents_and_regions.present_shapes[1]
 
-puts present
+puts present_shape
 puts
-puts present.flip
+puts present_shape.flip
 puts
-present = present.rotate
-puts present
+present_shape = present_shape.rotate
+puts present_shape
 puts
-present = present.rotate
-puts present
+present_shape = present_shape.rotate
+puts present_shape
 puts
-present = present.rotate
-puts present
+present_shape = present_shape.rotate
+puts present_shape
 puts
-present = present.rotate
-puts present
+present_shape = present_shape.rotate
+puts present_shape
 puts
