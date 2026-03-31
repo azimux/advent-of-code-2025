@@ -25,3 +25,14 @@ so winds up being N!/(2! * 1!)
 
 
 [A1, A2, B1, B2]
+
+Hmmm.... doesn't seem like it will work...
+
+#### other idea:
+
+Maybe come up with a quick way to short-circuit... for example, if presents area > region's area, return false!
+
+#### other idea as well:
+
+Decompose into smaller regions with smaller sets of presents and cache results to short-circuit other
+runs.
