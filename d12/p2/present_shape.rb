@@ -21,8 +21,18 @@ class PresentShape
   def width = spaces.first.size
 
   def to_s
-    spaces.map do |line|
-      line.map { it ? "#" : "." }.join
+    spaces.map do |column|
+      column.map { it ? "#" : "." }.join
     end.join("\n")
+  end
+
+  def each_filled_space
+    spaces.each_with_index do |column, x|
+      column.each_with_index do |filled, y|
+        if filled
+          yield x, y
+        end
+      end
+    end
   end
 end
