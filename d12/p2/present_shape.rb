@@ -12,7 +12,7 @@ class PresentShape
 
   def rotate
     rotated_spaces = (0...width).map do |column|
-      spaces.map { |row| row[column] }.reverse.join
+      spaces.map { |row| row[column] }.reverse
     end
 
     self.class.new(index, rotated_spaces)
@@ -21,6 +21,8 @@ class PresentShape
   def width = spaces.first.size
 
   def to_s
-    spaces.join("\n")
+    spaces.map do |line|
+      line.map { it ? "#" : "." }.join
+    end.join("\n")
   end
 end
