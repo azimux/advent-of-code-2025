@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+# require "pry"
+# require "pry-byebug"
+
+# This script suggests we are not barking up the right tree... takes forever to iterate over these
+# and it doesn't even take into account flipping/rotating, placing at different starting squares.
+
+def combos(quantity_per_category)
+  position_count = quantity_per_category.sum
+
+  (0...quantity_per_category.size).each do |chosen_category_for_first_position|
+    current_value = quantity_per_category[chosen_category_for_first_position]
+
+    next if current_value.zero?
+
+    if position_count == 1
+      yield [chosen_category_for_first_position]
+    else
+      new_quantity_per_category = quantity_per_category.dup
+      new_quantity_per_category[chosen_category_for_first_position] -= 1
+
+      combos(new_quantity_per_category) do |combo|
+        yield [chosen_category_for_first_position, *combo]
+      end
+    end
+  end
+end
+
+# combos([2, 1]) do |combo|
+#   puts combo.inspect
+# end
+
+quantity_per_category = [38, 32, 39, 37, 41, 38]
+
+count = 0
+
+combos(quantity_per_category) do |_combo|
+  count += 1
+
+  if count % 1_000_000 == 0
+    puts Time.now
+    puts count
+  end
+end
+
+puts count

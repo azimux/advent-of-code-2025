@@ -1,0 +1,27 @@
+Algorithm for iterating over all combinations ignoring duplicates
+
+A1A2B1
+
+A1 and A2 are shaped the same
+
+A1A2B1
+A1B1A2
+A2A1B1
+A2B1A1
+B1A1A2
+B1A2A1
+
+We have some duplicates, though...
+
+A1A2B1 and A2A1B1
+B1A1A2 and B1A2A1
+A1B1A2 and A2B1A2
+
+
+so winds up being N!/(2! * 1!)
+
+255! / (38! * 32! * 39! * 37! * 41! * 38!)
+255.fact / (38.fact * 32.fact * 39.fact * 37.fact * 41.fact * 38.fact)
+
+
+[A1, A2, B1, B2]
