@@ -4,27 +4,21 @@
 # require "pry-byebug"
 
 require_relative "presents_and_regions"
+require_relative "present_fitter"
 
 inputs_file = "inputs_test.txt"
 # inputs_file = "inputs.txt"
 
 presents_and_regions = PresentsAndRegions.new(inputs_file)
 
-present_shape = presents_and_regions.present_shapes[1]
+present_shapes = presents_and_regions.present_shapes
 
-puts present_shape
-puts
-puts present_shape.flip
-puts
-present_shape = present_shape.rotate
-puts present_shape
-puts
-present_shape = present_shape.rotate
-puts present_shape
-puts
-present_shape = present_shape.rotate
-puts present_shape
-puts
-present_shape = present_shape.rotate
-puts present_shape
-puts
+can_fit = 0
+
+presents_and_regions.region_to_present_counts.each_pair do |region, present_counts|
+  fitter = PresentFitter.new(present_shapes:, present_counts:, region:)
+
+  can_fit += 1 if fitter.can_fill?
+end
+
+puts can_fit
