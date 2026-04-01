@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-# require "pry"
-# require "pry-byebug"
+require "pry"
+require "pry-byebug"
 
 require_relative "presents_and_regions"
 require_relative "present_fitter"
@@ -18,9 +18,7 @@ end
 can_fit = 0
 
 presents_and_regions.region_to_present_counts.each_pair do |region, present_counts|
-  fitter = PresentFitter.new(present_counts:, region:)
-
-  can_fit += 1 if fitter.can_fill?
+  can_fit += 1 if PresentFitter.can_fit?(region, present_counts)
 end
 
 puts can_fit

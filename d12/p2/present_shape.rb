@@ -96,4 +96,10 @@ class PresentShape
 
     @variants
   end
+
+  def area
+    @area ||= spaces.sum do |column|
+      column.count { it }
+    end
+  end
 end

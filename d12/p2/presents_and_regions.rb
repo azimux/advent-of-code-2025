@@ -12,7 +12,7 @@ class PresentsAndRegions
     self.present_shapes = {}
 
     inputs_file_text.scan(presents_regex).each do |(index, dots)|
-      present_shapes[index] = PresentShape.new(dots_to_spaces(dots))
+      present_shapes[index.to_i] = PresentShape.new(dots_to_spaces(dots))
     end
 
     self.region_to_present_counts = {}
@@ -24,7 +24,7 @@ class PresentsAndRegions
 
       region = Region.new(height: height.to_i, width: width.to_i)
 
-      region_to_present_counts[region] = present_counts
+      region_to_present_counts[region] = present_counts.map.with_index { |count, index| [index, count] }.to_h
     end
   end
 
