@@ -9,8 +9,10 @@ class PresentsAndRegions
 
     inputs_file_text = File.read(inputs_file)
 
-    self.present_shapes = inputs_file_text.scan(presents_regex).map do |(index, dots)|
-      PresentShape.new(index.to_i, dots_to_spaces(dots))
+    self.present_shapes = {}
+
+    inputs_file_text.scan(presents_regex).each do |(index, dots)|
+      present_shapes[index] = PresentShape.new(dots_to_spaces(dots))
     end
 
     self.region_to_present_counts = {}

@@ -3,7 +3,6 @@
 # require "pry"
 # require "pry-byebug"
 
-
 require_relative "presents_and_regions"
 
 inputs_file = "inputs_test.txt"

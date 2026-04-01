@@ -11,12 +11,14 @@ inputs_file = "inputs_test.txt"
 
 presents_and_regions = PresentsAndRegions.new(inputs_file)
 
-present_shapes = presents_and_regions.present_shapes
+presents_and_regions.present_shapes.each_pair do |index, present_shape|
+  PresentShape[index] = present_shape
+end
 
 can_fit = 0
 
 presents_and_regions.region_to_present_counts.each_pair do |region, present_counts|
-  fitter = PresentFitter.new(present_shapes:, present_counts:, region:)
+  fitter = PresentFitter.new(present_counts:, region:)
 
   can_fit += 1 if fitter.can_fill?
 end

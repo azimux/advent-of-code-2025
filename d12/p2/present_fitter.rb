@@ -1,8 +1,7 @@
 class PresentFitter
-  attr_accessor :present_shapes, :region, :present_counts
+  attr_accessor :region, :present_counts
 
-  def initialize(present_shapes:, region:, present_counts:)
-    self.present_shapes = present_shapes
+  def initialize(region:, present_counts:)
     self.region = region
     self.present_counts = present_counts
   end
