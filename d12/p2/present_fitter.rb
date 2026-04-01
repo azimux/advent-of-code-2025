@@ -30,6 +30,8 @@ class PresentFitter
 
           new_present_counts[index] = count - 1
 
+          return true if new_present_counts.values.all?(&:zero?)
+
           if PresentFitter.can_fit?(new_region, new_present_counts)
             return true
           end

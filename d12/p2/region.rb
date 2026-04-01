@@ -62,7 +62,7 @@ class Region
 
   def available_area
     @available_area ||= spaces.sum do |column|
-      column.count { it }
+      column.count { !it }
     end
   end
 
@@ -77,5 +77,11 @@ class Region
 
     candidate_starting_points(present_shape, x + 1, y, &block)
     candidate_starting_points(present_shape, x, y + 1, &block)
+  end
+
+  def dup
+    super.tap do |new_region|
+      new_region.spaces = spaces.map(&:dup)
+    end
   end
 end
