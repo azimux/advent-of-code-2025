@@ -3,12 +3,11 @@ class Region
   class OutOfBoundsError < FillError; end
   class AlreadyFilledError < FillError; end
 
-  attr_accessor :height, :width, :present_counts, :spaces
+  attr_accessor :height, :width, :spaces
 
-  def initialize(height:, width:, present_counts:)
+  def initialize(height:, width:)
     self.height = height
     self.width = width
-    self.present_counts = present_counts
 
     self.spaces = Array.new(width) { Array.new(height, false) }
   end

@@ -9,19 +9,19 @@
 def combos(quantity_per_category)
   position_count = quantity_per_category.sum
 
-  (0...quantity_per_category.size).each do |chosen_category_for_first_position|
-    current_value = quantity_per_category[chosen_category_for_first_position]
+  (0...quantity_per_category.size).each do |index|
+    current_value = quantity_per_category[index]
 
     next if current_value.zero?
 
     if position_count == 1
-      yield [chosen_category_for_first_position]
+      yield [index]
     else
       new_quantity_per_category = quantity_per_category.dup
-      new_quantity_per_category[chosen_category_for_first_position] -= 1
+      new_quantity_per_category[index] -= 1
 
       combos(new_quantity_per_category) do |combo|
-        yield [chosen_category_for_first_position, *combo]
+        yield [index, *combo]
       end
     end
   end

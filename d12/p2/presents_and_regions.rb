@@ -2,7 +2,7 @@ require_relative "present_shape"
 require_relative "region"
 
 class PresentsAndRegions
-  attr_accessor :present_shapes, :regions
+  attr_accessor :present_shapes, :region_to_present_counts
 
   def initialize(inputs_file)
     presents_regex = /^(\d+):\n((?:[.#]+\n)+)/
@@ -13,12 +13,16 @@ class PresentsAndRegions
       PresentShape.new(index.to_i, dots_to_spaces(dots))
     end
 
+    self.region_to_present_counts = {}
+
     regions_regex = /^(\d+)x(\d+):\s+((?:\d+(?:\s+|$))+)/
 
-    self.regions = inputs_file_text.scan(regions_regex).map do |(height, width, present_counts)|
+    inputs_file_text.scan(regions_regex).each do |(height, width, present_counts)|
       present_counts = present_counts.chomp.split(/\s+|$/).map(&:to_i)
 
-      Region.new(height: height.to_i, width: width.to_i, present_counts:)
+      region = Region.new(height: height.to_i, width: width.to_i)
+
+      region_to_present_counts[region] = present_counts
     end
   end
 
