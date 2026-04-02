@@ -37,8 +37,9 @@ Maybe come up with a quick way to short-circuit... for example, if presents area
 Decompose into smaller regions with smaller sets of presents and cache results to short-circuit other
 runs.
 
-Thought: If we can fit a 3x3 shape into a region the total present count number of times,
-then we know for sure we could fit the presents!
+------
 
-We need to know how many 3x3 regions we have. We would have to reduce to dimensions
-divisible by 3.
+Check if we can trim from the left or the right. Explore adding shapes either to
+the top or the left not just the top.
+
+And obviously, add caching.
