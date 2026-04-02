@@ -32,14 +32,14 @@ class PresentShape
   def width = spaces.first.size
 
   def to_s
-    spaces.map do |column|
-      column.map { it ? "#" : "." }.join
+    spaces.map do |row|
+      row.map { it ? "#" : "." }.join
     end.join("\n")
   end
 
   def each_filled_space
-    spaces.each_with_index do |column, x|
-      column.each_with_index do |filled, y|
+    spaces.each_with_index do |row, x|
+      row.each_with_index do |filled, y|
         if filled
           yield x, y
         end
@@ -98,8 +98,8 @@ class PresentShape
   end
 
   def area
-    @area ||= spaces.sum do |column|
-      column.count { it }
+    @area ||= spaces.sum do |row|
+      row.count { it }
     end
   end
 end

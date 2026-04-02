@@ -37,8 +37,8 @@ Maybe come up with a quick way to short-circuit... for example, if presents area
 Decompose into smaller regions with smaller sets of presents and cache results to short-circuit other
 runs.
 
+Thought: If we can fit a 3x3 shape into a region the total present count number of times,
+then we know for sure we could fit the presents!
 
-where left off... there's a bug in the current changes but without the current changes
-the 3rd region runs forever. But the 2nd region should fit but says it doesn't
-fit with the current uncommitted changes.
-WTF the y < 2 guard causes the count to be wrong? how???
+We need to know how many 3x3 regions we have. We would have to reduce to dimensions
+divisible by 3.

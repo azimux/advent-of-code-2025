@@ -19,7 +19,7 @@ class PresentsAndRegions
 
     regions_regex = /^(\d+)x(\d+):\s+((?:\d+(?:\s+|$))+)/
 
-    inputs_file_text.scan(regions_regex).each do |(height, width, present_counts)|
+    inputs_file_text.scan(regions_regex).each do |(width, height, present_counts)|
       present_counts = present_counts.chomp.split(/\s+|$/).map(&:to_i)
 
       region = Region.new(height: height.to_i, width: width.to_i)

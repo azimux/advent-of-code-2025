@@ -14,7 +14,7 @@ class Region
     self.height = height
     self.width = width
 
-    self.spaces = Array.new(width) { Array.new(height, false) }
+    self.spaces = Array.new(height) { Array.new(width, false) }
   end
 
   def add_present_shape_at(present_shape, x, y)
@@ -46,11 +46,12 @@ class Region
       raise AlreadyFilledError, "Already filled! #{x}, #{y}"
     end
 
-    spaces[x][y] = true
+    # y first since we're row-wise
+    spaces[y][x] = true
   end
 
   def shape_out_of_bounds?(present_shape, x, y)
-    return true if width < 3
+    return true if width < 3 || height < 3
 
     present_shape.each_filled_space do |i, j|
       return true if point_out_of_bounds?(x + i, y + j)
@@ -59,8 +60,14 @@ class Region
     false
   end
 
-  def point_out_of_bounds?(x, y) = x >= width || y >= height
-  def filled?(x, y) = spaces[x][y]
+  def point_out_of_bounds?(x, y)
+    x >= width || y >= height || x < 0 || y < 0
+  end
+
+  # y first since we're row-wise
+  def filled?(x, y)
+    spaces[y][x]
+  end
 
   def available_area
     @available_area ||= spaces.sum do |column|
@@ -68,8 +75,24 @@ class Region
     end
   end
 
+  def non_empty_row_count
+    count = 0
+    i = 0
+
+    loop do
+      row = spaces[i]
+      break unless row
+      break unless row.any? { it }
+
+      count += 1
+      i += 1
+    end
+
+    count
+  end
+
   def candidate_starting_points(present_shape, x = 0, y = 0, &block)
-    return if width < 3
+    return if width < 3 || height < 3
     return if shape_out_of_bounds?(present_shape, x, y)
 
     if will_fit_at?(present_shape, x, y)
@@ -79,15 +102,14 @@ class Region
     end
 
     candidate_starting_points(present_shape, x + 1, y, &block)
-    # WTF why does commenting this out matter??
-    # if y < 2
-    candidate_starting_points(present_shape, x, y + 1, &block)
-    # end
+    if y < 1
+      candidate_starting_points(present_shape, x, y + 1, &block)
+    end
   end
 
   def trim!(present_counts)
     if can_trim?(present_counts)
-      self.width -= 1
+      self.height -= 1
       spaces.shift
       # TODO: this checks 4 trims when we can at most trim three times
       trim!(present_counts)
@@ -98,21 +120,29 @@ class Region
     if present_counts.values.all? { |i| i <= 0 }
       binding.pry
     end
-    return false if width < 3
+    return false if height < 3
 
     present_counts.each_pair do |index, count|
       next if count.zero?
 
       present_shape = PresentShape[index]
 
-      if present_shape.variants.any? do |present_variant|
-        will_fit_at?(present_variant, 0, height - 3)
-      end
-        return false
+      present_shape.variants.each do |present_variant|
+        0.upto(width - 3).each do |x|
+          if will_fit_at?(present_variant, x, 0)
+            return false
+          end
+        end
       end
     end
 
     true
+  end
+
+  def to_s
+    "#{width}x#{height}\n" + spaces.map do |row|
+      row.map { it ? "#" : "." }.join
+    end.join("\n")
   end
 
   def dup
