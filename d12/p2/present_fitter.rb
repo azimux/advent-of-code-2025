@@ -13,6 +13,10 @@ class PresentFitter
   end
 
   def can_fit?
+    if present_counts.values.all? { |i| i <= 0 }
+      binding.pry
+    end
+    return false if region.width < 3
     return false if total_present_area > available_area
 
     present_counts.each_pair do |index, count|
@@ -22,15 +26,18 @@ class PresentFitter
 
       present.each_variant do |present_variant|
         region.candidate_starting_points(present_variant) do |x, y|
-          new_region = region.dup
-
-          new_region.add_present_shape_at(present_variant, x, y)
-
           new_present_counts = present_counts.dup
 
           new_present_counts[index] = count - 1
 
           return true if new_present_counts.values.all?(&:zero?)
+
+          new_region = region.dup
+
+          new_region.add_present_shape_at(present_variant, x, y)
+          new_region.trim!(new_present_counts)
+
+          next if new_region.width < 3
 
           if PresentFitter.can_fit?(new_region, new_present_counts)
             return true

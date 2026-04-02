@@ -36,3 +36,9 @@ Maybe come up with a quick way to short-circuit... for example, if presents area
 
 Decompose into smaller regions with smaller sets of presents and cache results to short-circuit other
 runs.
+
+
+where left off... there's a bug in the current changes but without the current changes
+the 3rd region runs forever. But the 2nd region should fit but says it doesn't
+fit with the current uncommitted changes.
+WTF the y < 2 guard causes the count to be wrong? how???

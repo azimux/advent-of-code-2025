@@ -16,9 +16,11 @@ presents_and_regions.present_shapes.each_pair do |index, present_shape|
 end
 
 can_fit = 0
-
+runs = 0
 presents_and_regions.region_to_present_counts.each_pair do |region, present_counts|
+  runs += 1
   can_fit += 1 if PresentFitter.can_fit?(region, present_counts)
+  puts "#{can_fit} after #{runs} runs"
 end
 
 puts can_fit

@@ -50,6 +50,8 @@ class Region
   end
 
   def shape_out_of_bounds?(present_shape, x, y)
+    return true if width < 3
+
     present_shape.each_filled_space do |i, j|
       return true if point_out_of_bounds?(x + i, y + j)
     end
@@ -67,6 +69,7 @@ class Region
   end
 
   def candidate_starting_points(present_shape, x = 0, y = 0, &block)
+    return if width < 3
     return if shape_out_of_bounds?(present_shape, x, y)
 
     if will_fit_at?(present_shape, x, y)
@@ -76,7 +79,40 @@ class Region
     end
 
     candidate_starting_points(present_shape, x + 1, y, &block)
+    # WTF why does commenting this out matter??
+    # if y < 2
     candidate_starting_points(present_shape, x, y + 1, &block)
+    # end
+  end
+
+  def trim!(present_counts)
+    if can_trim?(present_counts)
+      self.width -= 1
+      spaces.shift
+      # TODO: this checks 4 trims when we can at most trim three times
+      trim!(present_counts)
+    end
+  end
+
+  def can_trim?(present_counts)
+    if present_counts.values.all? { |i| i <= 0 }
+      binding.pry
+    end
+    return false if width < 3
+
+    present_counts.each_pair do |index, count|
+      next if count.zero?
+
+      present_shape = PresentShape[index]
+
+      if present_shape.variants.any? do |present_variant|
+        will_fit_at?(present_variant, 0, height - 3)
+      end
+        return false
+      end
+    end
+
+    true
   end
 
   def dup
