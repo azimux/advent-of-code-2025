@@ -43,3 +43,17 @@ Check if we can trim from the left or the right. Explore adding shapes either to
 the top or the left not just the top.
 
 And obviously, add caching.
+
+
+------
+
+strategy:
+
+if it is wider than tall, then fill in the left column, otherwise, fill in the top row.
+
+This should force things towards squares over time and increase the chances of cache hits.
+
+Maybe also always choose the present with the highest required frequency first to try to force all of the
+present counts to the same number as well for the same reason?
+
+also, try jruby to see how much speedup there is

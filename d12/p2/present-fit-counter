@@ -3,11 +3,16 @@
 require "pry"
 require "pry-byebug"
 
+require_relative "can_fit_cache"
 require_relative "presents_and_regions"
 require_relative "present_fitter"
 
 inputs_file = "inputs_test.txt"
 # inputs_file = "inputs.txt"
+
+cache_file_name = inputs_file.gsub(/\.txt$/, ".cache")
+cache = CanFitCache.new(cache_file_name)
+PresentFitter.cache = cache
 
 presents_and_regions = PresentsAndRegions.new(inputs_file)
 
@@ -24,3 +29,4 @@ presents_and_regions.region_to_present_counts.each_pair do |region, present_coun
 end
 
 puts can_fit
+cache.stop
