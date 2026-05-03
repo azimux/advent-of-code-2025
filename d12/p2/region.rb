@@ -8,13 +8,18 @@ class Region
                                             [true, true, true],
                                             [true, true, true]
                                           ])
-  attr_accessor :height, :width, :spaces
 
-  def initialize(height:, width:)
+  attr_accessor :height, :width, :spaces, :last_rotated_clockwise
+
+  def initialize(height:,
+                 width:,
+                 last_rotated_clockwise: nil,
+                 spaces: Array.new(height) { Array.new(width, false) })
+    self.last_rotated_clockwise = last_rotated_clockwise
     self.height = height
     self.width = width
 
-    self.spaces = Array.new(height) { Array.new(width, false) }
+    self.spaces = spaces
   end
 
   def add_present_shape_at(present_shape, x, y)
@@ -148,6 +153,36 @@ class Region
   def dup
     super.tap do |new_region|
       new_region.spaces = spaces.map(&:dup)
+    end
+  end
+
+  def normalize(rotations = nil)
+    if rotations.nil? && last_rotated_clockwise
+      rotations = 2
+    end
+
+    if width > height
+      rotated_spaces = spaces
+
+      rotated_spaces = (0...width).map do |column|
+        rotated_spaces.map { |row| row[column] }.reverse
+      end
+
+      if rotations && rotations >= 0
+        new_region = Region.new(width: height,
+                                height: width,
+                                spaces: rotated_spaces,
+                                last_rotated_clockwise:)
+
+        new_region.normalize(rotations - 1)
+      else
+        Region.new(width: height,
+                   height: width,
+                   spaces: rotated_spaces,
+                   last_rotated_clockwise: !last_rotated_clockwise)
+      end
+    else
+      self
     end
   end
 end

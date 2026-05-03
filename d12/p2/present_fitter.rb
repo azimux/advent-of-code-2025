@@ -12,7 +12,7 @@ class PresentFitter
   attr_accessor :region, :present_counts
 
   def initialize(region, present_counts)
-    self.region = region
+    self.region = region.normalize
     self.present_counts = present_counts
   end
 
@@ -37,17 +37,20 @@ class PresentFitter
 
       # This hack doesn't seem to speed us up since we don't hit the breakpoint in the
       # test data, but maybe worth trying against the real data
-      empty_height = (region.height - region.non_empty_row_count)
-      fittable_three_by_three_presents_count = (empty_height / 3) * (region.width / 3)
+      # empty_height = (region.height - region.non_empty_row_count)
+      # fittable_three_by_three_presents_count = (empty_height / 3) * (region.width / 3)
+      #
+      # presents_left_to_fit = present_counts.values.sum
+      #
+      # if fittable_three_by_three_presents_count >= presents_left_to_fit
+      #   return true
+      # end
 
-      presents_left_to_fit = present_counts.values.sum
+      sorted_present_counts = present_counts.to_a
+      sorted_present_counts.sort_by!(&:last)
+      sorted_present_counts.reverse!
 
-      if fittable_three_by_three_presents_count >= presents_left_to_fit
-        binding.pry
-        return true
-      end
-
-      present_counts.each_pair do |index, count|
+      sorted_present_counts.each do |(index, count)|
         next if count.zero?
 
         present = PresentShape[index]
@@ -63,6 +66,7 @@ class PresentFitter
             new_region = region.dup
 
             new_region.add_present_shape_at(present_variant, x, y)
+            new_region = new_region.normalize
             new_region.trim!(new_present_counts)
 
             next if new_region.width < 3 || new_region.height < 3

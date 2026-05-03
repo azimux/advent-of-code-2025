@@ -7,7 +7,7 @@ gem "rubocop-rspec"
 gem "simplecov"
 
 gem "pry"
-gem "pry-byebug"
+# gem "pry-byebug"
 # TODO: Just adding this to suppress warnings seemingly coming from pry-byebug. Can probably remove this once
 # pry-byebug has irb as a gem dependency
 gem "irb"

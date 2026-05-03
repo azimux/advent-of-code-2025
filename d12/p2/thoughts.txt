@@ -57,3 +57,12 @@ Maybe also always choose the present with the highest required frequency first t
 present counts to the same number as well for the same reason?
 
 also, try jruby to see how much speedup there is
+
+
+-----
+
+If for given spaces, the present_counts in the cache can fit more presents than we have remaining,
+we can return true.
+
+If for a given spaces, the present_counts in the cache cannot fit fewer presents than we have remaining,
+we can return false.
