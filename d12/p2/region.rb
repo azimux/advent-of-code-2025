@@ -157,18 +157,18 @@ class Region
   end
 
   def normalize(rotations = nil)
-    if rotations.nil? && last_rotated_clockwise
-      rotations = 2
-    end
+    if rotations || width > height
+      if rotations.nil? && last_rotated_clockwise
+        rotations = 2
+      end
 
-    if width > height
       rotated_spaces = spaces
 
       rotated_spaces = (0...width).map do |column|
         rotated_spaces.map { |row| row[column] }.reverse
       end
 
-      if rotations && rotations >= 0
+      if rotations && rotations > 0
         new_region = Region.new(width: height,
                                 height: width,
                                 spaces: rotated_spaces,
